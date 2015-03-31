@@ -1,0 +1,91 @@
+---
+title: "A survey of NID techniques (`r format(Sys.time(), '%d %B, %Y')`)"
+output: html_document
+---
+
+#### Lazarevic, Aleksandar, et al. "A Comparative Study of Anomaly Detection Schemes in Network Intrusion Detection." SDM. 2003.
+
+Outlier detection schemes:
+
+- `k`-th nearest neighbour (supervised)
+- Mahalanobis-distance based outlier detection (semi-supervised)
+    - find the mean and standard deviation of the "normal" data
+    - compute the Mahalanobis-distance for each individual using the mean and sd
+    - most distant individuals from the mean are classified as outliers
+    - (the threshold is 2% of the total number of points?)
+- density based local outliers (LOF)
+
+Unsupervised SVMs:
+
+- separates unlabelled data into different classes
+- by varying SVM parameters, different models can be built
+
+The main findings are that LOF and NN worked the best followed by the unsupervised SVM approach.
+The main reason for the poor performance using the Mahalnobis-based approach is because the normal behaviour may not be characterised with a single distribution but there may be different types of normal behaviour.
+
+- The unsupervised SVMs approach showed very high detection rates but also very high false alarm rate.
+- The Mahalanobis based approach was poor at detecting attacks that were similar to normal behaviour.
+
+<br>
+
+#### Garcia-Teodoro, Pedro, et al. "Anomaly-based network intrusion detection: Techniques, systems and challenges." computers & security 28.1 (2009): 18-28.
+
+##### A) statistical based:
+
+- essentially supervised learning: models are derived from "normal" connections and their distributions, and any test data that deviate too much from their expected values are considered attacks.
+
+##### B) knowledge based:
+
+- includes the finite state machine (FSM) method, descriptive languages (N-grams), expert systems (rule-based classification). Expensive and time-consuming to develop but flexible and robust.
+
+##### C) Machine-learning based:
+
+- Bayesian networks: their drawback is the requirement of higher computational effort while their performance is similar to threshold-based systems.
+
+- Markov models: using Markov process (so trasitions between different states have probabilities). Highly dependent on the assumptions of the normal and attack behaviours.
+
+- Neural networks: does not provide a descriptive model to explain why a particular detection decision has been taken.
+
+- Fuzzy logic techniques: high resource consumption but effective against port scans and probes (and fuzzy logic is controversial to some people?).
+
+- Genetic algorithms: main advantage is the robust global search method that converges to a solution from multiple directions and no prior knowledge is required but involves high resource consumption.
+
+- Clustering and outlier detection: the main question to solve is "is the isolated outlier an anomaly?"
+
+- Others: PCA based and association rule methods.
+
+<br>
+
+#### Lee, Wenke, and Salvatore J. Stolfo. "Data mining approaches for intrusion detection." Usenix Security. 1998.
+##### supervised methods are suggested only.
+
+- They suggested an approach using RIPPER (rule mining program) on system call sequences, which outputs a set of if-then rules. Then the train data is transformed into a binary table (0 for "abnormal" and 1 for "normal") from which a meta classifier may be generated.
+
+- They also suggested using association rules and frequent episodes.
+
+<br>
+
+#### Shyu, Mei-Ling, et al. A novel anomaly detection scheme based on principal component classifier. MIAMI UNIV CORAL GABLES FL DEPT OF ELECTRICAL AND COMPUTER ENGINEERING, 2003.
+
+- They used the fact that the sum of the sqaures of the standardised PC scores for an observation is equivalent to the Mahalanobis distance of the observation from the mean, and follows chi-square distribution (under multivariate normality assumption).
+
+- Their proposed scheme was to:
+    - apply multivariate trimming (calculate Mahalanobis distances for all individuals and drop 0.005*n most distant individuals)
+    - do a PCA on the trimmed data and find the PCCs (which are just thresholds that they came up with)
+
+- They claim that their method outperforms LOF and NN but I'm having trouble reproducing their work..
+
+- Mahalanobis distance metric itself is sensitive to outliers in high dimensions (because M-distances sum to (n-1)*p by design and a few outliers can significantly shift them). A suggestion I found online says if 10 <= p <= 100 variables are in dataset, the OGK algorithm is recommended. And for p > 100, use the PCA-grid or ROBPCA approach.
+
+
+
+
+
+
+
+
+
+
+
+
+

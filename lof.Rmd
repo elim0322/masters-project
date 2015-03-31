@@ -1,0 +1,39 @@
+---
+title: "Reproducing LOF scores"
+output: html_document
+---
+
+```{r, echo=FALSE}
+load("../Desktop/kddcup.data_10_percent_corrected.RData")
+```
+
+- There are 42 features (including a feature for labels).
+- LOF scores are computed on the numeric features only (34 of them) with `k = 3`.
+- There are `494021` individuals in the dataset, `352542` of which are duplicated entries (about 71.4% are duplicates).
+    - LOF computation results in an overflow error because of these duplicates (a lot of `NaN`s produced) so these duplicates are dropped from the dataset.
+    - About 97.3% of the duplicates (342982) are attacks so we may drop them (safely?) and leave one duplicate as an attack.
+
+```{r, eval=FALSE}
+library(DMwR)
+dat2 = subset(dat, select=-c(2,3,4,7,12,20,21,22,42))
+dat3 = dat2[!duplicated(dat2), ]
+outlier.scores = lofactor(dat3, k=3)
+
+sum(outlier.scores > 1)
+dat4 = dat3
+dat4$attack_type = dat[!duplicated(dat2), 42]
+```
+
+```{r, echo=-1}
+load("../Desktop/outlier.scores.RData")
+## Detection rate:
+sum(outlier.scores > 1.1) / sum(dat4$attack_type != "normal.")
+
+```
+
+
+
+
+
+
+
