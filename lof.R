@@ -1,10 +1,8 @@
-# ==========================================================================
+# ===========================================================================
 # My implementation of finding local outlier factors.
 # The only existing LOF implementation in R is the lofactor() in DMwR,
 # which incorrectly selects k-distance sets (definition 4 is not satisfied).
-# NOTE: to make it run faster, use an alternative to dist() function that is
-#       slow..
-# ==========================================================================
+# ===========================================================================
 
 lof = function(data, k, method="euclidean") {
     knn_distances = dist.knn.mine(data, k, method)
@@ -25,6 +23,8 @@ reachability.mine = function(n_dist) {
         reach_dist = pmax(kdist, dist)
         
         lrd[i] = 1 / (sum(reach_dist) / length(reach_dist))
+        
+        cat(paste("lrd:", "i =", i, "done", "\n"))
     }
     
     lrd_sum = sapply(n_dist, function(x) sum(lrd[x$index]))
@@ -36,11 +36,14 @@ reachability.mine = function(n_dist) {
 
 dist.knn.mine <- function(data, k, method="euclidean") {
     n_dist = list()
+    dist_mat = as.matrix(dist(data, method))
     for (i in 1:nrow(data)) {
-        dist_i = dist_between(data, i, method)
+        dist_i = dist_mat[i, ]
         
         # find obervations that make up the k-distance neighborhood for observation dataset[i,]
         n_dist[[i]] = knn(dist_i, k)
+        
+        cat(paste("knn_dist:", "i =", i, "done", "\n"))
     }
     return(n_dist)
 }
@@ -64,11 +67,4 @@ knn <- function(distance, k) {
     
     result = list(index=nb_ind, dist=nb, kdist=knn_dist)
     return(result)
-}
-
-## find the distance to the i_th observation
-dist_between = function(data, i, method="euclidean") {
-    ## distance matrix (so can choose either i_th row/column)
-    dist_mat = as.matrix(dist(data, method))[, i]
-    return(as.vector(dist_mat))
 }
