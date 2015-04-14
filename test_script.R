@@ -1,6 +1,6 @@
 # dat = read.csv("//Users/eric/Chrome Downloads/kddcup.data", header = FALSE)
 # dat = read.csv("//Users/eric/Chrome Downloads/kddcup.data_10_percent", header = FALSE)
-dat = read.csv("../Desktop/kddcup.data_10_percent_corrected", header = FALSE)
+dat = read.csv("../kddcup.data_10_percent_corrected", header = FALSE)
 names(dat) = c("duration", "protocol_type", "service", "flag",
                "src_bytes", "dst_bytes", "land", "wrong_fragment",
                "urgent", "hot", "num_failed_logins", "logged_in",
@@ -372,6 +372,76 @@ X <- hilbert(9)[, 1:6]
 D <- diag(s$d)
 s$u %*% D %*% t(s$v) #  X = U D V'
 t(s$u) %*% X %*% s$v #  D = U' X V
+
+
+
+
+
+
+
+
+
+
+### LOF scores from weka
+iris_lof = read.csv("../lof.csv")
+iris_lof = iris_lof[, "LOF"]
+order(iris_lof)
+order(lofactor(iris[,-5], k=10))
+order(lofactor(iris[,-5], k=40))
+
+sort(iris_lof)[1:10]
+sort(lofactor(iris[,-5], k=10))[1:10]
+sort(lofactor(iris[,-5], k=40))[1:10]
+
+sampleInd = sample(which(dat$attack_type == "normal."), size = 5000, replace = TRUE)
+dat2 = dat[sampleInd, ]
+#dat2 = subset(dat, select=-c(2,3,4,7,12,14,20,21,22,42))
+write.csv(dat2[,-c(2,3,4,7,12,14,20,21,22,42)], file="../kddcup_numeric.csv")
+
+
+
+
+
+
+
+
+sys.sample = function(N, n) {
+    k = ceiling(N/n)
+    r = sample(1:k, 1)
+    sys.samp = seq(r, r + K*(n-1), k)
+    return(sys.samp)
+}
+
+normalSamples = sample(which(dat$attack_type == "normal."), size = 92279, replace = TRUE)
+attackSamples = sample(which(dat$attack_type != "normal."), size = 39674, replace = TRUE)
+#category = c(2,3,4,7,12,14,20,21,22,42)
+category = c(2,3,4,7,12,21,22)#,42)
+dat2 = dat[c(normalSamples, attackSamples), -category]
+write.csv(dat2, file = "../kddcup_numeric2.csv")
+
+
+time_current = Sys.time()
+lof.res = lof(dat2, k = 10)
+Sys.time() - time_current
+# Time difference of 10.88129 hours
+# Error in rowSums(centred^2) : 
+#    'Calloc' could not allocate memory (131953 of 16 bytes)
+
+obsInd = read.csv("../kddcup_numeric.csv")[, 1]
+
+dat3 = read.csv("../kddcup_lof.csv")
+lof_scores = dat3[, "LOF"]
+sum(lof_scores > 1.3)
+
+
+dat4 = dat[obsInd, ]
+sum(dat4$attack_type != "normal.")
+dat4$LOF = lof_scores
+
+#sum(dat4$LOF >= 1.232705) / sum(dat4$attack_type != "normal.")
+#sort(dat4$LOF, decreasing=T)[39674]
+sum(dat4[order(dat4$LOF, decreasing=TRUE)[1:39674], "attack_type"] == "normal.")
+dat4[order(dat4$LOF, decreasing=TRUE)[1], "LOF"]
 
 
 
