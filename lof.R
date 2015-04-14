@@ -4,41 +4,20 @@
 # which incorrectly selects k-distance sets (definition 4 is not satisfied).
 # ===========================================================================
 
-lof = function(data, k, method="euclidean") {
-    knn_distances = dist.knn.mine(data, k, method)
+lof = function(data, k) {
+    data = as.matrix(data)
+    knn_distances = dist.knn.mine(data, k)
     reach_list = reachability.mine(knn_distances)
-    
     lof = (reach_list[["summed_lrd"]] / reach_list[["lrd"]]) / reach_list[["nneighbours"]]
-
     return(lof)
 }
 
-reachability.mine = function(n_dist) {
-    k_distances = sapply(n_dist, function(x) x$kdist)
-    lrd = numeric()
-    N_k = numeric()
-    for (i in 1:length(n_dist)) {
-        kdist = k_distances[n_dist[[i]]$index]
-        dist  = n_dist[[i]]$dist
-        reach_dist = pmax(kdist, dist)
-        
-        lrd[i] = 1 / (sum(reach_dist) / length(reach_dist))
-        
-        cat(paste("lrd:", "i =", i, "done", "\n"))
-    }
-    
-    lrd_sum = sapply(n_dist, function(x) sum(lrd[x$index]))
-    N_k     = sapply(n_dist, function(x) length(x$index))
-        
-    result = list(lrd=lrd, summed_lrd=lrd_sum, nneighbours=N_k)
-    return(result)
-}
-
-dist.knn.mine <- function(data, k, method="euclidean") {
+dist.knn.mine <- function(data, k) {
     n_dist = list()
-    dist_mat = as.matrix(dist(data, method))
+    #dist_mat = as.matrix(dist(data, method))
     for (i in 1:nrow(data)) {
-        dist_i = dist_mat[i, ]
+        centred = scale(data, center = data[i, ], scale = FALSE)
+        dist_i  = sqrt(rowSums(centred^2))
         
         # find obervations that make up the k-distance neighborhood for observation dataset[i,]
         n_dist[[i]] = knn(dist_i, k)
@@ -66,5 +45,26 @@ knn <- function(distance, k) {
     nb_ind = ordered_ind[(1:nb_n) + 1]
     
     result = list(index=nb_ind, dist=nb, kdist=knn_dist)
+    return(result)
+}
+
+reachability.mine = function(n_dist) {
+    k_distances = sapply(n_dist, function(x) x$kdist)
+    lrd = numeric()
+    N_k = numeric()
+    for (i in 1:length(n_dist)) {
+        kdist = k_distances[n_dist[[i]]$index]
+        dist  = n_dist[[i]]$dist
+        reach_dist = pmax(kdist, dist)
+        
+        lrd[i] = 1 / (sum(reach_dist) / length(reach_dist))
+        
+        cat(paste("lrd:", "i =", i, "done", "\n"))
+    }
+    
+    lrd_sum = sapply(n_dist, function(x) sum(lrd[x$index]))
+    N_k     = sapply(n_dist, function(x) length(x$index))
+    
+    result = list(lrd=lrd, summed_lrd=lrd_sum, nneighbours=N_k)
     return(result)
 }
