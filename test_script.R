@@ -414,7 +414,6 @@ sys.sample = function(N, n) {
 
 normalSamples = sample(which(dat$attack_type == "normal."), size = 92279, replace = TRUE)
 attackSamples = sample(which(dat$attack_type != "normal."), size = 39674, replace = TRUE)
-#category = c(2,3,4,7,12,14,20,21,22,42)
 category = c(2,3,4,7,12,21,22)#,42)
 dat2 = dat[c(normalSamples, attackSamples), -category]
 write.csv(dat2, file = "../kddcup_numeric2.csv")
