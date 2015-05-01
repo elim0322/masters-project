@@ -1,23 +1,29 @@
 # ===============================================
 # Find detection rate through graphical approach
 # ===============================================
+# train1_d_30p = density(train1_lof_30p, n = 10000)
+# train2_d_30p = density(train2_lof_30p, n = 10000)
+# train3_d_30p = density(train3_lof_30p, n = 10000, from = 0, to = 5)
+# train4_d_30p = density(train4_lof_30p, n = 10000, from = 0, to = 5)
+# train5_d_30p = density(train5_lof_30p, n = 10000, from = 0, to = 5)
+# 
+# test_d_30p = density(test.df[, 4], n = 10000)
+# plot(test_d_30p)
+# #lines(density(train1_lof_30p, n=10000), lty=3, col = "red")
+# lines(density(train1_lof_30p, n=10000, from=min(test_d_30p$x), to=max(test_d_30p$x)), lty=3, col = "red")
+# 
+# 
+# 
+# plot(test_d_30p)
+# lines(train1_d_30p, col = "blue",   lty = 3)
+# 
+# 
+# lines(train2_d_30p, col = "red",    lty = 3)
+# lines(train3_d_30p, col = "green",  lty = 3)
+# lines(train4_d_30p, col = "orange", lty = 3)
+# lines(train5_d_30p, col = "grey",   lty = 3)
 
-plot(test_d_30p)
-lines(train1_d_30p, col = "blue",   lty = 3)
-lines(density(train1_lof_30p, bw=0.2, n=1000,from=0,to=5), col="red", lty=3)
-lines(density(test.df[,4], bw=0.1, n=1000,from=0,to=5),col="red",lty=3)
-
-
-computeRates1(train1_d_30p, test_d_30p)
-computeRates1(train1_d_30p, density(test.df[,4], bw=0.055, n=1000,from=0,to=5))
-computeRates1(train1_d_30p, density(test.df[,4], bw=0.085, n=1000,from=0,to=5))
-computeRates1(train1_d_30p, density(test.df[,4], bw=0.1, n=1000,from=0,to=5))
-
-
-lines(train2_d_30p, col = "red",    lty = 3)
-lines(train3_d_30p, col = "green",  lty = 3)
-lines(train4_d_30p, col = "orange", lty = 3)
-lines(train5_d_30p, col = "grey",   lty = 3)
+library(sfsmisc)
 
 computeRates = function() {
     trains  = paste0(c("train1", "train2", "train3", "train4", "train5"), "_d_30p")    
@@ -64,123 +70,67 @@ computeRates = function() {
     return(list("detection rate" = dr, "false alarm rate" = far))
 }
 
-computeRates1 = function(train.density, test.density) {
+computeRates1 = function(train, test) {
+    
+    test.density  = density(test,  n = 10000)
+    train.density = density(train, n = 10000, from = min(test.density$x), to = max(test.density$x))
+    
     diffs  = c(0, diff(train.density$y < test.density$y))
     inters = which(diffs != 0)
     
-    for (i in 1:(length(inters)-1)) {
+    #for (i in 1:(length(inters)-1)) {
+    for (i in 5:6) {
         if (i == 1) {
             if (diffs[inters][1] == -1) {
-                dr  = integrate.xy(train.density$x[1:inters[1]], train.density$y[1:inters[1]])
-                far = dr - integrate.xy(test.density$x[1:inters[1]], test.density$y[1:inters[1]])
+                # test density curve is higher than the train (ie, anomaly)
+                test.p  = integrate.xy(test.density$x[1:inters[1]], test.density$y[1:inters[1]])
+                train.p = integrate.xy(train.density$x[1:inters[1]], train.density$y[1:inters[1]])
+                diff.p  = test.p - train.p
+                abs.p   = diff.p / test.p
+                
+                detected = 0
             } else {
-                dr  = integrate.xy(test.density$x[1:inters[1]], test.density$y[1:inters[1]])
-                far = 0
+                diff.p = 0
+                abs.p  = 0
+                detected = 0
             }
         } else {
-            if (diffs[inters][i]==-1 & diffs[inters][i+1]==1) {
-                dr_i = integrate.xy(train.density$x[inters[i]:inters[(i+1)]],
-                                     train.density$y[inters[i]:inters[(i+1)]])
-                dr   = dr + dr_i
-                far  = far + dr_i - integrate.xy(test.density$x[inters[i]:inters[(i+1)]],
-                                                 test.density$y[inters[i]:inters[(i+1)]])
-            } else {
-                dr_i = integrate.xy(test.density$x[inters[i]:inters[(i+1)]],
-                                    test.density$y[inters[i]:inters[(i+1)]])
-                dr   = dr + dr_i
+            if (diffs[inters][i] == 1 & diffs[inters][i+1] == -1) {
+                ## where test density curve is higher than the train density curve
+                test.x = test.density$x[inters[i]:inters[i+1]]
+                test.y = test.density$y[inters[i]:inters[i+1]]
+                
+                train.x  = train.density$x[inters[i]:inters[i+1]]
+                train.y  = train.density$y[inters[i]:inters[i+1]]
+                
+                test.p  = integrate.xy(test.x,  test.y)
+                train.p = integrate.xy(train.x, train.y)
+#                 diff.p = 0 # delete this later
+#                 diff.p  = diff.p + (test.p - train.p)
+                
+                diff.p = test.p - train.p
+                abs.p  = diff.p / test.p
+                
+                detected = length(which(test.x[1] < test & test < test.x[length(test.x)])) * abs.p
+                
             }
         }
     }
-    return(list(dr, far))
-}
-
-param = function(train, test, n=100, false.alarm.rate) {
     
-    #train.density = density(train, n = n, from = 0, to = 5)
-    test.density  = density(test,  n = n, from = 0, to = 5)
-    
-    #train.bw = seq(train.density$bw*0.3, train.density$bw*3, length.out=n)
-    test.bw  = seq(test.density$bw*0.1,  test.density$bw*3,  length.out=n)
-    
-    res1  = matrix(nrow = n, ncol = 2)
-    res2  = matrix(nrow = n, ncol = 2)
-    res3  = matrix(nrow = n, ncol = 2)
-    res4  = matrix(nrow = n, ncol = 2)
-    res5  = matrix(nrow = n, ncol = 2)
-    for (i in 1:n) {
-        
-        #train.newd = density(train, bw = train.bw[i], n=1000, from=0, to=5)
-        test.newd  = density(test,  bw = test.bw[i],   n=1000, from=0, to=5)
-        
-        rates1 = computeRates1(train1_d_30p, test.newd)
-        res1[i, 1] = rates1[[1]]
-        res1[i, 2] = rates1[[2]]
-        
-        rates2 = computeRates1(train2_d_30p, test.newd)
-        res2[i, 1] = rates2[[1]]
-        res2[i, 2] = rates2[[2]]
-        
-        rates3 = computeRates1(train3_d_30p, test.newd)
-        res3[i, 1] = rates3[[1]]
-        res3[i, 2] = rates3[[2]]
-        
-        rates4 = computeRates1(train4_d_30p, test.newd)
-        res4[i, 1] = rates4[[1]]
-        res4[i, 2] = rates4[[2]]
-        
-        rates5 = computeRates1(train5_d_30p, test.newd)
-        res5[i, 1] = rates5[[1]]
-        res5[i, 2] = rates5[[2]]
-        
-    }
-    
-    dr_10 = c(res1[which(abs(res1[,2]-0.1) < 0.01),1],
-              res2[which(abs(res2[,2]-0.1) < 0.01),1],
-              res3[which(abs(res3[,2]-0.1) < 0.01),1],
-              res4[which(abs(res4[,2]-0.1) < 0.01),1],
-              res5[which(abs(res5[,2]-0.1) < 0.01),1])
-    
-    dr_8 = c(res1[which(abs(res1[,2]-0.08) < 0.01),1],
-             res2[which(abs(res2[,2]-0.08) < 0.01),1],
-             res3[which(abs(res3[,2]-0.08) < 0.01),1],
-             res4[which(abs(res4[,2]-0.08) < 0.01),1],
-             res5[which(abs(res5[,2]-0.08) < 0.01),1])
-    dr_8 = dr_8[dr_8 < mean(dr_10)]
-    
-    dr_6 = c(res1[which(abs(res1[,2]-0.06) < 0.02),1],
-             res2[which(abs(res2[,2]-0.06) < 0.02),1],
-             res3[which(abs(res3[,2]-0.06) < 0.02),1],
-             res4[which(abs(res4[,2]-0.06) < 0.02),1],
-             res5[which(abs(res5[,2]-0.06) < 0.02),1])
-    dr_6 = dr_6[dr_6 < mean(dr_8)]
-    
-    dr_4 = c(res1[which(abs(res1[,2]-0.04) < 0.02),1],
-             res2[which(abs(res2[,2]-0.04) < 0.02),1],
-             res3[which(abs(res3[,2]-0.04) < 0.02),1],
-             res4[which(abs(res4[,2]-0.04) < 0.02),1],
-             res5[which(abs(res5[,2]-0.04) < 0.02),1])
-    dr_4 = dr_4[dr_4 < mean(dr_6)]
-    
-    dr_2 = c(res1[which(abs(res1[,2]-0.02) < 0.02),1],
-             res2[which(abs(res2[,2]-0.02) < 0.02),1],
-             res3[which(abs(res3[,2]-0.02) < 0.02),1],
-             res4[which(abs(res4[,2]-0.02) < 0.02),1],
-             res5[which(abs(res5[,2]-0.02) < 0.02),1])
-    dr_2 = dr_2[dr_2 < mean(dr_4)]
-    
-    dr_1 = c(res1[which(abs(res1[,2]-0.01) < 0.02),1],
-             res2[which(abs(res2[,2]-0.01) < 0.02),1],
-             res3[which(abs(res3[,2]-0.01) < 0.02),1],
-             res4[which(abs(res4[,2]-0.01) < 0.02),1],
-             res5[which(abs(res5[,2]-0.01) < 0.02),1])
-    dr_1 = dr_1[dr_1 < mean(dr_2)]
-    
-    return(c(mean(dr_10), mean(dr_8), mean(dr_6), mean(dr_4), mean(dr_2), mean(dr_1)))
+    return(detected)
+    return(abs.p)
     
 }
 
+computeRates1(train1_lof_30p, test.df[, 4])
 
 
+
+
+# result = param(test=test.df[,4])
+# plot(rev(result[[1]]), type = "b", ylim = c(0, 1), xaxt = "n", 
+#      main = "Using k = 30%", xlab = "false alarm rate", ylab = "detection rate")
+# axis(1, at = 1:6, labels = c("1%", "2%", "4%", "6%", "8%", "10%"))
 
 
 # computeRates1(train1_d_30p, test_d_3)
