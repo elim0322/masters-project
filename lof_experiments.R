@@ -18,11 +18,11 @@ LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
 #============================
 ## sample 5000 random "normal" connections and find the LOF scores for them
 source("systematic_sampling.R")
-sample1 = sys.sample(nrow(dat), 5000); sample1[1]
-sample2 = sys.sample(nrow(dat), 5000); sample2[1]
-sample3 = sys.sample(nrow(dat), 5000); sample3[1]
-sample4 = sys.sample(nrow(dat), 5000); sample4[1]
-sample5 = sys.sample(nrow(dat), 5000); sample5[1]
+sample1 = sys.sample(sum(dat$attack_type == "normal."), 5000); sample1[1]
+sample2 = sys.sample(sum(dat$attack_type == "normal."), 5000); sample2[1]
+sample3 = sys.sample(sum(dat$attack_type == "normal."), 5000); sample3[1]
+sample4 = sys.sample(sum(dat$attack_type == "normal."), 5000); sample4[1]
+sample5 = sys.sample(sum(dat$attack_type == "normal."), 5000); sample5[1]
 
 train1 = dat[which(dat$attack_type == "normal.")[sample1], -c(2,3,4,7,12,21,22,42)]
 train2 = dat[which(dat$attack_type == "normal.")[sample2], -c(2,3,4,7,12,21,22,42)]
