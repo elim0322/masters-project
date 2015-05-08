@@ -6,7 +6,7 @@ options(java.parameters = "-Xmx4g")
 library(RWeka)
 
 ## need to re-install every time..
-#WPM("install-package", "localOutlierFactor")
+WPM("install-package", "localOutlierFactor")
 #WPM("load-package", "localOutlierFactor")
 
 ## make an R interface to use LOF
@@ -29,53 +29,56 @@ train2 = dat[which(dat$attack_type == "normal.")[sample2], -c(2,3,4,7,12,21,22,4
 train3 = dat[which(dat$attack_type == "normal.")[sample3], -c(2,3,4,7,12,21,22,42)]
 train4 = dat[which(dat$attack_type == "normal.")[sample4], -c(2,3,4,7,12,21,22,42)]
 train5 = dat[which(dat$attack_type == "normal.")[sample5], -c(2,3,4,7,12,21,22,42)]
+# 
+# train1_lof_5p = LOF(train1, control = Weka_control(min = 250, max = 250, "num-slots" = 1))[,"LOF"]
+# train2_lof_5p = LOF(train2, control = Weka_control(min = 250, max = 250, "num-slots" = 1))[,"LOF"]
+# train3_lof_5p = LOF(train3, control = Weka_control(min = 250, max = 250, "num-slots" = 1))[,"LOF"]
+# train4_lof_5p = LOF(train4, control = Weka_control(min = 250, max = 250, "num-slots" = 1))[,"LOF"]
+# train5_lof_5p = LOF(train5, control = Weka_control(min = 250, max = 250, "num-slots" = 1))[,"LOF"]
+# 
+# train1_lof_10p = LOF(train1, control = Weka_control(min = 500, max = 500, "num-slots" = 1))[,"LOF"]
+# train2_lof_10p = LOF(train2, control = Weka_control(min = 500, max = 500, "num-slots" = 1))[,"LOF"]
+# train3_lof_10p = LOF(train3, control = Weka_control(min = 500, max = 500, "num-slots" = 1))[,"LOF"]
+# train4_lof_10p = LOF(train4, control = Weka_control(min = 500, max = 500, "num-slots" = 1))[,"LOF"]
+# train5_lof_10p = LOF(train5, control = Weka_control(min = 500, max = 500, "num-slots" = 1))[,"LOF"]
+# 
+# train1_lof_20p = LOF(train1, control = Weka_control(min = 1000, max = 1000, "num-slots" = 1))[,"LOF"]
+# train2_lof_20p = LOF(train2, control = Weka_control(min = 1000, max = 1000, "num-slots" = 1))[,"LOF"]
+# train3_lof_20p = LOF(train3, control = Weka_control(min = 1000, max = 1000, "num-slots" = 1))[,"LOF"]
+# train4_lof_20p = LOF(train4, control = Weka_control(min = 1000, max = 1000, "num-slots" = 1))[,"LOF"]
+# train5_lof_20p = LOF(train5, control = Weka_control(min = 1000, max = 1000, "num-slots" = 1))[,"LOF"]
 
-train1_lof_10p = LOF(train1, control = Weka_control(min = 100, max = 100, "num-slots" = 2))[,"LOF"]
-train2_lof_10p = LOF(train2, control = Weka_control(min = 100, max = 100, "num-slots" = 2))[,"LOF"]
-train3_lof_10p = LOF(train3, control = Weka_control(min = 100, max = 100, "num-slots" = 2))[,"LOF"]
-train4_lof_10p = LOF(train4, control = Weka_control(min = 100, max = 100, "num-slots" = 2))[,"LOF"]
-train5_lof_10p = LOF(train5, control = Weka_control(min = 100, max = 100, "num-slots" = 2))[,"LOF"]
+train1_lof_30p = LOF(train1, control = Weka_control(min = 1500, max = 1500, "num-slots" = 1))[,"LOF"]
+train2_lof_30p = LOF(train2, control = Weka_control(min = 1500, max = 1500, "num-slots" = 1))[,"LOF"]
+train3_lof_30p = LOF(train3, control = Weka_control(min = 1500, max = 1500, "num-slots" = 1))[,"LOF"]
+train4_lof_30p = LOF(train4, control = Weka_control(min = 1500, max = 1500, "num-slots" = 1))[,"LOF"]
+train5_lof_30p = LOF(train5, control = Weka_control(min = 1500, max = 1500, "num-slots" = 1))[,"LOF"]
+train.df = data.frame(train1_lof_30p, train2_lof_30p, train3_lof_30p, train4_lof_30p, train5_lof_30p)
+rm(train1_lof_30p, train2_lof_30p, train3_lof_30p, train4_lof_30p, train5_lof_30p); gc()
 
-train1_lof_20p = LOF(train1, control = Weka_control(min = 200, max = 200, "num-slots" = 2))[,"LOF"]
-train2_lof_20p = LOF(train2, control = Weka_control(min = 200, max = 200, "num-slots" = 2))[,"LOF"]
-train3_lof_20p = LOF(train3, control = Weka_control(min = 200, max = 200, "num-slots" = 2))[,"LOF"]
-train4_lof_20p = LOF(train4, control = Weka_control(min = 200, max = 200, "num-slots" = 2))[,"LOF"]
-train5_lof_20p = LOF(train5, control = Weka_control(min = 200, max = 200, "num-slots" = 2))[,"LOF"]
-
-train1_lof_30p = LOF(train1, control = Weka_control(min = 300, max = 300, "num-slots" = 2))[,"LOF"]
-train2_lof_30p = LOF(train2, control = Weka_control(min = 300, max = 300, "num-slots" = 2))[,"LOF"]
-train3_lof_30p = LOF(train3, control = Weka_control(min = 300, max = 300, "num-slots" = 2))[,"LOF"]
-train4_lof_30p = LOF(train4, control = Weka_control(min = 300, max = 300, "num-slots" = 2))[,"LOF"]
-train5_lof_30p = LOF(train5, control = Weka_control(min = 300, max = 300, "num-slots" = 2))[,"LOF"]
-
-train1_lof_40p = LOF(train1, control = Weka_control(min = 400, max = 400, "num-slots" = 2))[,"LOF"]
-train2_lof_40p = LOF(train2, control = Weka_control(min = 400, max = 400, "num-slots" = 2))[,"LOF"]
-train3_lof_40p = LOF(train3, control = Weka_control(min = 400, max = 400, "num-slots" = 2))[,"LOF"]
-train4_lof_40p = LOF(train4, control = Weka_control(min = 400, max = 400, "num-slots" = 2))[,"LOF"]
-train5_lof_40p = LOF(train5, control = Weka_control(min = 400, max = 400, "num-slots" = 2))[,"LOF"]
-
-
-
-train1_lof_50p = LOF(train1, control = Weka_control(min = 500, max = 500, "num-slots" = 2))[,"LOF"]
-train1_lof_60p = LOF(train1, control = Weka_control(min = 600, max = 600, "num-slots" = 2))[,"LOF"]
-train1_lof_70p = LOF(train1, control = Weka_control(min = 700, max = 700, "num-slots" = 2))[,"LOF"]
-
-train1_lof = LOF(train1, control = Weka_control(min = 300, max = 700, "num-slots" = 1))[,"LOF"]
-
-plot(density(train1_lof_50p))
-lines(density(train1_lof_50p))
-lines(density(train1_lof_60p))
-plot(density(train1_lof_70p))
-lines(density(test.df[,4]))
-
-plot(density(test.df[, 4]))
-lines(density(train1_lof_50p))
-lines(density(train1_lof))
-
-
-
-
-
+# train1_lof_40p = LOF(train1, control = Weka_control(min = 2000, max = 2000, "num-slots" = 1))[,"LOF"]
+# train2_lof_40p = LOF(train2, control = Weka_control(min = 2000, max = 2000, "num-slots" = 1))[,"LOF"]
+# train3_lof_40p = LOF(train3, control = Weka_control(min = 2000, max = 2000, "num-slots" = 1))[,"LOF"]
+# train4_lof_40p = LOF(train4, control = Weka_control(min = 2000, max = 2000, "num-slots" = 1))[,"LOF"]
+# train5_lof_40p = LOF(train5, control = Weka_control(min = 2000, max = 2000, "num-slots" = 1))[,"LOF"]
+# 
+# train1.df = data.frame(train1_lof_5p, train1_lof_10p, train1_lof_20p, train1_lof_30p, train1_l)
+# train2.df = data.frame(train2_lof_5p, train2_lof_10p, train2_lof_20p, train2_lof_30p)
+# train3.df = data.frame(train3_lof_5p, train3_lof_10p, train3_lof_20p, train3_lof_30p)
+# train4.df = data.frame(train4_lof_5p, train4_lof_10p, train4_lof_20p, train4_lof_30p)
+# train5.df = data.frame(train5_lof_5p, train5_lof_10p, train5_lof_20p, train5_lof_30p)
+# 
+# save(train1.df, file = "train1.RData")
+# save(train2.df, file = "train2.RData")
+# save(train3.df, file = "train3.RData")
+# save(train4.df, file = "train4.RData")
+# save(train5.df, file = "train5.RData")
+# 
+# load(file="train1.RData")
+# load(file="train2.RData")
+# load(file="train3.RData")
+# load(file="train4.RData")
+# load(file="train5.RData")
 
 
 ## density distribution of the scores
@@ -294,32 +297,41 @@ box(); abline(h = 0, col = "grey"); axis(side = 1); axis(side = 2); title(main =
 #attack = sample(which(dat$attack_type != "normal."), size = 39674, replace = TRUE)
 
 ## 70% "normal" and 30% attacks
-normal   = sample(which(dat$attack_type == "normal."), size = 21000, replace = TRUE)
-attack   = sample(which(dat$attack_type != "normal."), size = 9000, replace = TRUE)
+normal   = sample(which(dat$attack_type == "normal."), size = 7000, replace = TRUE)
+attack   = sample(which(dat$attack_type != "normal."), size = 3000, replace = TRUE)
 category = c(2,3,4,7,12,21,22)#,42)
 test     = dat[c(normal, attack), -category]
 
-test_lof_5p  = LOF(test[,-35], control = Weka_control(min = 0.05*30000, max = 0.05*30000, "num-slots" = 2))[,"LOF"]; gc()
-test_lof_10p = LOF(test[,-35], control = Weka_control(min = 0.1*30000,  max = 0.1*30000, "num-slots" = 2))[,"LOF"]; gc()
-test_lof_20p = LOF(test[,-35], control = Weka_control(min = 0.2*30000,  max = 0.2*30000, "num-slots" = 2))[,"LOF"]; gc()
-test_lof_30p = LOF(test[,-35], control = Weka_control(min = 0.3*30000,  max = 0.3*30000, "num-slots" = 2))[,"LOF"]; gc()
-test_lof_40p = LOF(test[,-35], control = Weka_control(min = 0.4*30000,  max = 0.4*30000, "num-slots" = 2))[,"LOF"]; gc()
-test_lof_50p = LOF(test[,-35], control = Weka_control(min = 0.5*30000,  max = 0.5*30000, "num-slots" = 2))[,"LOF"]; gc()
+# test_lof_5p = LOF(test[,-35], control = Weka_control(min = 500, max = 500, "num-slots" = 1))[,"LOF"]; gc()
+# test_lof_10p = LOF(test[,-35], control = Weka_control(min = 1000, max = 1000, "num-slots" = 1))[,"LOF"]; gc()
+# test_lof_20p = LOF(test[,-35], control = Weka_control(min = 2000, max = 2000, "num-slots" = 1))[,"LOF"]; gc()
+test_lof_30p = LOF(test[,-35], control = Weka_control(min = 3000, max = 3000, "num-slots" = 1))[,"LOF"]; gc()
+names(test_lof_30p) = test$attack_type
+lof_exp(train.df, test_lof_30p)
+
+
+
+
+
+
+
+# test_lof_40p = LOF(test[,-35], control = Weka_control(min = 4000, max = 4000, "num-slots" = 1))[,"LOF"]; gc()
+#test_lof_50p = LOF(test[,-35], control = Weka_control(min = 0.5*30000,  max = 0.5*30000, "num-slots" = 2))[,"LOF"]; gc()
+
+
 
 
 ## label
-test.df = data.frame(test_lof_5p, test_lof_10p, test_lof_20p, test_lof_30p, test_lof_40p,
-                     test_lof_50p, "attack_type" = test$attack_type, "index" = c(normal, attack))
+test.df = data.frame(test_lof_5p, test_lof_10p, test_lof_20p, test_lof_30p, test_lof_30p, "attack_type" = test$attack_type, "index" = c(normal, attack))
 #save(test.df, file = "test_df.RData")
 #load("test_df.RData")
 
-## density
-test_d_5p  = density(test.df[, 1])
-test_d_10p = density(test.df[, 2])
-test_d_20p = density(test.df[, 3])
-test_d_30p = density(test.df[, 4], n = 10000, from = 0, to = 5)
-test_d_40p = density(test.df[, 5])
-test_d_50p = density(test.df[, 6])
+
+
+
+
+
+
 
 par(mfrow = c(3, 2))
 plot(test_d_5p, main = "k = 5%")
