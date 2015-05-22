@@ -33,8 +33,9 @@ experiment = function(data) {
     d = density(data, n = 10 * length(data))
     fp = finite_difference(d)
     neg = slope(fp)
-    ind = neg[which.min(diff(fp[neg]))]
-    threshold = d$x[ind]
+    #ind = neg[which.min(diff(fp[neg]))]
+    #threshold = d$x[ind]
+    threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
     
     ## floor() to be generous
     dr = sum(names(data[data >= threshold]) != "normal.") / sum(test1$attack_type != "normal.")
@@ -97,19 +98,22 @@ experiment1 = function(n) {
     
 }
 
-results = experiment1(n = 100)
-save(results, file = "results.RData")
-
-## create a results table
-tab = vector()
-for (i in 1:15) {
-    txt = paste0("c(", paste0("results[[", 1:100, "]][[", i, "]]", collapse = ", "), ")")
-    tab[i] = paste(round(mean(eval(parse(text = txt))), digits = 3),
-                   paste0("(", round(sd(eval(parse(text = txt))), digits = 3), ")"))
+make.table = function(result) {
+    tab = vector()
+    for (i in 1:15) {
+        txt = paste0("c(", paste0("result[[", 1:100, "]][[", i, "]]", collapse = ", "), ")")
+        tab[i] = paste(round(mean(eval(parse(text = txt))), digits = 3),
+                       paste0("(", round(sd(eval(parse(text = txt))), digits = 3), ")"))
+    }
+    
+    result.tab = data.frame(matrix(tab, nrow = 3), row.names = c("threshold", "detection.rate", "false.alarm.rate"))
+    colnames(result.tab) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%", "k = 50%")
+    result.tab
 }
 
-results.tab = data.frame(matrix(tab, nrow = 3), row.names = c("threshold", "detection.rate", "false.alarm.rate"))
-colnames(results.tab) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%", "k = 50%")
-print(results.tab)
-save(results.tab, file = "results.table.RData")
+t0 = Sys.time()
+results = experiment1(n = 100)
+results.table = make.table(results)
+cat(Sys.time() - t0)
+save(results, file = "results.table.RData")
 

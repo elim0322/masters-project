@@ -15,6 +15,12 @@ names(dat) = c("duration", "protocol_type", "service", "flag",
                "dst_host_srv_diff_host_rate", "dst_host_serror_rate",
                "dst_host_srv_serror_rate", "dst_host_rerror_rate",
                "dst_host_srv_rerror_rate", "attack_type")
+options(java.parameters = "-Xmx4g")
+library(RWeka)
+WPM("install-package", "localOutlierFactor")
+WPM("install-package", "XMeans")
+LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
+
 #save(dat, file = "../Desktop/kddcup.data_10_percent_corrected.RData")
 
 
