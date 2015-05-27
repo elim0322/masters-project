@@ -35,6 +35,8 @@ experiment = function(data) {
     neg = slope(fp)
     #ind = neg[which.min(diff(fp[neg]))]
     #threshold = d$x[ind]
+    
+    ## this part requires improvement
     threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
     
     ## floor() to be generous
