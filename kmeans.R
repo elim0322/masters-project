@@ -40,7 +40,7 @@ plot.kmeans(mydata.PC, title = "PC scores")
 preproc = function(data, mode) {
     
     ## remove redundant features which consist of one unique value
-    data = data[, sapply(data, function(x) length(unique(x))) != 1]
+    #data = data[, sapply(data, function(x) length(unique(x))) != 1]
     
     if (mode == "pca" ) {
         
@@ -52,7 +52,13 @@ preproc = function(data, mode) {
         
     } else if (mode == "normalise") {
         
-        data.proc = apply(data[, names(data) != "attack_type"], MARGIN = 2, FUN = function(x) (x - min(x))/diff(range(x)))
+        data.proc = apply(data[, names(data) != "attack_type"], MARGIN = 2, FUN = function(x){
+            norm = (x - min(x))/diff(range(x)))
+            if (any(is.nan(norm))) {
+                norm[is.nan(norm)] = 0
+            }
+            norm
+        }
         data.proc = as.data.frame(data.proc)
         data.proc$attack_type = data$attack_type
         colnames(data.proc) = names(data)
@@ -70,6 +76,8 @@ preproc = function(data, mode) {
     
 }
 kmeans1 = function(data, mode = NULL, centers, iter.max = 1000, nstart = 20, ...) {
+    
+    data = data[, sapply(data, function(x) length(unique(x))) != 1]
     
     ## pre-process data
     if (!is.null(mode)) {
@@ -91,6 +99,8 @@ kmeans1 = function(data, mode = NULL, centers, iter.max = 1000, nstart = 20, ...
     return(kmeans.res)
 }
 xmeans1 = function(data, mode = NULL) {
+    
+    data = data[, sapply(data, function(x) length(unique(x))) != 1]
     
     ## pre-process data
     if (!is.null(mode)) {
