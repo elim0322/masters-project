@@ -53,12 +53,12 @@ preproc = function(data, mode) {
     } else if (mode == "normalise") {
         
         data.proc = apply(data[, names(data) != "attack_type"], MARGIN = 2, FUN = function(x){
-            norm = (x - min(x))/diff(range(x)))
+            norm = (x - min(x))/diff(range(x))
             if (any(is.nan(norm))) {
                 norm[is.nan(norm)] = 0
             }
             norm
-        }
+        })
         data.proc = as.data.frame(data.proc)
         data.proc$attack_type = data$attack_type
         colnames(data.proc) = names(data)
