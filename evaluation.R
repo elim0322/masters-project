@@ -29,7 +29,7 @@ slope = function(fp) {
 }
 
 ## evaluate detection rate and false alarm rate
-experiment = function(data) {
+experiment = function(data, test) {
     d = density(data, n = 10 * length(data))
     fp = finite_difference(d)
     neg = slope(fp)
@@ -40,8 +40,8 @@ experiment = function(data) {
     threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
     
     ## floor() to be generous
-    dr = sum(names(data[data >= threshold]) != "normal.") / sum(test1$attack_type != "normal.")
-    fa = sum(names(data[data >= threshold]) == "normal.") / sum(test1$attack_type == "normal.")
+    dr = sum(names(data[data >= threshold]) != "normal.") / sum(test$attack_type != "normal.")
+    fa = sum(names(data[data >= threshold]) == "normal.") / sum(test$attack_type == "normal.")
     
     ret = list(threshold = threshold, detection.rate = dr, false.alarm = fa, detected = which(data >= threshold))
     return(ret)
@@ -113,9 +113,9 @@ make.table = function(result) {
     result.tab
 }
 
-t0 = Sys.time()
-results = experiment1(n = 100)
-results.table = make.table(results)
-cat(Sys.time() - t0)
-save(results, file = "results.table.RData")
+# t0 = Sys.time()
+# results = experiment1(n = 100)
+# results.table = make.table(results)
+# cat(Sys.time() - t0)
+# save(results, file = "results.table.RData")
 

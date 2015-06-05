@@ -1,11 +1,11 @@
 ## normalise data (feature scaling)
-mydata.norm = apply(trim1[, -which(names(trim1) == "attack_type")], MARGIN = 2, FUN = function(x) (x - min(x))/diff(range(x)))
+#mydata.norm = apply(trim1[, -which(names(trim1) == "attack_type")], MARGIN = 2, FUN = function(x) (x - min(x))/diff(range(x)))
 
 ## standardise data
-mydata.stan = scale(trim1[, -which(names(trim1) == "attack_type")])
+#mydata.stan = scale(trim1[, -which(names(trim1) == "attack_type")])
 
 ## PC scores
-mydata.PC = PCA(trim1[, -which(names(trim1) == "attack_type")], ncp = 35, graph = FALSE)$ind$coord
+#mydata.PC = PCA(trim1[, -which(names(trim1) == "attack_type")], ncp = 35, graph = FALSE)$ind$coord
 
 plot.kmeans = function(data, title) {
     wss = numeric()
@@ -29,10 +29,10 @@ plot.kmeans = function(data, title) {
     mtext(title, side = 3, line = -2, outer = TRUE)
     par(mfrow = c(1, 1))
 }
-plot.kmeans(trim1[,names(trim1)!="attack_type"], title = "Raw data")
-plot.kmeans(mydata.norm, title = "Normalised data")
-plot.kmeans(mydata.stan, title = "Standardised data")
-plot.kmeans(mydata.PC, title = "PC scores")
+# plot.kmeans(trim1[,names(trim1)!="attack_type"], title = "Raw data")
+# plot.kmeans(mydata.norm, title = "Normalised data")
+# plot.kmeans(mydata.stan, title = "Standardised data")
+# plot.kmeans(mydata.PC, title = "PC scores")
 
 
 
@@ -129,41 +129,41 @@ xmeans1 = function(data, mode = NULL) {
     return(xmeans.res)
 }
 
-kmeans1(trim1, centers = 3)[c("size", "purity", "table")]
-kmeans1(trim1, mode = "normalise", centers = 4)[c("size", "purity", "table")]
-kmeans1(trim1, mode = "standardise", centers = 5)[c("size", "purity", "table")]
-kmeans1(trim1, mode = "pca", centers = 5)[c("size", "purity", "table")]
-
-xmeans1(trim1)[c("size", "purity", "table")]
-xmeans1(trim1, mode = "normalise")[c("size", "purity", "table")]
-xmeans1(trim1, mode = "standardise")[c("size", "purity", "table")]
-xmeans1(trim1, mode = "pca")[c("size", "purity", "table")]
-
-
-train = dat[sample(which(dat$attack_type == "normal."), 5000), -category]
-train.norm = apply(train[, names(train)!="attack_type"], MARGIN = 2, FUN = function(x) (x - min(x))/diff(range(x)))
-train.norm[is.nan(train.norm)] = 0
-train.colmeans = as.vector(colMeans(train.norm))
-names(train.colmeans) = names(train[,names(train)!="attack_type"])
-
-#apply(dat[sample(which(dat$attack_type == "normal."), 5000), -c(category, 42)], 2, mean)
-#apply(dat[dat$attack_type=="normal.", -c(category, 42)], 2, mean)
-
-xmeans.norm = xmeans1(trim1, mode = "normalise")
-centers = gsub("^.+?n(0.+)}.+$", "\\1", capture.output(xmeans.norm$clusterer$getClusterCenters()))
-centers = eval(parse(text=paste("c(", gsub("\\\\n", ",", centers), ")")))
-centers = cbind(centers[1:31], centers[32: 62], centers[63:93], centers[94:124])
-rownames(centers) = xmeans.norm$feature
-
-means = cbind(centers, train.colmeans[which(names(train.colmeans) %in% rownames(centers))])
-colnames(means) = c("cluster 1", "cluster 2", "cluster 3", "cluster 4", "train")
-
-sum((means[, 1] - means[, 5])^2)
-sum((means[, 2] - means[, 5])^2)
-sum((means[, 3] - means[, 5])^2)
-sum((means[, 4] - means[, 5])^2)
-
-apply(means[,1:4], 2, function(x) sum( (x-means[,5])^2 ))
+# kmeans1(trim1, centers = 3)[c("size", "purity", "table")]
+# kmeans1(trim1, mode = "normalise", centers = 4)[c("size", "purity", "table")]
+# kmeans1(trim1, mode = "standardise", centers = 5)[c("size", "purity", "table")]
+# kmeans1(trim1, mode = "pca", centers = 5)[c("size", "purity", "table")]
+# 
+# xmeans1(trim1)[c("size", "purity", "table")]
+# xmeans1(trim1, mode = "normalise")[c("size", "purity", "table")]
+# xmeans1(trim1, mode = "standardise")[c("size", "purity", "table")]
+# xmeans1(trim1, mode = "pca")[c("size", "purity", "table")]
+# 
+# 
+# train = dat[sample(which(dat$attack_type == "normal."), 5000), -category]
+# train.norm = apply(train[, names(train)!="attack_type"], MARGIN = 2, FUN = function(x) (x - min(x))/diff(range(x)))
+# train.norm[is.nan(train.norm)] = 0
+# train.colmeans = as.vector(colMeans(train.norm))
+# names(train.colmeans) = names(train[,names(train)!="attack_type"])
+# 
+# #apply(dat[sample(which(dat$attack_type == "normal."), 5000), -c(category, 42)], 2, mean)
+# #apply(dat[dat$attack_type=="normal.", -c(category, 42)], 2, mean)
+# 
+# xmeans.norm = xmeans1(trim1, mode = "normalise")
+# centers = gsub("^.+?n(0.+)}.+$", "\\1", capture.output(xmeans.norm$clusterer$getClusterCenters()))
+# centers = eval(parse(text=paste("c(", gsub("\\\\n", ",", centers), ")")))
+# centers = cbind(centers[1:31], centers[32: 62], centers[63:93], centers[94:124])
+# rownames(centers) = xmeans.norm$feature
+# 
+# means = cbind(centers, train.colmeans[which(names(train.colmeans) %in% rownames(centers))])
+# colnames(means) = c("cluster 1", "cluster 2", "cluster 3", "cluster 4", "train")
+# 
+# sum((means[, 1] - means[, 5])^2)
+# sum((means[, 2] - means[, 5])^2)
+# sum((means[, 3] - means[, 5])^2)
+# sum((means[, 4] - means[, 5])^2)
+# 
+# apply(means[,1:4], 2, function(x) sum( (x-means[,5])^2 ))
 
 
 
