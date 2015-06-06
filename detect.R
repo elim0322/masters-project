@@ -1,7 +1,7 @@
 source("evaluation.R")
 source("kmeans.R")
 
-detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1) {
+detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, method = "euclidean") {
     
     invisible(gc())
     
@@ -59,10 +59,32 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1) {
     centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
     centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
     
+    if (method == "euclidean") {
+        d = apply(centers.detected, 2, function(x) sum(abs(x-centers.normal)^2))
+        normal.clust = which.min(d)
+    } else if (method == "manhattan") {
+        d = apply(centers.detected, 2, function(x) sum(abs(x-centers.normal)))
+        normal.clust = which.min(d)
+    } else if (method == "chebyshev") {
+        d = apply(centers.detected, 2, function(x) max(abs(x-centers.normal)))
+        normal.clust = which.min(d)
+    } else if (method == "minkoski") {
+        d = apply(centers.detected, 2, function(x) {
+            p = length(centers.normal)
+            (sum((abs(x-centers.normal))^p))^(1/p)
+        })
+        normal.clust = which.min(d)
+    } else if (method == "mahalanobis") {
+        d = apply(centers.detected, 2, function(x) sqrt((t(x-centers.detected) * cov(x, centers.detected)) %*% t(t(x-centers.detected))))
+        normal.clust = which.min(d)
+    } else if (method == "density") {
+        
+    }
+    
     #d = apply(centers.detected, 2, function(x) sum( (x - centers.normal)^2 ))
     #d = apply(centers.detected, 2, function(x) sum(x * centers.normal) / (sqrt(sum(x^2)) * sqrt(sum(centers.normal^2))) )
-    d = apply(centers.detected, 2, function(x) sum( abs(x - centers.normal) ))
-    normal.clust = which.min(d) - 1 # -1 as cluster ids start from 0
+    #d = apply(centers.detected, 2, function(x) sum( abs(x - centers.normal) ))
+    #normal.clust = which.min(d) - 1 # -1 as cluster ids start from 0
     #normal.clust = which.max(d) - 1
     normal.ind = which(xmeans.res$class_ids == normal.clust)
     
