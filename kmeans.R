@@ -54,9 +54,6 @@ preproc = function(data, mode) {
         
         data.proc = apply(data[, names(data) != "attack_type"], MARGIN = 2, FUN = function(x){
             norm = (x - min(x))/diff(range(x))
-            if (any(is.nan(norm))) {
-                norm[is.nan(norm)] = 0
-            }
             norm
         })
         data.proc = as.data.frame(data.proc)

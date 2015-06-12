@@ -29,8 +29,8 @@ slope = function(fp) {
 }
 
 ## evaluate detection rate and false alarm rate
-experiment = function(data, test) {
-    d = density(data, n = 10 * length(data))
+experiment = function(score, test) {
+    d = density(score, n = 10 * length(score))
     fp = finite_difference(d)
     neg = slope(fp)
     #ind = neg[which.min(diff(fp[neg]))]
@@ -40,10 +40,10 @@ experiment = function(data, test) {
     threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
     
     ## floor() to be generous
-    dr = sum(names(data[data >= threshold]) != "normal.") / sum(test$attack_type != "normal.")
-    fa = sum(names(data[data >= threshold]) == "normal.") / sum(test$attack_type == "normal.")
+    dr = sum(names(score[score >= threshold]) != "normal.") / sum(test$attack_type != "normal.")
+    fa = sum(names(score[score >= threshold]) == "normal.") / sum(test$attack_type == "normal.")
     
-    ret = list(threshold = threshold, detection.rate = dr, false.alarm = fa, detected = which(data >= threshold))
+    ret = list(threshold = threshold, detection.rate = dr, false.alarm = fa, detected = which(score >= threshold))
     return(ret)
 }
 
