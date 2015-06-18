@@ -1,5 +1,6 @@
 source("evaluation.R")
 source("kmeans.R")
+source("overlap.R")
 
 detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, method = "euclidean", trace = TRUE) {
     
@@ -37,6 +38,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     # ==================
     if (trace) cat(paste0("Running phase 1 detection ..... "))
     detected.ind = experiment(lof, testset)$detected
+    t1 = Sys.time() - t0
     if (trace) cat(paste0("done", "\n"))
     
     # ================
@@ -67,14 +69,15 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
         d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
         normal.clust = which.min(d)
     } else if (method == "w.euclidean") {
+        #return(list(detected.df, centers.detected, normal.df, centers.normal, xmeans.res$class_ids))
         weights.normal   = sapply(normal.df[,which(names(normal.df) %in% rownames(centers.detected))], function(x) sd(x))
-        w.centers.normal = weights.normal * centers.normal
+        w.centers.normal = ifelse(weights.normal == 0, 0, 1/weights.normal) * centers.normal
         for (i in 1:nc) {
             which.var = which(names(detected.df) %in% rownames(centers.detected))
             weights.detected = sapply(detected.df[which(xmeans.res$class_ids == i), which.var], function(x) sd(x))
-            centers.detected[, i] = weights.detected * centers.detected[, i]
+            centers.detected[, i] = ifelse(weights.detected == 0, 0, 1/weights.detected) * centers.detected[, i]
         }
-        d = apply(centers.detected, 2, function(x) sum((x - w.centers.normal)^2))
+        d = apply(centers.detected, 2, function(x) sqrt(sum((x - w.centers.normal)^2)))
         normal.clust = which.min(d)
     } else if (method == "manhattan") {
         d = apply(centers.detected, 2, function(x) sum(abs(x-centers.normal)))
@@ -94,17 +97,14 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
         normal.clust = which.min(d)
     } else if (method == "density") {
         #return(list(detected.df, normal.df, xmeans.res$class_ids))
-        return(list(detected.df[which(xmeans.res$class_ids == 1), 2], normal.df[, 2]))
-        overlap(detected.df[which(xmeans.res$class_ids == 1), 2], normal.df[, 2])
-#         pAvg = numeric()
-#         for (i in 1:nc) {
-#             tmp.df  = detected.df[which(xmeans.res$class_ids == i), ]
-#             probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal.df[, j]))
-#             pAvg[i] = mean(probs[probs <= 1])
-#             cat(probs)
-#             cat("\n")
-#         }
-return()
+        pAvg = numeric()
+        for (i in 1:nc) {
+            tmp.df  = detected.df[which(xmeans.res$class_ids == i), ]
+            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal.df[, j]))
+            pAvg[i] = mean(probs[probs <= 1])
+            cat(probs)
+            cat("\n")
+        }
         normal.clust = which.max(pAvg)
     }
     
@@ -113,6 +113,9 @@ return()
     #return(summary(normal.df$attack_type))
     #return(summary(detected.df$attack_type))
     detected.final = detected.df$attack_type[-normal.ind]
+    
+    t3 = Sys.time() - t0
+    t2 = t3 - t1
     
     #return(summary(detected.df$attack_type[-normal.ind]))
     
@@ -131,7 +134,9 @@ return()
     result$purity               = xmeans.res$purity
     if (method == "density")    { result$prob = pAvg }
     else                        { result$dist = d    }
-    result$time                 = Sys.time() - t0
+    result$time                 = t3
+    result$p1.time              = t1
+    result$p2.time              = t2
     #return(list(centers.detected,centers.normal, result$correct.cluster))
     result
 }
@@ -148,6 +153,8 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
     far   = paste0("c(", paste0("result[[", 1:n, "]]$false.alarm.rate", collapse = ", "), ")")
     clust = paste0("c(", paste0("result[[", 1:n, "]]$correctly.identified", collapse = ", "), ")")
     time  = paste0("c(", paste0("result[[", 1:n, "]]$time", collapse = ", "), ")")
+    p1.time  = paste0("c(", paste0("result[[", 1:n, "]]$p1.time", collapse = ", "), ")")
+    p2.time  = paste0("c(", paste0("result[[", 1:n, "]]$p2.time", collapse = ", "), ")")
     
     dr.avg  = round(mean(eval(parse(text = dr))), digits = 5)
     far.avg = round(mean(eval(parse(text = far))), digits = 5)
@@ -155,12 +162,26 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
     dr.sd  = round(sd(eval(parse(text = dr))), digits = 5)
     far.sd = round(sd(eval(parse(text = far))), digits = 5)
     
+    avg.time            = round(mean(eval(parse(text = time))), 5)
+    sd.time             = round(sd(eval(parse(text = time))), 5)
+    p1.avg.time         = round(mean(eval(parse(text = p1.time))), 5)
+    p1.sd.time          = round(sd(eval(parse(text = p1.time))), 5)
+    p2.avg.time         = round(mean(eval(parse(text = p2.time))), 5)
+    p2.sd.time          = round(sd(eval(parse(text = p2.time))), 5)
+    
     ret = list()
-    ret$table = data.frame(matrix(c(dr.avg, paste0("(", dr.sd, ")"), far.avg, paste0("(", far.sd, ")")), ncol = 2), row.names = c("mean", "sd"))
+    ret$table = data.frame(matrix(c(dr.avg, paste0("(", dr.sd, ")"),
+                                    far.avg, paste0("(", far.sd, ")")), ncol = 2),
+                           row.names = c("mean", "sd"))
     colnames(ret$table)     = c("detection.rate", "false.alarm.rate")
     ret$tot.correct.cluster = sum(eval(parse(text = clust)))
     ret$correct.cluster     = eval(parse(text = clust))
-    ret$avg.time            = mean(eval(parse(text = time)))
+    
+    ret$time = data.frame(matrix(c(avg.time, paste0("(", sd.time, ")"), 
+                                   p1.avg.time, paste0("(", p1.sd.time, ")"),
+                                   p2.avg.time, paste0("(", p2.sd.time, ")")), nrow = 2),
+                          row.names = c("mean", "sd"))
+    colnames(ret$time)      = c("overall", "phase.1", "phase.2")
     ret$tot.time            = sum(eval(parse(text = time)))
     
     ret
@@ -174,6 +195,8 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
 # k30.min = eval.detect(dat, n = 100, method = "minkoski")
 # k30.mah = eval.detect(dat, n = 100, method = "mahalanobis")
 # k30.den = eval.detect(dat, n = 100, method = "density")
+save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, file = "evaluation.results.RData")
+
 
 #a <- detect(dat, seed = 40, method = "density")
 

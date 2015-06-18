@@ -54,6 +54,12 @@ preproc = function(data, mode) {
         
         data.proc = apply(data[, names(data) != "attack_type"], MARGIN = 2, FUN = function(x){
             norm = (x - min(x))/diff(range(x))
+            ## redundant variables with only one unique values will result in NaN
+            ## as 0/0 occurs so make them all 0 to effectively remove them
+            ## They are redundant anyway
+            if (any(is.nan(norm))) {
+                norm[is.nan(norm)] = 0
+            }
             norm
         })
         data.proc = as.data.frame(data.proc)
