@@ -67,22 +67,26 @@ overlap = function(v1, v2, graph = FALSE, ablines = FALSE) {
     if (all(intrs == 0)) {
         if (all(d1$y < d2$y)) {
             pArea = integrate.xy(d1$x, d1$y)
-            polygon(
-                x = c(d1$x[1], d1$x, d1$x[length(d1$x)]),
-                y = c(0,       d1$y, 0),
-                col = "skyblue", border = "skyblue"
-            )
-            lines(d1, col = "blue")
-            lines(d2)
+            if(graph) {
+                polygon(
+                    x = c(d1$x[1], d1$x, d1$x[length(d1$x)]),
+                    y = c(0,       d1$y, 0),
+                    col = "skyblue", border = "skyblue"
+                )
+                lines(d1, col = "blue")
+                lines(d2)
+            }
         } else if (all(d1$y > d2$y)) {
             pArea = integrate.xy(d2$x, d2$y)
-            polygon(
-                x = c(d2$x[1], d2$x, d2$x[length(d2$x)]),
-                y = c(0,       d2$y, 0),
-                col = "skyblue", border = "skyblue"
-            )
-            lines(d1)
-            lines(d2, col = "blue")
+            if(graph) {
+                polygon(
+                    x = c(d2$x[1], d2$x, d2$x[length(d2$x)]),
+                    y = c(0,       d2$y, 0),
+                    col = "skyblue", border = "skyblue"
+                )
+                lines(d1)
+                lines(d2, col = "blue")
+            }
         }
         return(pArea)
     }

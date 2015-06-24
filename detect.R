@@ -6,6 +6,13 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     
     invisible(gc(reset = TRUE))
     
+#     if (!(require()))
+#     options(java.parameters = "-Xmx4g")
+#     if (!require(RWeka))
+#     WPM("install-package", "localOutlierFactor")
+#     WPM("install-package", "XMeans")
+#     LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
+    
     t0 = Sys.time()
     
     # =========
@@ -111,7 +118,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
         pAvg = numeric()
         for (i in 1:nc) {
             tmp.df  = detected.df2[which(xmeans.res$class_ids == i), ]
-            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal2.df[, j]))
+            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal.df[, j]))
             pAvg[i] = mean(probs[probs <= 1])
         }
         normal.clust = which.max(pAvg)
