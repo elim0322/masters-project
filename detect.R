@@ -64,6 +64,8 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     normal.df = preproc(testset[-detected.ind, ], "normalise")
     centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
     centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
+    #normal2.df = testset[-detected.ind, which(names(centers.normal) %in% rownames(centers.detected))]
+    normal2.df = testset[-detected.ind, ]
     
     if (method == "euclidean") {
         d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
@@ -96,14 +98,21 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
             sqrt((t(x-centers.normal) * cov(x, centers.normal)) %*% t(t(x-centers.normal))))
         normal.clust = which.min(d)
     } else if (method == "density") {
-        #return(list(detected.df, normal.df, xmeans.res$class_ids))
+        #return(list(detected.df, normal2.df, xmeans.res$class_ids))
         pAvg = numeric()
         for (i in 1:nc) {
             tmp.df  = detected.df[which(xmeans.res$class_ids == i), ]
-            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal.df[, j]))
+            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal2.df[, j]))
             pAvg[i] = mean(probs[probs <= 1])
-            cat(probs)
-            cat("\n")
+        }
+        normal.clust = which.max(pAvg)
+    } else if (method == "density.norm") {
+        detected.df2 = preproc(detected.df, "normalise")
+        pAvg = numeric()
+        for (i in 1:nc) {
+            tmp.df  = detected.df2[which(xmeans.res$class_ids == i), ]
+            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal2.df[, j]))
+            pAvg[i] = mean(probs[probs <= 1])
         }
         normal.clust = which.max(pAvg)
     }
@@ -132,8 +141,11 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     result$correct.cluster      = actual.clust
     result$identified.cluster   = normal.clust
     result$purity               = xmeans.res$purity
-    if (method == "density")    { result$prob = pAvg }
-    else                        { result$dist = d    }
+    if (method == "density" | method == "density.norm") {
+        result$prob = pAvg 
+    } else {
+        result$dist = d
+    }
     result$time                 = t3
     result$p1.time              = t1
     result$p2.time              = t2
@@ -195,38 +207,55 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
 # k30.min = eval.detect(dat, n = 100, method = "minkoski")
 # k30.mah = eval.detect(dat, n = 100, method = "mahalanobis")
 # k30.den = eval.detect(dat, n = 100, method = "density")
-save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, file = "evaluation.results.RData")
+# k30.nden = eval.detect(dat, n = 100, method = "density.norm")
+# save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, k30.den, k30.nden, file = "evaluation.results.RData")
+# load(file = "evaluation.results.RData")
 
+## a <- detect(dat, seed = 1, method = "density")
+# sapply(1:34, function(i) {
+#     cat(i, sep = "\n")
+#     overlap(a[[1]][a[[3]] == 3, i], a[[2]][, i])
+# })
+# a[[1]][a[[3]] == 3, 18]
+# a[[2]][, 18]
 
-#a <- detect(dat, seed = 40, method = "density")
+# a[[1]][a[[3]] == 4, 20]
+# a[[2]][, 20]
 
-
-# k40 = eval.detect(dat, k = 0.4, n = 100)
-# k50 = eval.detect(dat, k = 0.5, n = 100)
+# overlap(a[[1]][a[[3]] == 1, 2], a[[2]][, 2])
 # 
-# a = detect(dat, seed = 10)
-# apply(a[[1]], 2, function(x) sum( (x - a[[2]])^2 ))
-# apply(a[[1]], 2, function(x) sum( abs(x - a[[2]]) ))
-# apply(a[[1]], 2, function(x) sum(x*a[[2]]) / (sqrt(sum(x^2)) * sqrt(sum(a[[2]]^2))) )
+# plot(density(a[[1]][a[[3]] == 1, 2]))
+# plot(density(a[[2]][, 2]))
+# 
+# plot(density(a[[1]][a[[3]] == 1, 2]))
+# lines(density(a[[2]][, 2]))
 
 
 
 
-# detect(dat, seed = 10)
-# detect(dat, seed = 10, k = 0.4)
-# detect(dat, seed = 10, k = 0.5)
-
-# a = detect(dat, lof = lof_30p)
-# which.min(detect(dat, lof = lof_30p))
 
 
 
 
-# xmeans.norm = xmeans1(trim1, mode = "normalise")
-# centers = gsub("^.+?n(0.+)}.+$", "\\1", capture.output(xmeans.norm$clusterer$getClusterCenters()))
-# centers = eval(parse(text=paste("c(", gsub("\\\\n", ",", centers), ")")))
-# centers = cbind(centers[1:31], centers[32: 62], centers[63:93], centers[94:124])
-# rownames(centers) <- xmeans.norm$feature
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
