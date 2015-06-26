@@ -1,0 +1,5 @@
+\contentsline {chapter}{\numberline {1}Method}{1}
+\contentsline {section}{\numberline {1.1}Phase 1}{1}
+\contentsline {subsection}{\numberline {1.1.1}Local Outlier Factor}{1}
+\contentsline {section}{\numberline {1.2}Phase 2}{1}
+\contentsline {subsection}{\numberline {1.2.1}X-Means}{1}

@@ -1,0 +1,35 @@
+<<set-parent, echo=FALSE, cache=FALSE>>=
+knitr::set_parent(parent = "../Main/Main.Rnw")
+@
+
+\chapter{Methods}
+\label{ch:methods}
+
+Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [CITE:intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it enables the detection of novel threats. In consideration of increasing cyber crime incidences around the globe, the ability to detect novel attacks has given us a sounding reason to pursue the incorporation of an anomaly-based approach into our method. The caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually. The result of solving the said problems in separate steps, each of which is specialised to solve one of those problems, is a two-phase system that 
+
+
+
+The desired outcome of this research is a novel anomaly-based network intrusion detection system (NIDS) that improves upon other exisitng techniques. The rest of this chapter is divided into sections, each of which deals with a specific topic to deliver in-depth discussion.
+
+
+%----------------------------------------------------------
+\section{Overview}
+\label{sec:methods-overview}
+
+The intrusion detection scheme that we propose is a two-phase method that falls within the domain of unsupervised anomaly detection. 
+
+
+%----------------------------------------------------------
+\section{Phase 1}
+\label{sec:methods-phase1}
+\subsection{Local Outlier Factor}
+\label{subsec:methods-phase1-lof}
+LOF is...
+
+
+%----------------------------------------------------------
+\section{Phase 2}
+\label{sec:methods-phase2}
+\subsection{X-Means}
+
+

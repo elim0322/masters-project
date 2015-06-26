@@ -1,0 +1,18 @@
+<<set-parent, echo=FALSE, cache=FALSE>>=
+knitr::set_parent(parent = "../Main/Main.Rnw")
+@
+
+\chapter{Introduction}
+\label{ch:intro}
+
+An intrusion detection system (IDS) can fall under two main categories: a signature-based and an anomaly-based IDS where the former detects threats by matching connections with a database of previously known hostile connections and the latter by treating the threats as anomalies. In comparison to the anomaly-based IDS, the signature-based IDS is associated with superior performance through higher detection rate with minimal false alarm rate in a similar manner
+
+
+The domain of unsupervised anomaly detection is, in particular, attractive to the field of network intrusion detection due to its ability to detect novel hostile connections.
+
+
+has attracted much attention due to its ability to detect novel attacks which
+
+There are 
+
+The intrusion detection scheme that we propose is a two-phase method that falls within the domain of unsupervised anomaly detection. 
