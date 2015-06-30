@@ -132,6 +132,24 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
             d[i] = sqrt(sum((x - y)^2))
         }
         normal.clust = which.min(d)
+    } else if (method == "density3") {
+        detected.df2 = preproc(detected.df, "normalise")
+        d = numeric()
+        #return(list(centers.detected, centers.normal))
+        for (i in 1:nc) {
+            tmp.df = detected.df2[which(xmeans.res$class_ids == i), ]
+            probs  = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal.df[, j]))
+            #which.probs = names(tmp.df)[which(probs >= 0.7)]
+            names(probs) = names(tmp.df)[names(tmp.df)!="attack_type"]
+            probs = probs[names(probs) %in% rownames(centers.detected)]
+            probs1 = 1 - probs
+            
+            x = ifelse(probs >= 0.7, probs1 * centers.detected[, i], centers.detected[, i])
+            y = ifelse(probs >= 0.7, probs1 * centers.normal, centers.normal)
+            
+            d[i] = sqrt(sum((x - y)^2))
+        }
+        normal.clust = which.min(d)
     }
     
     normal.ind = which(xmeans.res$class_ids == normal.clust)
