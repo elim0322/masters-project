@@ -5,31 +5,89 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 \chapter{Methods}
 \label{ch:methods}
 
-Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [CITE:intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it enables the detection of novel threats. In consideration of increasing cyber crime incidences around the globe, the ability to detect novel attacks has given us a sounding reason to pursue the incorporation of an anomaly-based approach into our method. The caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually. The result of solving the said problems in separate steps, each of which is specialised to solve one of those problems, is a two-phase system that 
+Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the detection of novel threats. In order to secure a network, it is of the essence to be able to identify previously unknown threats before any harm can be caused. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the ability to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised anomaly-based approach into our method.
 
+As mentioned earlier in chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to yield improved detection, and (2) a clustering scheme is applied to identify the cluster of false positives which will be removed to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS shown in Figure \ref{fig:overview}.
 
+\begin{figure}[h]
+\centering
+  \begin{tikzpicture}
+    \node(input)  [simple]                                         {Input data};
+    \node(phase1) [process, below of=input,   node distance=2.8cm] {Phase 1: \\ Anomaly detection};
+    \node(anomaly)[simple,  right of=phase1,  node distance=3.8cm] {Anomalies};
+    \node(phase2) [process, right of=anomaly, node distance=3.8cm] {Phase 2: \\  Clustering and trimming};
+    \node(output) [simple,  above of=phase2,  node distance=2.8cm] {Anomalies \\ (false positives removed)};
+    
+    \draw [->] (input)   to (phase1);
+    \draw [->] (phase1)  to (anomaly);
+    \draw [->] (anomaly) to (phase2);
+    \draw [->] (phase2)  to (output);
+  \end{tikzpicture}
+  \caption{System overview}
+  \label{fig:overview}
+\end{figure}
 
-The desired outcome of this research is a novel anomaly-based network intrusion detection system (NIDS) that improves upon other exisitng techniques. The rest of this chapter is divided into sections, each of which deals with a specific topic to deliver in-depth discussion.
+The rest of this chapter is divided into sections with in-depth discussion... (fix this)
 
 
 %----------------------------------------------------------
-\section{Overview}
-\label{sec:methods-overview}
+\section{Anomaly Detection}
 
-The intrusion detection scheme that we propose is a two-phase method that falls within the domain of unsupervised anomaly detection. 
+Supervised and semi-supervised anomaly detection techniques are not considered in our method as they require a labelled training dataset from which a classifier or a model is constructed. Since the desired outcome of this research is a NIDS with the novelty detection capability, any labels in a dataset are treated as non-existent and are only used for system evaluation.
+
+From the unsupervised anomaly detection domain, the local outlier factor (LOF) algorithm is chosen for its advantages over others. The main advantage is that anomalous objects are detected by a local approach rather than global. Figure \ref{fig:lof-example} illustrates this point. Suppose a dataset with two clusters, one being extremely dense and the other being sparse. Distance-based nearest neighbour approaches such as the $k$-th Nearest Neighbour ($k$NN) will fail to detect the outlier, $p$, as the distance between any point in the sparse cluster to its nearest neighbours is always greater than the distance between $p$ and its nearest neighbours. Hence the distance involving $p$ can never be significantly greater than the other distances to be detected as an outlier.
+
+<<lof-example, echo=FALSE, fig.align='center', fig.cap="The LOF approach", out.width="0.8\\linewidth">>=
+set.seed(3)
+a = cbind(rnorm(30, mean = 10, sd = 4), rnorm(30, mean = 10, sd = 4))
+set.seed(3)
+b = cbind(rnorm(100, mean = 1, sd = 0.4), rnorm(100, mean = 1, sd = 0.4))
+
+xmin = min(c(min(a[,1]), min(b[,1])))
+xmax = max(c(max(a[,1]), max(b[,1])))
+ymin = min(c(min(a[,2]), min(b[,2])))
+ymax = max(c(max(a[,2]), max(b[,2])))
+
+plot(a, xlim = c(xmin, xmax), ylim = c(ymin, ymax), xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+points(b)
+points(x = max(b[,1])+0.3, y = max(b[,2])+0.2, pch = 4)
+text(x = max(b[,1])+0.3, y = max(b[,2])+0.2, labels = "p", cex = 0.8, pos = 3, family = "sans")
+@
+
+The LOF algorithm overcomes this problem by comparing local densities given by the distance between objects and their nearest neighbours. The local density, or deviation, of an object is measured with respect to its neighbours so that sparse objects, relative to their neighbours, can be identified as outliers. The result of LOF is a score for every object in a dataset to indicate whether an object is an outlier. Because the algorithm implements the local approach, the LOF score of an object can not imply the degree of outlierness of the object. The scores are dependent on the local environment, or the neighbourhood, associated with individual objects. The difficulty in interpreting the result can be avoided by assigning the Local Outlier Probability (LoOP) for each object. The probability can provide reasonable and comparative indication of an object's outlierness due to its normalised nature but this is beyond the scope of our research as simple yet effective detection is what we are after.
+
+The rest of this section is divided into subsections that discuss other anomaly detection approaches along with their limitations and our implementation of anomaly detection that corresponds to phase 1 of the proposed scheme.
+
+\subsection{Other approaches}
+\subsubsection{Statistical model-based approach}
+A classical approach using statistical models is to compute the Mahalanobis distance of all points in a dataset, given by
+\[ D_M(x) = \sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}, \]
+where $\mu$ and $\Sigma$ denote the vector of means and covariance matrix of the points, respectively. Under the multivariate normality assumption, the Mahalanobis distance follows a $\chi^{2}_{k}$-distribution, where $k$ is the degrees of freedom associated with the dataset. Hence a point whose $D_M$ is greater than the 97.5th percentile of the corresponding $\chi^{2}_{k}$ quantile function is a statistical outlier. The main problem with this approach is that it is extremely difficult to satisfy the multivariate normality assumption for any real life data. Another problem is that the mean of a set of points is extremely sensitive to outlier itself to result in a bias. Obtaining the inverse of a covariance matrix is also problematic when the matrix is singular, which could happen when there are duplicates in the data. Other possible problem to note is that the Mahalanobis distance metric is heavily affected by the curse of dimensionality.
+
+\subsubsection{Neighbourhood-based approach}
+As mentioned earlier, the simple distance-based nearest neighbour approaches such as the $k$NN suffers from varying densities in a dataset. There is no guarantee to suggest that the dataset is always dense, especially when it contains binary features whose components are mostly zeroes. (Check with Mazier which packet information can be binary).
+
+\subsubsection{Clustering-based approach}
+Unsupervised clustering techniques such as the PCA-based method... (more reading)
+
+The $k$-means clustering is another popular technique that is efficient with reasonable performance. However its drawbacks include (1) using variance as a measure of cluster scatter which can be sensitive to outliers, (2) requirement of the input parameter, $k$, which can affect the result and (3) most notably the convergence to local minima to produce incorrect results. Some of these limitations can be prevented by using the $X$-means clustering but the fundamental problems associated with any distance-based clustering techniques, such as the adequacy of the distance metric, are still present.
+
+
+
+
+\subsection{Phase 1 algorithm}
 
 
 %----------------------------------------------------------
-\section{Phase 1}
-\label{sec:methods-phase1}
-\subsection{Local Outlier Factor}
-\label{subsec:methods-phase1-lof}
-LOF is...
+% \section{Clustering}
+% \subsection{X-Means}
 
 
 %----------------------------------------------------------
-\section{Phase 2}
-\label{sec:methods-phase2}
-\subsection{X-Means}
+% \section{Cluster Identification}
+
+
+
+
 
 
