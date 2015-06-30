@@ -1,0 +1,50 @@
+\documentclass[12pt,examcopy]{../uathesis}
+    \usepackage{graphicx}
+    \usepackage{algorithm}
+    \usepackage{algpseudocode}
+    \usepackage{amssymb}
+    \usepackage{moreverb}
+    \usepackage{booktabs}
+
+\newtheorem{definition}{Definition}
+
+% some settings to fill pages more densely
+\renewcommand\floatpagefraction{.9}
+\renewcommand\topfraction{.9}
+\renewcommand\bottomfraction{.9}
+\renewcommand\textfraction{.1}
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+
+\begin{document}
+\title{Put the Thesis Title Here}
+\author{Put Your Name Here}
+\department{Computer Science}
+\supervisor{Supervisor 1}{Supervisor 2}
+\maketitle
+
+\frontmatter
+\begin{abstract}
+The abstract
+\end{abstract}
+
+\begin{acknowledgements}
+I would like to acknowledge and thank: ...
+\end{acknowledgements}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+\mainmatter
+<<Method, child='../Method/Method.Rnw'>>=
+@
+% \include{Introduction/Introduction}
+% % include more chapters here...
+% \include{Conclusion/Conclusion}
+
+\backmatter
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}

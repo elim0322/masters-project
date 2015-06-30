@@ -1,4 +1,9 @@
 *.Rproj.user
 *.Rhistory
 *.png
-.Rproj.user
+
+Writing/**/*.concordance.tex
+Writing/**/*.log
+Writing/**/*.pdf
+Writing/**/*.synctex.gz
+Writing/**/*.tex
