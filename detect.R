@@ -6,7 +6,10 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     
     invisible(gc(reset = TRUE))
     
-#     if (!(require()))
+#     if (!require(RWeka)) {
+#         
+#     }
+    
 #     options(java.parameters = "-Xmx4g")
 #     if (!require(RWeka))
 #     WPM("install-package", "localOutlierFactor")
@@ -71,8 +74,6 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     normal.df = preproc(testset[-detected.ind, ], "normalise")
     centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
     centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
-    #normal2.df = testset[-detected.ind, which(names(centers.normal) %in% rownames(centers.detected))]
-    normal2.df = testset[-detected.ind, ]
     
     if (method == "euclidean") {
         d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
@@ -104,16 +105,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
         d = apply(centers.detected, 2, function(x) 
             sqrt((t(x-centers.normal) * cov(x, centers.normal)) %*% t(t(x-centers.normal))))
         normal.clust = which.min(d)
-    } else if (method == "density") {
-        #return(list(detected.df, normal2.df, xmeans.res$class_ids))
-        pAvg = numeric()
-        for (i in 1:nc) {
-            tmp.df  = detected.df[which(xmeans.res$class_ids == i), ]
-            probs   = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal2.df[, j]))
-            pAvg[i] = mean(probs[probs <= 1])
-        }
-        normal.clust = which.max(pAvg)
-    } else if (method == "density.norm") {
+    } else if (method == "density1") {
         detected.df2 = preproc(detected.df, "normalise")
         pAvg = numeric()
         for (i in 1:nc) {
@@ -122,6 +114,24 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
             pAvg[i] = mean(probs[probs <= 1])
         }
         normal.clust = which.max(pAvg)
+    } else if (method == "density2") { # feature selection using similarity
+        detected.df2 = preproc(detected.df, "normalise")
+        d = numeric()
+        #return(list(centers.detected, centers.normal))
+        for (i in 1:nc) {
+            tmp.df = detected.df2[which(xmeans.res$class_ids == i), ]
+            probs  = sapply(1:(which(names(tmp.df)=="attack_type") - 1), function(j) overlap(tmp.df[, j], normal.df[, j]))
+            #which.probs = names(tmp.df)[which(probs >= 0.7)]
+            names(probs) = names(tmp.df)[names(tmp.df)!="attack_type"]
+            probs = probs[names(probs) %in% rownames(centers.detected)]
+            probs = 1 - probs
+            
+            x = probs * centers.detected[, i]
+            y = probs * centers.normal
+            
+            d[i] = sqrt(sum((x - y)^2))
+        }
+        normal.clust = which.min(d)
     }
     
     normal.ind = which(xmeans.res$class_ids == normal.clust)
@@ -213,9 +223,10 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
 # k30.che = eval.detect(dat, n = 100, method = "chebyshev")
 # k30.min = eval.detect(dat, n = 100, method = "minkoski")
 # k30.mah = eval.detect(dat, n = 100, method = "mahalanobis")
-# k30.den = eval.detect(dat, n = 100, method = "density")
+# k30.den = eval.detect(dat, n = 100, method = "density1")
+# k30.den2 = eval.detect(dat, n = 100, method = "density2")
 # k30.nden = eval.detect(dat, n = 100, method = "density.norm")
-# save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, k30.den, k30.nden, file = "evaluation.results.RData")
+# save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, k30.den, k30.den2, k30.nden, file = "evaluation.results.RData")
 # load(file = "evaluation.results.RData")
 
 ## a <- detect(dat, seed = 1, method = "density")
