@@ -37,7 +37,7 @@ Supervised and semi-supervised anomaly detection techniques are not considered i
 
 From the unsupervised anomaly detection domain, the local outlier factor (LOF) algorithm is chosen for its advantages over others. The main advantage is that anomalous objects are detected by a local approach rather than global. Figure \ref{fig:lof-example} illustrates this point. Suppose a dataset with two clusters, one being extremely dense and the other being sparse. Distance-based nearest neighbour approaches such as the $k$-th Nearest Neighbour ($k$NN) will fail to detect the outlier, $p$, as the distance between any point in the sparse cluster to its nearest neighbours is always greater than the distance between $p$ and its nearest neighbours. Hence the distance involving $p$ can never be significantly greater than the other distances to be detected as an outlier.
 
-<<lof-example, echo=FALSE, fig.align='center', fig.cap="The LOF approach", out.width="0.8\\linewidth">>=
+<<lof-example, echo=FALSE, fig.align='center', fig.cap="Advantages of the LOF algorithm", out.width="0.8\\linewidth">>=
 set.seed(3)
 a = cbind(rnorm(30, mean = 10, sd = 4), rnorm(30, mean = 10, sd = 4))
 set.seed(3)
@@ -51,7 +51,7 @@ ymax = max(c(max(a[,2]), max(b[,2])))
 plot(a, xlim = c(xmin, xmax), ylim = c(ymin, ymax), xlab = "", ylab = "", xaxt = "n", yaxt = "n")
 points(b)
 points(x = max(b[,1])+0.3, y = max(b[,2])+0.2, pch = 4)
-text(x = max(b[,1])+0.3, y = max(b[,2])+0.2, labels = "p", cex = 0.8, pos = 3, family = "sans")
+text(x = max(b[,1])+0.3, y = max(b[,2])+0.2, labels = "p", pos = 3, family = "sans")
 @
 
 The LOF algorithm overcomes this problem by comparing local densities given by the distance between objects and their nearest neighbours. The local density, or deviation, of an object is measured with respect to its neighbours so that sparse objects, relative to their neighbours, can be identified as outliers. The result of LOF is a score for every object in a dataset to indicate whether an object is an outlier. Because the algorithm implements the local approach, the LOF score of an object can not imply the degree of outlierness of the object. The scores are dependent on the local environment, or the neighbourhood, associated with individual objects. The difficulty in interpreting the result can be avoided by assigning the Local Outlier Probability (LoOP) for each object. The probability can provide reasonable and comparative indication of an object's outlierness due to its normalised nature but this is beyond the scope of our research as simple yet effective detection is what we are after.
@@ -73,9 +73,17 @@ Unsupervised clustering techniques such as the PCA-based method... (more reading
 The $k$-means clustering is another popular technique that is efficient with reasonable performance. However its drawbacks include (1) using variance as a measure of cluster scatter which can be sensitive to outliers, (2) requirement of the input parameter, $k$, which can affect the result and (3) most notably the convergence to local minima to produce incorrect results. Some of these limitations can be prevented by using the $X$-means clustering but the fundamental problems associated with any distance-based clustering techniques, such as the adequacy of the distance metric, are still present.
 
 
-
-
 \subsection{Phase 1 algorithm}
+The aim of phase 1 is to detect as much anomalies as possible. The desired detection rate of phase 1 is essentially 100\%. Hence the anomaly detection is executed generously. This leads to more false positives being included in the result, which are to be trimmed out in phase 2.
+
+The initial step of phase 1 is to apply the LOF algorithm on the numeric portion of a test dataset. Kernel density estimates are computed on the set of resulting LOF scores so that their corresponding probability distribution can be plotted. The kernel density estimation (KDE) is a non-parametric m
+
+The set of resulting LOF scores are then plotted to show their density distribution. Kernel density estimation (KDE) is used 
+
+
+<<phase1-example>>=
+
+@
 
 
 %----------------------------------------------------------
