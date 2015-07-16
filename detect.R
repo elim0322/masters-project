@@ -1,20 +1,19 @@
 source("evaluation.R")
 source("kmeans.R")
 source("overlap.R")
+library(MVN)
 
 detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, method = "euclidean", trace = TRUE) {
     
     invisible(gc(reset = TRUE))
     
-#     if (!require(RWeka)) {
-#         
-#     }
-    
-#     options(java.parameters = "-Xmx4g")
-#     if (!require(RWeka))
-#     WPM("install-package", "localOutlierFactor")
-#     WPM("install-package", "XMeans")
-#     LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
+    # if (!require(RWeka)) {
+    # }
+    # options(java.parameters = "-Xmx4g")
+    # if (!require(RWeka))
+    # WPM("install-package", "localOutlierFactor")
+    # WPM("install-package", "XMeans")
+    # LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
     
     t0 = Sys.time()
     
@@ -47,8 +46,14 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     # Phase 1 detection
     # ==================
     if (trace) cat(paste0("Running phase 1 detection ..... "))
-    detected.ind = experiment(lof, testset)$detected
+    p1.result = experiment(lof, testset)
     t1 = Sys.time() - t0
+    
+    threshold        = p1.result$threshold
+    detection.rate   = p1.result$detection.rate
+    false.alarm.rate = p1.result$false.alarm
+    detected.ind     = p1.result$detected
+    
     if (trace) cat(paste0("done", "\n"))
     
     # ================
@@ -75,6 +80,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
     centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
     
+    {
     if (method == "euclidean") {
         d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
         normal.clust = which.min(d)
@@ -151,6 +157,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
         }
         normal.clust = which.min(d)
     }
+    }
     
     normal.ind = which(xmeans.res$class_ids == normal.clust)
     
@@ -170,6 +177,8 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     names(normal.clust) = NULL
     
     result = list()
+    
+    result$phase1 = list(threshold = threshold, detection.rate = detection.rate, false.alarm.rate = false.alarm.rate)
     result$detection.rate       = sum(detected.final != "normal.") / n_attack
     result$false.alarm.rate     = sum(detected.final == "normal.") / n_normal
     result$correctly.identified = ifelse(actual.clust == normal.clust, TRUE, FALSE)
@@ -196,12 +205,24 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
         cat(paste0(" done", "\n"))
     }
     
+    p1.thd = paste0("c(", paste0("result[[", 1:n, "]]$phase1$threshold", collapse = ", "), ")")
+    p1.dr  = paste0("c(", paste0("result[[", 1:n, "]]$phase1$detection.rate", collapse = ", "), ")")
+    p1.far = paste0("c(", paste0("result[[", 1:n, "]]$phase1$false.alarm.rate", collapse = ", "), ")")
+    
     dr    = paste0("c(", paste0("result[[", 1:n, "]]$detection.rate", collapse = ", "), ")")
     far   = paste0("c(", paste0("result[[", 1:n, "]]$false.alarm.rate", collapse = ", "), ")")
     clust = paste0("c(", paste0("result[[", 1:n, "]]$correctly.identified", collapse = ", "), ")")
     time  = paste0("c(", paste0("result[[", 1:n, "]]$time", collapse = ", "), ")")
     p1.time  = paste0("c(", paste0("result[[", 1:n, "]]$p1.time", collapse = ", "), ")")
     p2.time  = paste0("c(", paste0("result[[", 1:n, "]]$p2.time", collapse = ", "), ")")
+    
+    
+    p1.thd.avg = round(mean(eval(parse(text = p1.thd))), digits = 5)
+    p1.thd.sd  = round(sd(eval(parse(text = p1.thd))), digits = 5)
+    p1.dr.avg  = round(mean(eval(parse(text = p1.dr))), digits = 5)
+    p1.dr.sd   = round(sd(eval(parse(text = p1.dr))), digits = 5)
+    p1.far.avg = round(mean(eval(parse(text = p1.far))), digits = 5)
+    p1.far.sd  = round(sd(eval(parse(text = p1.far))), digits = 5)
     
     dr.avg  = round(mean(eval(parse(text = dr))), digits = 5)
     far.avg = round(mean(eval(parse(text = far))), digits = 5)
@@ -217,6 +238,12 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
     p2.sd.time          = round(sd(eval(parse(text = p2.time))), 5)
     
     ret = list()
+    ret$p1.table = data.frame(matrix(c(p1.thd.avg, paste0("(", p1.thd.sd, ")"),
+                                       p1.dr.avg,  paste0("(", p1.dr.sd, ")"),
+                                       p1.far.avg, paste0("(", p1.far.sd, ")")), ncol = 3),
+                              row.names = c("mean", "sd"))
+    colnames(ret$p1.table) = c("threshold", "detection.rate", "false.alarm.rate")
+    
     ret$table = data.frame(matrix(c(dr.avg, paste0("(", dr.sd, ")"),
                                     far.avg, paste0("(", far.sd, ")")), ncol = 2),
                            row.names = c("mean", "sd"))
@@ -234,17 +261,17 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
     ret
     
 }
-
+# phase1 = eval.detect(dat, n = 100, method = "euclidean")
 # k30.euc = eval.detect(dat, n = 100, method = "euclidean")
 # k30.weuc = eval.detect(dat, n = 100, method = "w.euclidean")
 # k30.man = eval.detect(dat, n = 100, method = "manhattan")
 # k30.che = eval.detect(dat, n = 100, method = "chebyshev")
 # k30.min = eval.detect(dat, n = 100, method = "minkoski")
 # k30.mah = eval.detect(dat, n = 100, method = "mahalanobis")
-# k30.den = eval.detect(dat, n = 100, method = "density1")
+# k30.den1 = eval.detect(dat, n = 100, method = "density1")
 # k30.den2 = eval.detect(dat, n = 100, method = "density2")
-# k30.nden = eval.detect(dat, n = 100, method = "density.norm")
-# save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, k30.den, k30.den2, k30.nden, file = "evaluation.results.RData")
+# k30.den3 = eval.detect(dat, n = 100, method = "density3")
+# save(k30.euc, k30.weuc, k30.man, k30.che, k30.min, k30.mah, k30.den1, k30.den2, k30.den3, file = "evaluation.results.RData")
 # load(file = "evaluation.results.RData")
 
 ## a <- detect(dat, seed = 1, method = "density")

@@ -31,13 +31,21 @@ slope = function(fp) {
 ## evaluate detection rate and false alarm rate
 experiment = function(score, test) {
     d = density(score, n = 10 * length(score))
-    fp = finite_difference(d)
-    neg = slope(fp)
-    #ind = neg[which.min(diff(fp[neg]))]
-    #threshold = d$x[ind]
+#     fp = finite_difference(d)
+#     neg = slope(fp)
+#     #ind = neg[which.min(diff(fp[neg]))]
+#     #threshold = d$x[ind]
+#     
+#     ## this part requires improvement
+#     threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
     
-    ## this part requires improvement
-    threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
+    
+    ## diff(diff(x)) essentially computes the discrete analogue of the second derivative
+    ## so should be negative at local maxima and positive at local minima.
+    local_min = min(which(diff(sign(diff(d$y))) ==  2) + 1) # should be the first local minimum after 1
+    local_max = min(which(diff(sign(diff(d$y))) == -2) + 1) # should be the global maximum at 1
+    
+    threshold = d$x[local_min] - diff(c(d$x[local_max], d$x[local_min])) * 0.1
     
     ## floor() to be generous
     dr = sum(names(score[score >= threshold]) != "normal.") / sum(test$attack_type != "normal.")
