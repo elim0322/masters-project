@@ -7,33 +7,32 @@
 ## PC scores
 #mydata.PC = PCA(trim1[, -which(names(trim1) == "attack_type")], ncp = 35, graph = FALSE)$ind$coord
 
-plot.kmeans = function(data, title) {
-    wss = numeric()
-    tot.var = numeric()
-    aic = numeric()
-    bic = numeric()
-    for (i in 1:10) {
-        if (i == 1) wss[i] = (nrow(data)-1)*sum(apply(data,2,var))
-        #set.seed(123)
-        tmp = kmeans(data, centers = i, iter.max = 1000, nstart = 25)
-        wss[i] = tmp$tot.withinss
-        tot.var[i] = (tmp$betweenss / tmp$totss) * 100
-        aic[i] = tmp$tot.withinss + 2 * ncol(tmp$centers) * nrow(tmp$centers)
-        bic[i] = tmp$tot.withinss + 2 * log(length(tmp$cluster)) * ncol(tmp$centers) * nrow(tmp$centers)
-    }
-    par(mfrow = c(2, 2))
-    plot(1:10, wss, type = "b", xlab = "Number of clusters", ylab = "Within groups sum of squares")
-    plot(1:10, tot.var, type = "b", xlab = "Number of clusters", ylab = "Variance explained (%)")
-    plot(1:10, aic, type = "b", xlab = "Number of clusters", ylab = "AIC")
-    plot(1:10, bic, type = "b", xlab = "Number of clusters", ylab = "BIC")
-    mtext(title, side = 3, line = -2, outer = TRUE)
-    par(mfrow = c(1, 1))
-}
+# plot.kmeans = function(data, title) {
+#     wss = numeric()
+#     tot.var = numeric()
+#     aic = numeric()
+#     bic = numeric()
+#     for (i in 1:10) {
+#         if (i == 1) wss[i] = (nrow(data)-1)*sum(apply(data,2,var))
+#         #set.seed(123)
+#         tmp = kmeans(data, centers = i, iter.max = 1000, nstart = 25)
+#         wss[i] = tmp$tot.withinss
+#         tot.var[i] = (tmp$betweenss / tmp$totss) * 100
+#         aic[i] = tmp$tot.withinss + 2 * ncol(tmp$centers) * nrow(tmp$centers)
+#         bic[i] = tmp$tot.withinss + 2 * log(length(tmp$cluster)) * ncol(tmp$centers) * nrow(tmp$centers)
+#     }
+#     par(mfrow = c(2, 2))
+#     plot(1:10, wss, type = "b", xlab = "Number of clusters", ylab = "Within groups sum of squares")
+#     plot(1:10, tot.var, type = "b", xlab = "Number of clusters", ylab = "Variance explained (%)")
+#     plot(1:10, aic, type = "b", xlab = "Number of clusters", ylab = "AIC")
+#     plot(1:10, bic, type = "b", xlab = "Number of clusters", ylab = "BIC")
+#     mtext(title, side = 3, line = -2, outer = TRUE)
+#     par(mfrow = c(1, 1))
+# }
 # plot.kmeans(trim1[,names(trim1)!="attack_type"], title = "Raw data")
 # plot.kmeans(mydata.norm, title = "Normalised data")
 # plot.kmeans(mydata.stan, title = "Standardised data")
 # plot.kmeans(mydata.PC, title = "PC scores")
-
 
 
 # =======================================
@@ -78,29 +77,6 @@ preproc = function(data, mode) {
     return(data.proc)
     
 }
-kmeans1 = function(data, mode = NULL, centers, iter.max = 1000, nstart = 20, ...) {
-    
-    data = data[, sapply(data, function(x) length(unique(x))) != 1]
-    
-    ## pre-process data
-    if (!is.null(mode)) {
-        data.proc = preproc(data, mode)
-    } else {
-        data.proc = data
-    }
-    
-    kmeans.res = kmeans(data.proc[names(data.proc)!="attack_type"], centers = centers, ...)
-    kmeans.res$table  = list()
-    kmeans.res$purity = numeric()
-    
-    for (i in 1:centers) {
-        tmp.table             = table(data.proc[which(kmeans.res$cluster == i), "attack_type"])
-        kmeans.res$table[[i]] = tmp.table[tmp.table != 0]
-        kmeans.res$purity[i]  = max(tmp.table) / kmeans.res$size[i]
-    }
-    
-    return(kmeans.res)
-}
 xmeans1 = function(data, mode = NULL) {
     
     data = data[, sapply(data, function(x) length(unique(x))) != 1]
@@ -131,6 +107,30 @@ xmeans1 = function(data, mode = NULL) {
     
     return(xmeans.res)
 }
+
+# kmeans1 = function(data, mode = NULL, centers, iter.max = 1000, nstart = 20, ...) {
+#     
+#     data = data[, sapply(data, function(x) length(unique(x))) != 1]
+#     
+#     ## pre-process data
+#     if (!is.null(mode)) {
+#         data.proc = preproc(data, mode)
+#     } else {
+#         data.proc = data
+#     }
+#     
+#     kmeans.res = kmeans(data.proc[names(data.proc)!="attack_type"], centers = centers, ...)
+#     kmeans.res$table  = list()
+#     kmeans.res$purity = numeric()
+#     
+#     for (i in 1:centers) {
+#         tmp.table             = table(data.proc[which(kmeans.res$cluster == i), "attack_type"])
+#         kmeans.res$table[[i]] = tmp.table[tmp.table != 0]
+#         kmeans.res$purity[i]  = max(tmp.table) / kmeans.res$size[i]
+#     }
+#     
+#     return(kmeans.res)
+# }
 
 # kmeans1(trim1, centers = 3)[c("size", "purity", "table")]
 # kmeans1(trim1, mode = "normalise", centers = 4)[c("size", "purity", "table")]

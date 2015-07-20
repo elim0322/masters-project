@@ -1,20 +1,14 @@
 source("evaluation.R")
 source("kmeans.R")
 source("overlap.R")
-library(MVN)
 
-detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, method = "euclidean", trace = TRUE) {
+## cascade x-means?
+detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.method = "xmeans", method = "euclidean", trace = TRUE) {
     
+    ## force garbage collection to reset memory usage
     invisible(gc(reset = TRUE))
     
-    # if (!require(RWeka)) {
-    # }
-    # options(java.parameters = "-Xmx4g")
-    # if (!require(RWeka))
-    # WPM("install-package", "localOutlierFactor")
-    # WPM("install-package", "XMeans")
-    # LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
-    
+    ## initial time
     t0 = Sys.time()
     
     # =========
@@ -31,9 +25,10 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     testset  = data[c(normal, attack), -category]
     if (trace) cat(paste0("done", "\n"))
     
-    # ============
-    # Phase 1 LOF
-    # ============
+    # ===========================
+    # Phase 1: Anomaly Detection
+    # ===========================
+    ### LOF ###
     k_min = k * (n_normal + n_attack)
     k_max = k * (n_normal + n_attack)
     
@@ -42,9 +37,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     names(lof) <- data[c(normal, attack), "attack_type"]
     if (trace) cat(paste0("done", "\n"))
     
-    # ==================
-    # Phase 1 detection
-    # ==================
+    ### detection ###
     if (trace) cat(paste0("Running phase 1 detection ..... "))
     p1.result = experiment(lof, testset)
     t1 = Sys.time() - t0
@@ -56,22 +49,31 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, met
     
     if (trace) cat(paste0("done", "\n"))
     
-    # ================
-    # Phase 2 X-means
-    # ================
-    detected.df = testset[detected.ind, ]
+    # ===============================
+    # Phase 2: False Alarm Reduction
+    # ===============================
+    ### X-Means ###
+    if (p2.method == "xmeans") {
+        detected.df = testset[detected.ind, ]
+        
+        xmeans.res = xmeans1(detected.df, "normalise")
+        xmeans.res$class_ids = xmeans.res$class_ids + 1 # class_ids start from 0
+        centers = gsub("^.+?n(0.+)}.+$", "\\1", capture.output(xmeans.res$clusterer$getClusterCenters()))
+        centers = eval(parse(text = paste("c(", gsub("\\\\n", ",", centers), ")")))
+        
+        n  = length(centers)
+        nc = xmeans.res$clusterer$numberOfClusters()
+        x  = 1:n
+        split.list  = split(x, ceiling(x / (n / nc)))
+        centers.detected = sapply(split.list, function(x) centers[x])
+        rownames(centers.detected) <- xmeans.res$feature
+    } else if (p2.method == "kmedoids") {
+        
+        detected.df = testset[detected.ind, ]
+        return(detected.df)
+        
+    }
     
-    xmeans.res = xmeans1(detected.df, "normalise")
-    xmeans.res$class_ids = xmeans.res$class_ids + 1 # class_ids start from 0
-    centers = gsub("^.+?n(0.+)}.+$", "\\1", capture.output(xmeans.res$clusterer$getClusterCenters()))
-    centers = eval(parse(text = paste("c(", gsub("\\\\n", ",", centers), ")")))
-    
-    n  = length(centers)
-    nc = xmeans.res$clusterer$numberOfClusters()
-    x  = 1:n
-    split.list  = split(x, ceiling(x / (n / nc)))
-    centers.detected = sapply(split.list, function(x) centers[x])
-    rownames(centers.detected) <- xmeans.res$feature
     
     # ==========================
     # Phase 2 center comparison

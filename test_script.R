@@ -16,9 +16,11 @@ names(dat) = c("duration", "protocol_type", "service", "flag",
 #load(file = "../Desktop/kddcup.data_10_percent_corrected.RData")
 options(java.parameters = "-Xmx4g")
 library(RWeka)
-WPM("install-package", "localOutlierFactor")
-WPM("install-package", "XMeans")
+Sys.setenv(WEKA_HOME = "C:\\Users\\OEM\\wekafiles")
+WPM("load-package", "localOutlierFactor")
 LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
+# WPM("install-package", "localOutlierFactor")
+# WPM("install-package", "XMeans")
 
 #save(dat, file = "../kddcup.data_10_percent_corrected.RData")
 
