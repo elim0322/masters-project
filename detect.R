@@ -79,6 +79,8 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
     # Phase 2 center comparison
     # ==========================
     normal.df = preproc(testset[-detected.ind, ], "normalise")
+    
+    ## is it worth doing a x-means on the normal set rather than assuming that there is only one pattern in the normal set.
     centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
     centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
     

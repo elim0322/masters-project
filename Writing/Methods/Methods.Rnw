@@ -219,7 +219,10 @@ points(d[e[31], 1], d[e[31], 2], pch = 4)
 points(d[e[29], 1], d[e[29], 2], pch = 4)
 @
 
-The second approach is to apply a clustering scheme to clump similar instances into clusters. The resulting clusters can then be compared with the actual normal instances, i.e., the undetected set in phase 1, in an unsupervised fashion. Even when the situation is dire such as shown in Figure \ref{fig:phase2-exmaple2}, the data points can still be effectively clustered as shown in Figure \ref{fig:phase2-example3}. 
+The second approach is to apply a clustering scheme to clump similar instances into clusters. The resulting clusters can then be compared with the actual normal instances, i.e., the undetected set in phase 1, in an unsupervised fashion. 
+
+
+Even when the situation is dire such as shown in Figure \ref{fig:phase2-example2}, the data points can still be effectively clustered as shown in Figure \ref{fig:phase2-example3}.
 
 <<phase2-example3, echo=FALSE, fig.align='center', fig.cap="", out.width="0.45\\linewidth">>=
 set.seed(1)
@@ -254,22 +257,29 @@ points(f[g$cluster==1, ], pch = 3)
 points(f[g$cluster==2, ], pch = 4)
 points(f[g$cluster==3, ], pch = 0)
 points(f[g$cluster==4, ], pch = 1)
-
-
-
 @
 
 
 \subsection{X-Means Clustering}
 
+k-means and k-medoids are the most efficient and widely accepted clustering schemes:
 
+1. Talk about k-medoids' insensitivity to presence of outliers but every instance in a detected set is a possible outlier under the LOF algorithm.
 
-
-
+2. k-means could have been used but x-means is chosen in this case to get rid of having to consider the adequacy of the parameter, $k$. X-means chooses the number of centre that makes the most sense under the Bayesian information criterion.
 
 
 %----------------------------------------------------------
 \subsection{Cluster Identification}
+
+The decision to use distance metrics as a similarity measure is to be consistent with X-Means which is partially based on a distance metric. If the performance of X-Means is reasonable, i.e., purity for each cluster is high enough -> then the distance metric used in the X-Means must qualify as adequately as the value of purity itself.
+Talk about the use of different distance metrics such as the Euclidean, Chebyshev, Mahalanobis and Minkowski distances:
+
+1. Chebyshev, $max(|p-q|)$: "measures distance assuming only the most significant dimension is relevant.
+2. Mahalanobis, $\sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}$: normalises based on a covariance matrix to make the distance metric scale-invariant. The dataset is normalised prior to X-Means, which means each data point has equal contribution.
+3. Minkowski distance: generalisation that unites Euclidean, Manhattan and Chebyshev distances.
+
+
 
 
 
