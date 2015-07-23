@@ -140,15 +140,12 @@ Identification of a false positive instance can be accomplished using two approa
 
 \begin{enumerate}
 
-\item \emph{Randomness}: When a detected set, from phase 1, poses random patterns in a sense that those patterns cannot be modelled effectively, it may be extremely difficult to recognise false positive instances. Suppose a two-dimensional dataset such as shown in Figure \ref{fig:phase2-example1} that resembles a densely packed circle with a few obvious outliers. Imagine an anomaly detection scheme has been applied and points marked with crosses have been identified as possible anomalies under the particular detection criteria of that scheme. Then these marked points, as shown in the plot on the right, represent the detected set of this particular dataset that we may face in phase 2. It may still be arguable that the true outliers in the detected set are distinguishable as they are reasonably isolated from the false positive instances that are favourably clumped together. However the idea of anomaly detection would not be so successful in a more serious situation, as shown in Figure \ref{fig:phase2-example2}, where false positive instances are rather sparse without obvious patterns. A quick glance at Figure \ref{fig:phase2-example2} by itself tells us that there appears to be no apprant patterns but a random scatter of points that hinders effective model construction.
-
-\item \emph{Outlierness within outliers}: one must reconsider using an additional anomaly detection scheme to a dataset that has been previously detected as possible outliers. In our case, the density-based anomaly detection algorithm, LOF, has been applied in phase 1 to provide a set of data points that are considered to be highly sparse and isolated from one another. The sparsity and the extent of isolation among these points are directly related to the fact that the points are distant from one another as well as to the rest of the data. This means that the use of distance, which happens to be what most anomaly detection methods rely on, is not so advantageous in identifying false positive instances.
-
-\end{enumerate}
+\item \emph{Randomness}: When a detected set, from phase 1, poses random patterns in a sense that those patterns cannot be modelled effectively, it may be extremely difficult to recognise false positive instances. Suppose a two-dimensional snythetic dataset such as shown in the top left plot of Figure \ref{fig:phase2-example1} that resembles a densely packed circle with a few obvious outliers. Imagine an arbitrary anomaly detection scheme has been applied to the dataset and possible anomalous instances are marked with crosses under the particular detection criteria of that scheme. Then these marked points, as seen in the top right plot, represent the detected set of this particular dataset that we may face in phase 2. It may still be arguable that the true outliers in the detected set are distinguishable as they are reasonably isolated from the false positive instances that are favourably clumped together. However the idea of anomaly detection would not be so successful in a more serious situation, as shown in the bottom right plot, where false positive instances are rather sparse without obvious patterns. A quick glance at the plot by itself can contribute towards raising an intuition that there appears to be no apprant patterns but a random scatter of points that hinders effective model construction.
 
 <<phase2-example-data, echo=FALSE, cache=TRUE>>=
 set.seed(1)
-t1.a = runif(250, 0.03, 0.65)
+# t1.a = runif(250, 0.03, 0.65)
+t1.a = runif(500, 0.03, 0.5*pi)
 set.seed(2)
 r1.a = sqrt(runif(250, min = 0.004)) * 0.8
 a.1 = cbind(r1.a*cos(t1.a), r1.a*sin(t1.a))
@@ -198,27 +195,27 @@ c = cbind(r3*cos(t3), r3*sin(t3))
 d = rbind(a, b, c)
 e = numeric()
 for (i in 1:nrow(c)) {
-    dis = apply(d[1:1850, ], 1, function(x) sqrt((x[1]-c[i,1])^2 + (x[2]-c[i,2])^2))
+    dis = apply(d[1:2100, ], 1, function(x) sqrt((x[1]-c[i,1])^2 + (x[2]-c[i,2])^2))
     ord = order(dis, decreasing = FALSE)[2:10]
-    e = c(e, ord[ord > 1750])
+    e = c(e, ord[ord > 2000])
 }
 @
 
-<<phase2-example1, echo=FALSE, fig.align='center', fig.cap="", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
-plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", asp = 1)
-points(d[1:1750, ], col = "grey70")
-points(d[c(1851:1855, e), ], col = "grey30", pch = 4)
-legend("topleft", "detected instances", pch = 4, adj = c(0, 0.5), cex = 1.3, pt.cex = 1.1)
+<<phase2-example1, echo=FALSE, fig.align='center', fig.cap="Synthetic dataset where consecutive anomaly detection may be ineffective.", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
+plot(d, xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic data", asp = 1)
 
-plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", asp = 1)
-points(d[1851:1855, ], col = "grey30", pch = 4)
-points(d[e, ], col = "grey70")
-legend("topleft", c("True positive", "False positive"), pch = c(4, 1), adj = c(0, 0.5), cex = 1.3, pt.cex = 1.1)
-@
+plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic data processed with arbitrary anomaly detection", asp = 1)
+points(d[1:2000, ], col = "grey70")
+points(d[c(2101:2105, e), ], pch = 4)
+legend("topleft", "detected instances", pch = 4, adj = c(0, 0.5), cex = 1.3, pt.cex = 1)
 
-<<phase2-example2, echo=FALSE, fig.align='center', fig.cap="", out.width="0.45\\linewidth", cache=TRUE, dependson="phase2-example-data">>=
-plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", asp = 1)
-points(d[1851:1855, ], col = "grey30", pch = 4)
+plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic, detected data", asp = 1)
+points(d[2101:2105, ], pch = 4)
+points(d[e, ])
+legend("topleft", c("True positive", "False positive"), pch = c(4, 1), adj = c(0, 0.5), cex = 1.3, pt.cex = 1)
+
+plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Extreme case", asp = 1)
+points(d[2101:2105, ], pch = 4)
 #order(d[e, 1])
 points(d[e[16], 1], d[e[16], 2], pch = 4)
 points(d[e[15], 1], d[e[15], 2], pch = 4)
@@ -228,61 +225,68 @@ points(d[e[10], 1], d[e[10], 2], pch = 4)
 points(d[e[9], 1], d[e[9], 2], pch = 4)
 points(d[e[23], 1], d[e[23], 2], pch = 4)
 
-points(d[e[31], 1], d[e[31], 2], pch = 4)
 points(d[e[29], 1], d[e[29], 2], pch = 4)
+points(d[e[28], 1], d[e[28], 2], pch = 4)
 @
 
-The second approach is to apply a clustering scheme to clump similar instances into clusters. The resulting clusters can then be compared with the actual normal instances, i.e., the undetected set in phase 1, in an unsupervised fashion. 
+\item \emph{Outlierness within outliers}: One must reconsider using an additional anomaly detection scheme to a dataset that has been previously detected as possible outliers. In our case, the density-based anomaly detection algorithm, LOF, has been applied in phase 1 to provide a set of data points that are considered to be highly sparse and isolated from one another. The sparsity and the extent of isolation among these points are directly related to the fact that the points are distant from one another as well as to the rest of the data. This means that the use of distance, which happens to be what most anomaly detection methods rely on, will not be so advantageous in identifying false positive instances. Involving further density-based anomaly detection will obviously be ineffective due to the presence of false positive instances which is a strong indication that their local densities are most likely homogenous.
 
+\end{enumerate}
 
-Even when the situation is dire such as shown in Figure \ref{fig:phase2-example2}, the data points can still be effectively clustered as shown in Figure \ref{fig:phase2-example3}.
+\noindent
+The second approach is to apply a clustering scheme to group similar instances into clusters. The resulting clusters can then be compared with the actual normal instances, i.e., the undetected, normal set from phase 1, in an unsupervised learning fashion. Even when a random scatter is present as we have seen in Figure \ref{fig:phase2-example1}, the data points can still be effectively clustered as shown in Figure \ref{fig:phase2-example2}. Similarly, normal instances could also be clustered to capture more than one patterns that may be present among them. Then each of the detected clusters can be compared with each of the undetected clusters using permutation.
 
-<<phase2-example3, echo=FALSE, fig.align='center', fig.cap="", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
-f = rbind(d[1851:1855, ], d[e[c(16,15,11,10,9,23,31,29)], ])
+(make another dataset...)
+
+<<phase2-example2, echo=FALSE, fig.align='center', fig.cap="Clustering approach.", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
+f = rbind(d[2101:2105, ], d[e[c(16,15,11,10,9,23,29,28)], ])
 set.seed(1)
 g = kmeans(f, 4, nstart = 20)
-set.seed(3)
-h = kmeans(a, 8, nstart = 50)
+set.seed(2)
+h = kmeans(a, 9, nstart = 50)
 
-plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", asp = 1)
-points(f[g$cluster==1, ], pch = 3)
-points(f[g$cluster==2, ], pch = 4)
-points(f[g$cluster==3, ], pch = 2)
-points(f[g$cluster==4, ], pch = 1)
-
-plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", asp = 1)
+plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic, detected data with clustering", asp = 1)
 points(f[g$cluster==1, ], pch = 3)
 points(f[g$cluster==4, ], pch = 0)
 points(f[g$cluster==2, ], pch = 2)
 points(f[g$cluster==3, ], pch = 4)
-points(a[h$cluster==1, ], pch = 1, col = "grey90")
+
+plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Snythetic data with clustering", asp = 1)
+points(f[g$cluster==1, ], pch = 3)
+points(f[g$cluster==4, ], pch = 0)
+points(f[g$cluster==2, ], pch = 2)
+points(f[g$cluster==3, ], pch = 4)
+points(a[h$cluster==1, ], pch = 0, col = "grey70")
 points(a[h$cluster==2, ], pch = 1, col = "grey90")
 points(a[h$cluster==3, ], pch = 1, col = "grey90")
-points(a[h$cluster==4, ], pch = 3, col = "grey70")
-points(a[h$cluster==5, ], pch = 0, col = "grey70")
+points(a[h$cluster==4, ], pch = 2, col = "grey70")
+points(a[h$cluster==5, ], pch = 1, col = "grey90")
 points(a[h$cluster==6, ], pch = 1, col = "grey90")
-points(a[h$cluster==7, ], pch = 1, col = "grey90")
-points(a[h$cluster==8, ], pch = 4, col = "grey70")
+points(a[h$cluster==7, ], pch = 4, col = "grey70")
+points(a[h$cluster==8, ], pch = 3, col = "grey70")
+points(a[h$cluster==9, ], pch = 1, col = "grey90")
 @
 
 
 \subsection{X-Means Clustering}
+NOTE: k-means and k-medoids are the most efficient and reasonably well accepted clustering schemes (and that's why we chose them):
 
-k-means and k-medoids are the most efficient and widely accepted clustering schemes:
+1. Talk about k-medoids' insensitivity to the presence of outliers but every instance in a detected set is already a possible outlier under the LOF algorithm. It doesn't make sense that we need to be careful about them when we are essentially trying to cluster them!
 
-1. Talk about k-medoids' insensitivity to presence of outliers but every instance in a detected set is a possible outlier under the LOF algorithm.
-
-2. k-means could have been used but x-means is chosen in this case to get rid of having to consider the adequacy of the parameter, $k$. X-means chooses the number of centre that makes the most sense under the Bayesian information criterion.
+2. k-means could have been used but x-means is chosen in this case to get rid of having to consider the adequacy of the parameter, $k$. X-means chooses the number of centres that makes the most sense under the Bayesian information criterion. It makes our method truely unsupervised.. etc.
 
 
 %----------------------------------------------------------
 \subsection{Cluster Identification}
 
-The decision to use distance metrics as a similarity measure is to be consistent with X-Means which is partially based on a distance metric. If the performance of X-Means is reasonable, i.e., purity for each cluster is high enough -> then the distance metric used in the X-Means must qualify as adequately as the value of purity itself.
+The decision to use distance metrics as a similarity measure is to be consistent with X-Means which is partially based on a distance metric, namely Euclidean. If the performance of X-Means is reasonable, i.e., purity for each cluster is high enough -> then the distance metric used in the X-Means must qualify as adequately as the value of purity itself.
+
 Talk about the use of different distance metrics such as the Euclidean, Chebyshev, Mahalanobis and Minkowski distances:
 
 1. Chebyshev, $max(|p-q|)$: "measures distance assuming only the most significant dimension is relevant.
+
 2. Mahalanobis, $\sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}$: normalises based on a covariance matrix to make the distance metric scale-invariant. The dataset is normalised prior to X-Means, which means each data point has equal contribution.
+
 3. Minkowski distance: generalisation that unites Euclidean, Manhattan and Chebyshev distances.
 
 

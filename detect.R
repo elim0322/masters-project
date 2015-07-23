@@ -54,19 +54,12 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
     # ===============================
     ### X-Means ###
     if (p2.method == "xmeans") {
-        detected.df = testset[detected.ind, ]
         
-        xmeans.res = xmeans1(detected.df, "normalise")
+        detected.df          = testset[detected.ind, ]
+        xmeans.res           = xmeans1(detected.df, "normalise")
         xmeans.res$class_ids = xmeans.res$class_ids + 1 # class_ids start from 0
-        centers = gsub("^.+?n(0.+)}.+$", "\\1", capture.output(xmeans.res$clusterer$getClusterCenters()))
-        centers = eval(parse(text = paste("c(", gsub("\\\\n", ",", centers), ")")))
+        centers.detected     = xmeans.res$center.matrix
         
-        n  = length(centers)
-        nc = xmeans.res$clusterer$numberOfClusters()
-        x  = 1:n
-        split.list  = split(x, ceiling(x / (n / nc)))
-        centers.detected = sapply(split.list, function(x) centers[x])
-        rownames(centers.detected) <- xmeans.res$feature
     } else if (p2.method == "kmedoids") {
         
         detected.df = testset[detected.ind, ]
@@ -74,20 +67,42 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
         
     }
     
-    
     # ==========================
     # Phase 2 center comparison
     # ==========================
-    normal.df = preproc(testset[-detected.ind, ], "normalise")
+    ## normalise data
+    # normal.df = preproc(testset[-detected.ind, ], "normalise")
     
-    ## is it worth doing a x-means on the normal set rather than assuming that there is only one pattern in the normal set.
-    centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
-    centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
+    ## is it worth doing a x-means on the normal set rather than assuming that there is only one pattern in the normal set?
+    # centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
+    # centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
+    
+    undetected.df         = testset[-detected.ind, ]
+    xmeans.res2           = xmeans1(undetected.df, "normalise")
+    xmeans.res2$class_ids = xmeans.res2$class_ids + 1 # class_ids start from 0
+    centers.undetected    = xmeans.res2$center.matrix
+    
+    
+    return(list(detected.df, undetected.df, centers.detected, centers.undetected))
+    
     
     {
     if (method == "euclidean") {
-        d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
-        normal.clust = which.min(d)
+        # d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
+        # normal.clust = which.min(d)
+        d=list()
+        for (i in 1:ncol(centers.undetected)) {
+            
+            d[[i]] = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.undetected[,i])^2)))
+            
+            
+            
+            
+        }
+        
+        return(d)
+        
+        
     } else if (method == "w.euclidean") {
         #return(list(detected.df, centers.detected, normal.df, centers.normal, xmeans.res$class_ids))
         weights.normal   = sapply(normal.df[,which(names(normal.df) %in% rownames(centers.detected))], function(x) sd(x))

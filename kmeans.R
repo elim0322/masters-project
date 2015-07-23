@@ -79,7 +79,7 @@ preproc = function(data, mode) {
 }
 xmeans1 = function(data, mode = NULL) {
     
-    data = data[, sapply(data, function(x) length(unique(x))) != 1]
+    #data = data[, sapply(data, function(x) length(unique(x))) != 1]
     
     ## pre-process data
     if (!is.null(mode)) {
@@ -89,16 +89,34 @@ xmeans1 = function(data, mode = NULL) {
     }
     
     ## http://weka.sourceforge.net/doc.packages/XMeans/weka/clusterers/XMeans.html
-    xmeans.res = XMeans(data.proc[, names(data.proc)!="attack_type"], c("-H", 50, "-use-kdtree","-K", "weka.core.neighboursearch.KDTree -P"))
-    xmeans.res$table   = list()
-    xmeans.res$purity  = numeric()
-    xmeans.res$size    = numeric()
-    xmeans.res$feature = names(data.proc[,names(data.proc)!="attack_type"])
+    xmeans.res = XMeans(data.proc[, names(data.proc)!="attack_type"], c("-I", 1, "-H", 50, "-use-kdtree","-K", "weka.core.neighboursearch.KDTree -P"))
     
-    clusters = sort(unique(xmeans.res$class_ids))
+    ## construct result object
+    xmeans.res$class_ids = xmeans.res$class_ids + 1 # class_ids start from 0
     
-    for (i in 1:length(clusters)) {
-        members               = which(xmeans.res$class_ids == clusters[i])
+    cluster.raw = capture.output(xmeans.res$clustere$getClusterCenters())
+    ## character part
+    cluster.chr   = gsub("^.+?[\\\\]n@attribute (.*)?[\\\\]n@data.*$", "\\1", cluster.raw)
+    cluster.chr   = gsub("([ ]numeric)|(@attribute[ ])", "", cluster.chr)
+    cluster.chr   = gsub("[\\\\]n", "\n", cluster.chr)
+    feature.names = capture.output(cat(cluster.chr))
+    
+    ## numeric part
+    cluster.num = gsub("^.+[\\\\]n@data[\\\\]n(.*)}.*$", "\\1", cluster.raw)
+    cluster.num = unlist(strsplit(cluster.num, "[\\\\]n"))
+    centers     = lapply(cluster.num, function(x) eval(parse(text = paste0("c(", x, ")"))))
+    
+    center.matrix = matrix(unlist(centers), ncol = length(centers),dimnames = list(feature.names))
+    
+    ## result
+    xmeans.res$center.matrix = center.matrix
+    xmeans.res$table         = list()
+    xmeans.res$purity        = numeric()
+    xmeans.res$size          = numeric()
+    xmeans.res$feature       = names(data.proc[,names(data.proc)!="attack_type"])
+    
+    for (i in 1:ncol(center.matrix)) {
+        members               = which(xmeans.res$class_ids == i)
         tmp.table             = table(data.proc[members, "attack_type"])
         xmeans.res$table[[i]] = tmp.table[tmp.table != 0]
         xmeans.res$size[i]    = length(members)
