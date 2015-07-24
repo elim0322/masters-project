@@ -33,7 +33,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
     k_max = k * (n_normal + n_attack)
     
     if (trace) cat(paste0("Running LOF algorithm ......... "))
-    lof = LOF(testset, control = Weka_control(min = k_min, max = k_max, "num-slots" = 2))[,"LOF"]; invisible(gc())
+    lof = LOF(testset, control = Weka_control(min = k_min, max = k_max, "num-slots" = 2))[,"LOF"]
     names(lof) <- data[c(normal, attack), "attack_type"]
     if (trace) cat(paste0("done", "\n"))
     
