@@ -5,52 +5,75 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 \chapter{Methods}
 \label{ch:methods}
 
-Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the possibility of detecting novel threats. The most crucial aspect of securing a network or a system is in the ability to prevent additional losses from the attacks of previously known characteristics. What is of an equal, or possibly greater, importance is the ability to identify previously unknown threats before any harm is inflicted. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the intelligence to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised approach into our method. 
+Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the possibility of detecting novel threats. The most crucial aspect of securing a network or a system is in the ability to prevent further losses from the attacks of previously known characteristics. What is of an equal, or possibly greater, importance is the ability to identify previously unknown threats before any harm is inflicted. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the intelligence to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised approach into our method.
 
 %Supervised and semi-supervised anomaly detection techniques are not considered in our method as they require a labelled training dataset from which a classifier or a model is constructed. Since the desired outcome of this research is a network intrusion detection system (NIDS) with the novelty detection capability, any labels in a dataset are treated as non-existent and are only used for system evaluation.
 
-As mentioned earlier in chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to maximise detection rate, and (2) a clustering scheme is applied to identify the cluster of false positives which will be eliminated to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS whose schematic overview is represented in figure \ref{fig:overview}. A brief system overview is as follows:
+As mentioned earlier in Chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to maximise detection rate, and (2) a clustering scheme is applied to identify the cluster of false positives which will be eliminated to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS whose schematic overview is represented in figure \ref{fig:overview}. A brief system overview is as follows:
 
-\begin{enumerate}
-\item The numeric portion of a test dataset is used as the input for Phase 1.
-\item Possible anomalies, present in the input dataset, are identified via the density-based anomaly detection algorithm, LOF. Then the dataset is partitioned into two subsets of normal instances, 3(a), and possible anomalies, 3(b). It should be noted that the first subset is purely composed of true positive, i.e., normal, instances and therefore it will be referred to as a True Positive (TP) set while the second subset consists of both true positive and false positive instances and will be referred to as a Possibly Anomalous (PA) set.
-\item The output of Phase 1 are the TP and PA sets.
-\item The direct input of Phase 2 is the PA set where the anomalous instances are clustered using the X-Means algorithm. Each of the resulting clusters is compared with the profile of the TP set, as indirect input, to find the most dissimilar cluster. This cluster, which is the most distinct relative to the TP set, is defined to be the false positive cluster. Then the false positive cluster is eliminated from the PA set and the remaining instances will be referred to as an eliminated PA (ePA) set.
-\item The output of Phase 2 is the merged set which consists of the TP and the eliminated sets.
-\end{enumerate}
-
-\begin{figure}[h]
+\begin{figure}
 \centering
   \begin{tikzpicture}
     \node(input)  [simple] {1. Input dataset};
     \node(phase1) [process, below of=input, node distance=3cm] {2. Phase 1: \\ Partition via Anomaly Detection};
-    \node(TP) [simple,  below left of=phase1, node distance=5cm] {3. True positve instances \\ (TP set)};
-    \node(PA) [simple,  below right of=phase1, node distance=5cm] {3. Possible anomalies \\ (PA set)};
+    \node(NI) [simple,  below left of=phase1, node distance=5cm] {3(a). Non-Intrusion instances \\ (NI set)};
+    \node(PA) [simple,  below right of=phase1, node distance=5cm] {3(b). Possibly Anomalous instances \\ (PA set)};
     \node(phase2) [process, below of=PA, node distance=3cm] {4. Phase 2: \\ False Positive Elimination};
     \node(output) [simple,  below of=phase2, node distance=3cm] {5. Possible anomalies with \\ false positive eliminated \\ (ePA set)};
-    \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
+%     \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
     
     \draw [->] (input)   to (phase1);
-    \draw [->] (phase1)  to (TP);
+    \draw [->] (phase1)  to (NI);
     \draw [->] (phase1)  to (PA);
     \draw [->] (PA) to (phase2);
-    \draw [->, dotted] (TP) |- (phase2);
+    \draw [->, dotted] (NI.300) |- (phase2);
     \draw [->] (phase2)  to (output);
-    \draw [->] (TP) |- (final);
-    \draw [->] (output) |- (final);
+%     \draw [->] (NI.240) |- (final);
+%     \draw [->] (output) |- (final);
   \end{tikzpicture}
   \caption{System overview}
   \label{fig:overview}
 \end{figure}
 
+\begin{enumerate}
+\item The numeric portion of a test dataset is used as input for Phase 1.
+\item Possible anomalies, present in the input dataset, are identified via the density-based anomaly detection algorithm, LOF. Then the dataset is partitioned into two subsets of `normal', i.e., non-intrusion, instances, 3(a), and possible anomalies, i.e., intrusion instances, 3(b). It should be noted that the first subset is purely composed of non-intrusion instances and therefore will be referred to as a Non-Intrusion (NI) set while the second subset consists of true positive and false positive instances as a result of the anomaly detection and will be referred to as a Possibly Anomalous (PA) set.
+\item The output of Phase 1 are the NI and PA sets.
+\item The direct input of Phase 2 is the PA set where the anomalous instances are clustered using the X-Means algorithm. Each of the resulting clusters is compared with the profile of the NI set, as indirect input, to find the most dissimilar cluster. This cluster, which is the most distinct relative to the NI set, is defined to be the false positive cluster. Then the false positive cluster is eliminated from the PA set and the remaining instances will be referred to as an eliminated PA (ePA) set.
+\item The final output, ePA set, contains the intrusion instances associated with the original data with minimal false positive instances.
+%\item The output of Phase 2 is the merged set which consists of the NI and the eliminated sets.
+\end{enumerate}
+
 The rest of this chapter is divided into sections to bring detailed discussion for each phase.
 
 
 %----------------------------------------------------------
-\newpage
 \section{Phase 1: Partition via Anomaly Detection}
 
-The main purpose of phase 1 is to detect all possible anomalies associated with a dataset, which suggests that the desired detection rate is essentially 1. To achieve such a high detection rate means that the resulting false alarm rate will be correspondingly high as the two rate measures are usually positively correlated. An attempt to attain a higher detection rate often involves changing a certain threshold, on which detection criteria are based, that will in turn allow more false positives to be included in the result. As an example, consider a univariate random sample, $X$, from a normal distribution with the mean of 0 and variance of 4, whose probability distribution function is as shown in figure \ref{fig:rate-example}. Supposing the detection criterion for this particular example is such that an object, $o$, is an anomaly if $o \leq \theta_1$. Then the detection rate, as indicated by the area under the curve to the left of $\theta_1$, is $p_1$ and the false alarm rate is determined by the amount of false positives scattered in this area. To achieve a higher detection rate, the initial threshold, $\theta_1$, can be increased to $\theta_2$ which will increase the previous detection rate by $p_2$ to produce an overall detection rate of 0.95. Also the amount of false positives in the new area will be added to that of the previous area to result in a higher overall false alarm rate. Thus the result of phase 1 is expected to have a relatively high false positive rate which is to be reduced in phase 2.
+The high level overview of Phase 1 is listed as follows:
+
+\begin{enumerate}
+\item The LOF algorithm is applied on the numeric portion of input dataset. A vector of LOF scores are computed as a result, each of which corresponds to each instance.
+\item The density of the LOF scores
+\item 
+\end{enumerate}
+
+The main purpose of Phase 1 is to detect all anomalies associated with a dataset so that the dataset can be flawlessly partitioned into a subset purely composed of `normal' instances and another containing possible anomalies. Hence the target detection rate of LOF, given by the number of anomalous instances detected by the algorithm, i.e., true positive, over the total number of anomalous instances, is one. In order to achieve such a high detection rate, a compromise has been made for the false alarm rate of the detection, denoted by the number of `normal' instances detected as anomalous, i.e., false positive, over the total number of `normal' instances.
+
+It is highly desirable for any detection system to attain a high detection rate while maintaing a low false alarm rate. However it is extremely difficult to do so due to the relationship between the two rates. There is a strong positive correlation between them to cause an increase in the detection rate to be inevitably followed by a corresponding increase in the false alarm rate. To visualise this, consider a univariate sample from a normal distribution to represent some metric computed for a dataset, such as distance or density, that is used in an arbitrary anomaly detection method. If the detection threshold is $\theta_1$ and an anomaly is defined to be any object whose said metric is below $\theta_1$, then the detection rate is $p_1$ given by the area under the curve to the left of $\theta_1$ and the false alarm rate is the number of false positive instances in this area over the total number of false positive instances in the dataset. If the threshold is increased to $\theta_2$ to attain a higher detection rate of 0.95, the amount of false positive instances in this new area must be added to that in the previous area to result in an increased false alarm rate.
+
+Therefore the result of the 
+
+
+Looking at the density of the sample as shown in Figure \ref{fig:rate-example}, 
+
+
+
+Supposing that an arbitrary anomaly detection method defines 
+
+
+
+To achieve such a high detection rate means that the resulting false alarm rate will be correspondingly high as the two rate measures are usually positively correlated. An attempt to attain a higher detection rate often involves changing a certain threshold, on which detection criteria are based, that will in turn allow more false positives to be included in the result. As an example, consider a univariate random sample, $X$, from a normal distribution with the mean of 0 and variance of 4, whose probability distribution function is as shown in figure \ref{fig:rate-example}. Supposing the detection criterion for this particular example is such that an object, $o$, is an anomaly if $o \leq \theta_1$. Then the detection rate, as indicated by the area under the curve to the left of $\theta_1$, is $p_1$ and the false alarm rate is determined by the amount of false positives scattered in this area. To achieve a higher detection rate, the initial threshold, $\theta_1$, can be increased to $\theta_2$ which will increase the previous detection rate by $p_2$ to produce an overall detection rate of 0.95. Also the amount of false positives in the new area will be added to that of the previous area to result in a higher overall false alarm rate. Thus the result of phase 1 is expected to have a relatively high false positive rate which is to be reduced in phase 2.
 
 <<rate-example, echo=FALSE, fig.align='center', fig.cap="Density of a random sample, $X \\sim N(\\mu = 0, \\sigma^2 = 4)$", out.width="0.6\\linewidth">>=
 set.seed(2)
