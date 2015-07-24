@@ -1,5 +1,5 @@
-library(RWeka)
 options(java.parameters = "-Xmx6g")
+library(RWeka)
 WPM("install-package", "localOutlierFactor")
 WPM("install-package", "XMeans")
 LOF = make_Weka_filter("weka/filters/unsupervised/attribute/LOF")
