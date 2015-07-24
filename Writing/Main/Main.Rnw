@@ -9,7 +9,7 @@
       \usetikzlibrary{decorations.text, arrows}  % decoration for for curved text
       \usetikzlibrary{positioning}  % for positioning nodes
       \tikzstyle{simple}  = [minimum width=2.3cm, minimum height=1.3cm, text centered, align=center]
-      \tikzstyle{process} = [minimum width=3.2cm, minimum height=1.3cm, rectangle, rounded corners, draw=black, text centered, align=center]
+      \tikzstyle{process} = [minimum width=3.2cm, minimum height=1.3cm, rectangle, draw=black, text centered, align=center]
     
 \newtheorem{definition}{Definition}
 
