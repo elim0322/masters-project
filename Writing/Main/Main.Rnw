@@ -1,4 +1,5 @@
 \documentclass[12pt,examcopy]{../uathesis}
+    \usepackage{amsmath}
     \usepackage{graphicx}
     \usepackage{algorithm}
     \usepackage{algpseudocode}
