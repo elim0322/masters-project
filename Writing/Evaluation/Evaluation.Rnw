@@ -1,0 +1,124 @@
+<<set-parent, echo=FALSE, cache=FALSE>>=
+knitr::set_parent(parent = "../Main/Main.Rnw")
+@
+
+\chapter{Evaluation}
+\label{ch:evaluation}
+
+The dataset we have chosen for evaluating our system is the one used in KDD Cup 1999 [CITE]. There are a few issues associated with the dataset such as the presence of redundant features and duplicated instances, mentioned by Tavallaee et al. who also proposed an improved version of the dataset called NSL-KDD. Despite the issues, our decision to proceed with KDD'99 is because it is a real world data captured at MIT Lincoln Labs which means it is more likely to be accurate at describing the characteristics of real world connections compared to those described by the processed data, NSL-KDD. Another possible limitation with KDD'99 dataset is its age. Because the dataset is dated, there is high possibility that the characteristics of modern attacks may be different to those described in the dataset. However it is the only real world dataset with complete attack labels to remain as the most popular choice as a benchmarking medium for any IDS evaluation. The lack of other public network data appears to be due to the highly sensitive nature associated with network information. Technical description of KDD'99 dataset is presented in Section \ref{sec:evaluation-data}.
+
+The experimental setup for the evaluation is described in Section \ref{sec:evaluation-setup}.
+
+Phase-specific evaluation results are presented in Section \ref{}, along with our choice of performance measures.
+
+System evaluation results are presented in Section \ref{}.
+
+
+%----------------------------------------------------------
+\section{KDD'99 Data Description}
+\label{sec:evaluation-data}
+The KDD dataset is prepared by Stolfo et al. [CITE] based on a much larger dataset called DARPA'98 which consists of nine weeks of raw TCP dump data captured at MIT Lincoln Labs as a part of the 1988 DARPA Intrusion Evaluation Program [CITE]. %http://www.cs.columbia.edu/~wfan/PAPERS/JAM99.pdf
+There are approximately 4,900,000 connection records in KDD training dataset, each of which consists of 41 features and is labelled as either normal or an attack of 24 different types. KDD test dataset contains 14 unique attack types that are not present in the training set to allow the evaluation of detecting novel attacks.
+
+All of these attack types fall in one of the four main categories:
+
+\begin{enumerate}
+\item \textbf{Denial-of-service (DoS):} an attack to temporarily or indefinitely disable services of a host to its intended users by flooding memory resources.
+
+\item \textbf{Remote-to-local (R2L):} a situation where an attacker is able to send packets to a target machine over a network in order to gain access as a local user of the machine.
+
+\item \textbf{User-to-root (U2R):} an attempt by the attacker with precedent access to a target machine as a normal user to further gain control of root privileges.
+
+\item \textbf{Probing:} a type of surveillance attack to monitor a target network of a machine in order to gain information on possible vulnerabilities of the network. As a result, the probing attacks are usually followed up by a chain of attacks that exploit any identified network vulnerabilities.
+\end{enumerate}
+
+Each instance in KDD'99 is a connection record, that is a sequence of TCP packets for a data flow between a source IP address to a target IP address. There are 41 features in the dataset that can be categorized into three groups:
+
+\begin{enumerate}
+\item \textbf{Basic features:} 9 of the 41 features are basic features of individual TCP connections, such as the types of the protocol and network service.
+
+\item \textbf{Content features:} 13 of the 41 features are content features suggested by domain knowledge, such as the numbers of shell prompts, file creation operations and "root" accesses.
+%The DoS and probing attacks occur in bursts, i.e., these attacks involve many connections in an extremely short time period, to result in frequent sequential patterns for intrusions. On the other hand, the R2L and U2R attacks usually involve a single connection and are more difficult to detect using just the basic features. Hence the main purpose of the content features is to provide additional information that can be used to improve detection.
+
+\item \textbf{Traffic features:} 18 of the 41 features are traffic features computed using a two-second time window that can be further divided into two groups:
+    
+    \begin{enumerate}
+    \item \textbf{"same host" features:} statistics derived from the connections in the past two seconds that have the same destination host as the current connection
+    
+    \item \textbf{"same service" features:} similar statistics from the connections in the past two seconds that have the same service as the current connection
+    \end{enumerate}
+    
+\end{enumerate}
+
+
+%----------------------------------------------------------
+\section{Experimental Setup}
+\label{sec:evaluation-setup}
+
+The proposed detection scheme is evaluated under the following framework:
+
+\begin{enumerate}
+    \item The 10\% subset of the complete KDD'99, provided by the competition, is used for the experiment.
+    
+    \item Each experiment is conducted using a random sample of 5,000 records as a testset, where 3,500 of them are non-intrusion instances and the remaining 1,500 are attacks. The sampling is carried out without replacement to avoid duplication. The sample size is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
+    
+    \item The parameter $k$ for the LOF algorithm is set to be 30\% of the testset size.
+    
+    \item The experiment is repeated on 100 different testsets to account for the relatively small sample size.
+\end{enumerate}
+
+In order to assess the performance, the mean and standard deviation of the detection and false positive rates are computed.
+
+
+%----------------------------------------------------------
+\section{Phase-specific Evaluation}
+\label{}
+
+\subsubsection{Phase 1}
+
+
+\subsubsection{Phase 2}
+
+
+
+%----------------------------------------------------------
+\section{System Evaluation}
+\label{}
+
+
+% \subsection{Experimental Results}
+% 
+% <<load_results, echo=FALSE>>=
+% load(file = "evaluation.results.RData")
+% @
+% 
+% 
+% \subsubsection{Phase 1}
+% 
+% \begin{itemize}
+% \item Detection rate from LOF
+% \item False alarm rate from LOF
+% \item Computation time
+% \end{itemize}
+% 
+% \subsubsection{Phase 2}
+% 
+% \begin{itemize}
+% \item Average purity of clusters and s.d.
+% \item Rate of correctly identifying "normal" clusters
+% \item Six different distance metrics
+% \item Computation time
+% \end{itemize}
+% 
+% \subsubsection{Overall}
+% 
+% <<echo=FALSE, results=tex>>=
+% library(xtable)
+% xtable(k30.euc$table,  caption = "Euclidean")
+% xtable(k30.weuc$table, caption = "Weighted Euclidean")
+% xtable(k30.man$table,  caption = "Manhattan")
+% xtable(k30.che$table,  caption = "Chebyshev")
+% xtable(k30.min$table,  caption = "Minkoski")
+% xtable(k30.mah$table,  caption = "Mahalanobis")
+% @
+
