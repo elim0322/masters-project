@@ -1,5 +1,6 @@
 dat = read.csv("../kddcup.data_10_percent_corrected", header = FALSE)
-names(dat) = c("duration", "protocol_type", "service", "flag",
+dat2 = read.csv("../kddcup.testdata_10_percent_corrected", header = FALSE)
+names(dat2) = c("duration", "protocol_type", "service", "flag",
                "src_bytes", "dst_bytes", "land", "wrong_fragment",
                "urgent", "hot", "num_failed_logins", "logged_in",
                "num_compromised", "root_shell", "su_attempted",

@@ -3,7 +3,7 @@ source("kmeans.R")
 source("overlap.R")
 
 ## cascade x-means?
-detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.method = "xmeans", method = "euclidean", trace = TRUE) {
+detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, method = "euclidean", trace = TRUE) {
     
     ## force garbage collection to reset memory usage
     invisible(gc(reset = TRUE))
@@ -16,10 +16,10 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
     # =========
     if (trace) cat(paste0("Initializing samples .......... "))
     set.seed(seed)
-    normal = sample(which(dat$attack_type == "normal."), size = n_normal, replace = FALSE)
+    normal = sample(which(data$attack_type == "normal."), size = n_normal, replace = FALSE)
     
     set.seed(seed)
-    attack = sample(which(dat$attack_type != "normal."), size = n_attack, replace = FALSE)
+    attack = sample(which(data$attack_type != "normal."), size = n_attack, replace = FALSE)
     
     category = c(2,3,4,7,12,21,22)#,42)
     testset  = data[c(normal, attack), -category]
@@ -34,6 +34,7 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
     
     if (trace) cat(paste0("Running LOF algorithm ......... "))
     lof = LOF(testset, control = Weka_control(min = k_min, max = k_max, "num-slots" = 2))[,"LOF"]
+    
     names(lof) <- data[c(normal, attack), "attack_type"]
     if (trace) cat(paste0("done", "\n"))
     
@@ -52,56 +53,33 @@ detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1, p2.
     # ===============================
     # Phase 2: False Alarm Reduction
     # ===============================
-    ### X-Means ###
-    if (p2.method == "xmeans") {
-        
-        detected.df          = testset[detected.ind, ]
-        xmeans.res           = xmeans1(detected.df, "normalise")
-        xmeans.res$class_ids = xmeans.res$class_ids + 1 # class_ids start from 0
-        centers.detected     = xmeans.res$center.matrix
-        
-    } else if (p2.method == "kmedoids") {
-        
-        detected.df = testset[detected.ind, ]
-        return(detected.df)
-        
-    }
+    detected.df          = testset[detected.ind, ]
+    xmeans.res           = xmeans1(detected.df, "normalise")
+    centers.detected     = xmeans.res$center.matrix
     
     # ==========================
     # Phase 2 center comparison
     # ==========================
     ## normalise data
-    # normal.df = preproc(testset[-detected.ind, ], "normalise")
+    normal.df = preproc(testset[-detected.ind, ], "normalise")
     
     ## is it worth doing a x-means on the normal set rather than assuming that there is only one pattern in the normal set?
-    # centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
-    # centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
+    centers.normal = colMeans(normal.df[, names(normal.df)!="attack_type"])
+    centers.normal = centers.normal[which(names(centers.normal) %in% rownames(centers.detected))]
     
-    undetected.df         = testset[-detected.ind, ]
-    xmeans.res2           = xmeans1(undetected.df, "normalise")
-    xmeans.res2$class_ids = xmeans.res2$class_ids + 1 # class_ids start from 0
-    centers.undetected    = xmeans.res2$center.matrix
-    
-    
-    return(list(detected.df, undetected.df, centers.detected, centers.undetected))
-    
+#     undetected.df         = testset[-detected.ind, ]
+#     xmeans.res2           = xmeans1(undetected.df, "normalise")
+#     xmeans.res2$class_ids = xmeans.res2$class_ids + 1 # class_ids start from 0
+#     centers.undetected    = xmeans.res2$center.matrix
     
     {
     if (method == "euclidean") {
-        # d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
-        # normal.clust = which.min(d)
-        d=list()
-        for (i in 1:ncol(centers.undetected)) {
-            
-            d[[i]] = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.undetected[,i])^2)))
-            
-            
-            
-            
-        }
-        
-        return(d)
-        
+        d = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.normal)^2)))
+        normal.clust = which.min(d)
+#         d=list()
+#         for (i in 1:ncol(centers.undetected)) {
+#             d[[i]] = apply(centers.detected, 2, function(x) sqrt(sum((x-centers.undetected[,i])^2)))
+#         }
         
     } else if (method == "w.euclidean") {
         #return(list(detected.df, centers.detected, normal.df, centers.normal, xmeans.res$class_ids))
@@ -280,6 +258,9 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
     ret
     
 }
+
+#test_testdata = eval.detect(dat2, n = 100, k = 0.4, n_normal = 4500, n_attack = 500, method = "euclidean")
+save(test_testdata, file = "Writing/Evaluation/system_testset.RData")
 # phase1 = eval.detect(dat, n = 100, method = "euclidean")
 # k30.euc = eval.detect(dat, n = 100, method = "euclidean")
 # k30.weuc = eval.detect(dat, n = 100, method = "w.euclidean")
@@ -311,34 +292,6 @@ eval.detect = function(data, k = 0.3, n_normal = 3500, n_attack = 1500, seed = 1
 # 
 # plot(density(a[[1]][a[[3]] == 1, 2]))
 # lines(density(a[[2]][, 2]))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

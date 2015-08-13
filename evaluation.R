@@ -18,8 +18,8 @@ experiment = function(score, test) {
     threshold = d$x[local_min] - diff(c(d$x[local_max], d$x[local_min])) * 0.1
     
     ## floor() to be generous
-    dr = sum(names(score[score >= threshold]) != "normal.") / sum(test$attack_type != "normal.")
-    fa = sum(names(score[score >= threshold]) == "normal.") / sum(test$attack_type == "normal.")
+    dr = sum(test$attack_type[score >= threshold] != "normal.") / sum(test$attack_type != "normal.")
+    fa = sum(test$attack_type[score >= threshold] == "normal.") / sum(test$attack_type == "normal.")
     
     ret = list(threshold = threshold, detection.rate = dr, false.alarm = fa, detected = which(score >= threshold))
     return(ret)
