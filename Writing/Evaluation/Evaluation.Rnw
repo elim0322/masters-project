@@ -58,13 +58,19 @@ Each instance in KDD'99 is a connection record, that is a sequence of TCP packet
 The proposed detection scheme is evaluated under the following framework:
 
 \begin{enumerate}
+    
     \item The 10\% subset of the complete KDD'99, provided by the competition, is used for the experiment.
     
-    \item Each experiment is conducted using a random sample of 5,000 records as a testset, where 3,500 of them are non-intrusion instances and the remaining 1,500 are attacks. The sampling is carried out without replacement to avoid duplication. The sample size is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
+    \item Each experiment is conducted using a random sample of 5,000 records as a testset, where 3,500 of them are non-intrusion instances and the remaining 1,500 are attacks. The sampling is carried out without replacement to prevent duplication in the testset. The sample size is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
     
     \item The parameter $k$ for the LOF algorithm is set to be 30\% of the testset size.
     
     \item The experiment is repeated on 100 different testsets to account for the relatively small sample size.
+    
+    \item The random seed for each iteration is a sequence from 1 to 100.
+    
+    \item The environment of the experiment is in 64 bit Windows 7 and R.
+    
 \end{enumerate}
 
 In order to assess the performance, the mean and standard deviation of the detection and false positive rates are computed.
@@ -74,10 +80,37 @@ In order to assess the performance, the mean and standard deviation of the detec
 \section{Phase-specific Evaluation}
 \label{}
 
-\subsubsection{Phase 1}
+\subsection{Phase 1}
+
+The choice of the input parameter, $k$, heavily depends on the application domain and prior knowledge about data. Without knowing the actual sizes, or the local densities, of possible clusters in the data, $k$ can only be set arbitrarily. According to the authors of the LOF algorithm, $k$ must be large enough to avoid any statistical fluctuations in the computed scores. Also $k$ must be less than the size of the entire dataset to avoid including every instance as non-outliers. What can be deducted from the examples given in the literature is that the choice of $k$ is related to the size of data that the algorithm is applied to. Therefore we have decided to set $k$ to be at least proportional to the size of a testset such that $k$ is appropriately high for a large dataset.
+
+We have tested the performance of LOF on four different values of $k$, namely 500, 1,000, 1,500 and 2,000, that is 10, 20, 30 and 40\% of the testset size of 5,000. The amount of intrusion instances in the testset is also varied to assess whether the adequacy of $k$ depends on the number of intrusion instances in the testset. For the performance measures, the means and standard deviations of detection rate and false positive rate are computed. Table \cite{} presents the results.
 
 
-\subsubsection{Phase 2}
+
+
+
+
+
+
+
+%The input parameter, $k$, is set to be proportional to the size of the testset. We have tested the performance of LOF using $k$ values at 10\%, 20\%, 30\% and 40\% of the testset size, that is 500, 1,000, 1,500 and 2,000 respectively. The initial $k$ value of 500 may seem rather large but our intention is to avoid any statistical inconsistency by setting it too low, as mentioned by the authors of the LOF algorithm. Four different types of testsets are used, where the number of intrusion instances is varied between 2,000, 1,500, 1,000 and 500.
+
+
+
+
+
+
+
+
+% As discussed by the authors of the LOF algorithm, a set of LOF scores can fluctuate non-monotonically depending on the choice of the input parameter, $k$. What they have found was that the variation, measured by the standard deviation, in the scores computed for a random uniform sample stabilises for $k$ greater than 10. From this, they suggested a heuristic that $k$ should be greater than 10 to avoid any statistical inconsistency in the computed LOF scores. On the other hand, if $k$ is set to be too large, non-outliers can end up being detected as outliers because the size of the neighbourhood increases to potentially include non-outliers from other clusters as $k$ increases. The authors' suggestion is to compute LOF scores over a range of $k$ and take the maximum of the scores to report on the most outlying scores.
+% 
+% The difficulty to proceed with their heuristic is the computation time and memory resource consumption, both of which depend on the size of $k$ range. If $k$ is set to be over a wide range, the LOF algorithm is going to occur that much more compared to over a narrow range.
+% 
+% Hence, the size 
+
+
+\subsection{Phase 2}
 
 
 
