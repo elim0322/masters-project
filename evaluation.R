@@ -1,28 +1,89 @@
-## evaluate detection rate and false alarm rate
-experiment = function(score, test) {
-    d = density(score, n = 10 * length(score))
-#     fp = finite_difference(d)
-#     neg = slope(fp)
-#     #ind = neg[which.min(diff(fp[neg]))]
-#     #threshold = d$x[ind]
-#     
-#     ## this part requires improvement
-#     threshold = d$x[neg[length(neg)]] - diff(c(d$x[neg[1]], d$x[neg[length(neg)]])) * 0.1
+#--- evaluate detection rate and false alarm rate ---#
+evaluate = function(score, test, e = 0.1) {
     
+    threshold = threshold(score, e)
     
-    ## diff(diff(x)) essentially computes the discrete analogue of the second derivative
-    ## so should be negative at local maxima and positive at local minima.
-    local_min = min(which(diff(sign(diff(d$y))) ==  2) + 1) # should be the first local minimum after 1
-    local_max = min(which(diff(sign(diff(d$y))) == -2) + 1) # should be the global maximum at 1
-    
-    threshold = d$x[local_min] - diff(c(d$x[local_max], d$x[local_min])) * 0.1
+    # n = sum(score >= d$x[local_max] & score <= d$x[local_min])
     
     ## floor() to be generous
     dr = sum(test$attack_type[score >= threshold] != "normal.") / sum(test$attack_type != "normal.")
     fa = sum(test$attack_type[score >= threshold] == "normal.") / sum(test$attack_type == "normal.")
     
     ret = list(threshold = threshold, detection.rate = dr, false.alarm = fa, detected = which(score >= threshold))
-    return(ret)
+    
+    return(ret[-4])
+    
+}
+
+#--- find threshold based on density of score ---#
+threshold = function(score, e = 0.1, graph = FALSE) {
+    
+    ## density
+    d = density(score, n = 10 * length(score))
+    
+    ## find extrema, minima and maxima (less than 2)
+    extrema = diff(sign(diff(d$y)))
+    extrema = c(0, extrema, 0)  # to make the length equal to d
+    maxima  = which(extrema[d$x < 2.5] == -2)
+    minima  = which(extrema[d$x < 2.5] ==  2)
+    
+    ## find prob for each curvature
+    prob = numeric()
+    require(sfsmisc)
+    for (i in 1:(length(minima)-1)) {
+        if (i == 1) { prob[1] = integrate.xy(d$x[1:minima[1]], d$y[1:minima[1]]) }
+        prob[i+1] = integrate.xy(d$x[minima[i]:minima[i+1]], d$y[minima[i]:minima[i+1]])
+    }
+    
+    ## first index at which the cumulative sum of prob is greater than 0.5
+    ind = which(cumsum(prob) > 0.5)[1]
+    
+    ## find the local minimum, maximum and threshold
+    maximum   = maxima[ind]
+    minimum   = minima[ind]
+    threshold = d$x[minimum] - e * diff(c(d$x[maximum], d$x[minimum]))
+    
+    if (graph) {
+        plot(d, main = "Density curve of LOF scores")
+        abline(v = threshold, col = "blue", lty = 2)
+        legend("topright", "threshold", lty = 2, col = "blue")
+    }
+    
+    return(threshold)
+    
+}
+
+
+#--- evaluate detection rate and false alarm rate ---#
+experiment = function(score, test = NULL) {
+    d = density(score, n = 10 * length(score))
+    ## diff(diff(x)) essentially computes the discrete analogue of the second derivative
+    ## so should be negative at local maxima and positive at local minima.
+    
+    extrema   = diff(sign(diff(d$y)))
+    local_min = min(which(extrema ==  2) + 1) # should be the first local minimum after 1
+    local_max = min(which(extrema == -2) + 1) # should be the global maximum at 1
+#     local_min = min(which(extrema ==   2)[-1] + 1)
+#     local_max = min(which(extrema ==  -2)[-1] + 1)
+    
+#     return(list(c(local_max, local_min), c(d$x[local_max], d$x[local_min]),
+#                 sfsmisc::integrate.xy(d$x[1:local_min], d$y[1:local_min]),
+#                 sfsmisc::integrate.xy(d$x[local_max:local_min], d$y[local_max:local_min]),
+#                 sfsmisc::integrate.xy(d$x[local_min:length(d$x)], d$y[local_min:length(d$y)])
+#                 ))
+    
+    #threshold = d$x[local_min] - diff(c(d$x[local_max], d$x[local_min])) * 0.1
+    threshold = d$x[local_max]
+    n = length(d$x[local_max] <= score & score <= d$x[local_min])
+    
+    if (!is.null(test)) {
+        dr = sum(test$attack_type[score >= threshold] != "normal.") / sum(test$attack_type != "normal.")
+        fa = sum(test$attack_type[score >= threshold] == "normal.") / sum(test$attack_type == "normal.")
+        ret = list(threshold = threshold, detection.rate = dr, false.alarm = fa, detected = which(score >= threshold), n = n)
+        return(ret)
+    }
+    
+    return(list(threshold = threshold, n = n))
 }
 
 ## compute finite difference estimation on density values

@@ -9,9 +9,9 @@ phase1_eval = function(n = 100, p.attack = 0.3, k = 0.3, file) {
         
         cat(paste(i, "..."))
         
-        set.seed(i); normal = sample(which(dat$attack_type == "normal."), size = nSize, replace = FALSE)
-        set.seed(i); attack = sample(which(dat$attack_type != "normal."), size = aSize, replace = FALSE)
-        testset  = dat[c(normal, attack), -c(2,3,4,7,12,21,22)]
+        set.seed(i); normal = sample(which(dat2$attack_type == "normal."), size = nSize, replace = FALSE)
+        set.seed(i); attack = sample(which(dat2$attack_type != "normal."), size = aSize, replace = FALSE)
+        testset  = dat2[c(normal, attack), -c(2,3,4,7,12,21,22)]
         result   = t(as.matrix(LOF(testset, control = Weka_control(min = k, max = k, "num-slots" = 2))[,"LOF"]))
         
         write.table(result, file = file, append = TRUE, row.names = FALSE, col.names = FALSE, sep = ",")
@@ -20,6 +20,8 @@ phase1_eval = function(n = 100, p.attack = 0.3, k = 0.3, file) {
     }
     
 }
+
+# phase1_eval(p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
 
 # phase1_eval(p.attack = 0.4, k = 0.1, file = "Writing/Evaluation/phase1_scores-40a-10k.csv")
 # phase1_eval(p.attack = 0.4, k = 0.2, file = "Writing/Evaluation/phase1_scores-40a-20k.csv")
@@ -41,7 +43,7 @@ phase1_eval = function(n = 100, p.attack = 0.3, k = 0.3, file) {
 # phase1_eval(p.attack = 0.1, k = 0.3, file = "Writing/Evaluation/phase1_scores-10a-30k.csv")
 # phase1_eval(p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k.csv")
 
-phase1_exp = function(p.attack = 0.3, k = 0.3, file) {
+phase1_exp = function(data, p.attack = 0.3, k = 0.3, file) {
     
     nSize  = 5000 * (1 - p.attack)
     aSize  = 5000 * p.attack
@@ -54,11 +56,11 @@ phase1_exp = function(p.attack = 0.3, k = 0.3, file) {
         
         cat(paste(i, "..."))
         
-        set.seed(i); normal = sample(which(dat$attack_type == "normal."), size = nSize, replace = FALSE)
-        set.seed(i); attack = sample(which(dat$attack_type != "normal."), size = aSize, replace = FALSE)
-        testset  = dat[c(normal, attack), -c(2,3,4,7,12,21,22)]
+        set.seed(i); normal = sample(which(data$attack_type == "normal."), size = nSize, replace = FALSE)
+        set.seed(i); attack = sample(which(data$attack_type != "normal."), size = aSize, replace = FALSE)
+        testset  = data[c(normal, attack), -c(2,3,4,7,12,21,22)]
         
-        res = experiment(as.numeric(score[i, ]), testset)
+        res = evaluate(as.numeric(score[i, ]), testset)
         
         result[i, 1] = res$threshold
         result[i, 2] = res$detection.rate
@@ -73,7 +75,8 @@ phase1_exp = function(p.attack = 0.3, k = 0.3, file) {
     
 }
 
-
+a = phase1_exp(dat, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k.csv")
+b = phase1_exp(dat2, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
 # a10_10k = phase1_exp(p.attack = 0.1, k = 0.1, file = "Writing/Evaluation/phase1_scores-10a-10k.csv")
 # a10_20k = phase1_exp(p.attack = 0.1, k = 0.2, file = "Writing/Evaluation/phase1_scores-10a-20k.csv")
 # a10_30k = phase1_exp(p.attack = 0.1, k = 0.3, file = "Writing/Evaluation/phase1_scores-10a-30k.csv")
