@@ -89,7 +89,7 @@ xmeans1 = function(data, mode = NULL) {
     }
     
     ## http://weka.sourceforge.net/doc.packages/XMeans/weka/clusterers/XMeans.html
-    xmeans.res = XMeans(data.proc[, names(data.proc)!="attack_type"], c("-I", 1, "-H", 50, "-use-kdtree","-K", "weka.core.neighboursearch.KDTree -P"))
+    xmeans.res = XMeans(data.proc[, names(data.proc)!="attack_type"], c("-J", 5000, "-H", 30, "-use-kdtree","-K", "weka.core.neighboursearch.KDTree -P"))
     
     ## construct result object
     xmeans.res$class_ids = xmeans.res$class_ids + 1 # class_ids start from 0
@@ -113,7 +113,7 @@ xmeans1 = function(data, mode = NULL) {
     xmeans.res$table         = list()
     xmeans.res$purity        = numeric()
     xmeans.res$size          = numeric()
-    xmeans.res$feature       = names(data.proc[,names(data.proc)!="attack_type"])
+    #xmeans.res$feature       = names(data.proc[,names(data.proc)!="attack_type"])
     
     for (i in 1:ncol(center.matrix)) {
         members               = which(xmeans.res$class_ids == i)
