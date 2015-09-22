@@ -7,3 +7,8 @@ Writing/**/*.log
 Writing/**/*.pdf
 Writing/**/*.synctex.gz
 Writing/**/*.tex
+
+Writing/**/*.csv
+Writing/**/*.bbl
+
+.Rproj.user
