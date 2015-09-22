@@ -1,7 +1,7 @@
 source("evaluation.R")
 source("kmeans.R")
 
-phase2_exp = function(data, method,
+phase2_exp = function(data, method, size.p,
                       n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k.csv") {
     
     nSize  = 5000 * (1 - p.attack)
@@ -30,7 +30,7 @@ phase2_exp = function(data, method,
             p1.threshold = threshold(score[i, ])
             PAset = which(score[i, ] >= p1.threshold)
             NIset = which(score[i, ] < p1.threshold)
-            NIset.random = sample(NIset, size = 1000, replace = FALSE)
+            NIset.random = sample(NIset, size = size.p * length(NIset), replace = FALSE)
             detected.df = testset[c(PAset, NIset.random), ]
             dbscan.res = DBScan(detected.df)
             cluster.ids = unique(dbscan.res$class_ids)
@@ -102,9 +102,29 @@ phase2_exp = function(data, method,
     return(list(detection, false.alarm))
 }
 
-# a1 = phase2_exp(dat, method = 1, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
-# a2 = phase2_exp(dat, method = 1, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
-# a3 = phase2_exp(dat, method = 1, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a1 = phase2_exp(dat, method = 1, size = 300, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a2 = phase2_exp(dat, method = 1, size = 500, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a3 = phase2_exp(dat, method = 1, size = 700, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a4 = phase2_exp(dat, method = 1, size = 900, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a5 = phase2_exp(dat, method = 1, size = 1100, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a6 = phase2_exp(dat, method = 1, size = 1300, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a7 = phase2_exp(dat, method = 1, size = 1500, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a8 = phase2_exp(dat, method = 1, size = 1700, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a9 = phase2_exp(dat, method = 1, size = 1900, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+# a10 = phase2_exp(dat, method = 1, size = 2100, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+
+b1 = phase2_exp(dat, method = 1, size.p = 0.05, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b2 = phase2_exp(dat, method = 1, size.p = 0.1, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b3 = phase2_exp(dat, method = 1, size.p = 0.15, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b4 = phase2_exp(dat, method = 1, size.p = 0.2, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b5 = phase2_exp(dat, method = 1, size.p = 0.25, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b6 = phase2_exp(dat, method = 1, size.p = 0.3, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b7 = phase2_exp(dat, method = 1, size.p = 0.35, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b8 = phase2_exp(dat, method = 1, size.p = 0.4, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+b9 = phase2_exp(dat, method = 1, size.p = 0.45, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
+
+
+
 # b = phase2_exp(dat, method = 2, n = 1, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
 
 # c1 = phase2_exp(dat2, method = 1, n = 100, p.attack = 0.1, k = 0.4, file = "Writing/Evaluation/phase1_scores-10a-40k-test.csv")
