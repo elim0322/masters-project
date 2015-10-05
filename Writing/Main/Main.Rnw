@@ -9,9 +9,12 @@
     \usepackage{tikz}
       \usetikzlibrary{decorations.text, arrows}  % decoration for for curved text
       \usetikzlibrary{positioning}  % for positioning nodes
-      \tikzstyle{simple}  = [minimum width={width("Possible anomalies")+2pt}, minimum height=1cm, text centered, align=center]
-      \tikzstyle{process} = [minimum width=2cm, minimum height=1cm, rectangle, draw=black, text centered, align=center]
-    
+      \usetikzlibrary{shapes.geometric}
+      \tikzstyle{simple} = [minimum width={width("Possible anomalies")+2pt}, minimum height=1cm, text centered, align=center]
+      \tikzstyle{start}  = [minimum width=2cm, minimum height=1cm, rectangle, rounded corners, draw=black, text centered, align=center, fill=gray!30]
+      \tikzstyle{inout}  = [minimum width=2cm, minimum height=1cm, trapezium, trapezium left angle=60, trapezium right angle=-60, draw=black, text centered, align=center]
+      \tikzstyle{procs}  = [minimum width=2cm, minimum height=1cm, rectangle, draw=black, text centered, align=center]
+      \tikzstyle{decis}  = [minimum width=2cm, minimum height=1cm, diamond,   draw=black, text centered, align=center]
 \newtheorem{definition}{Definition}
 
 % some settings to fill pages more densely

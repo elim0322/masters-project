@@ -5,54 +5,233 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 \chapter{Methods}
 \label{ch:methods}
 
-Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the possibility of detecting novel threats. The most crucial aspect of securing a network or a system is probably in the ability to prevent further losses from the attacks of previously known characteristics. What is of an equal, or possibly greater, importance is the ability to identify previously unknown threats before any harm is inflicted. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the intelligence to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised approach into our method.
+%Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the possibility of detecting novel threats without a need for attack labels. The most crucial aspect of securing a network or a system is probably in the ability to prevent further losses from the attacks of previously known characteristics. What is of an equal, or possibly greater, importance is the ability to identify previously unknown threats before any harm is inflicted. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the intelligence to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised approach into our method.
 
 %Supervised and semi-supervised anomaly detection techniques are not considered in our method as they require a labelled training dataset from which a classifier or a model is constructed. Since the desired outcome of this research is a network intrusion detection system (NIDS) with the novelty detection capability, any labels in a dataset are treated as non-existent and are only used for system evaluation.
 
-As mentioned earlier in Chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to maximise detection rate, and (2) a clustering scheme is applied to identify the cluster of false positives which will be eliminated to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS whose schematic overview is represented in figure \ref{fig:overview}. A brief system overview is as follows:
+
+Our initial concern was the inferior performance often associated with unsupervised anomaly detection methods due to their nature of disregarding labels in the responses of data. The core mechanism of these methods relies on the use of patterns, in data, portrayed by one or more uniquely defined similarity measures for each method, rather than utilising the labels to aid in building more accurate models like their supervised counterparts. Because of this, unsupervised learning tasks are bound to yield relatively poor results, which raises an intuitive question: could an unsupervised anomaly detection method ever produce results comparable to its supervised counterpart?
+
+
+%----------------------------------------------------------
+\newpage
+\section{General schematic}
+\label{methods:sec1}
+
+To answer the question, we have drafted a general scheme that could work as an extension of any chosen threshold-based anomaly detection methods that could potentially circumvent the performance-related caveats associated with the unsupervised detection. The main idea of our hypothetical scheme is simple, that is to focus on solving problems separately by assigning one specific task to address one specific problem. In the context of anomaly detection, one task for maximising detection capability and another for minimising the prevalence of false positives would be the ideal elements in the scheme. While there should be numerous possible solutions to achieve this, such as modifying and tweaking the algorithm of a chosen detection method, the one that we have decided to examine is as seen in Figure \ref{fig:methods-scheme}.
+
+The main idea of the scheme, which can be seen in Figure \ref{fig:methods-scheme}, is simplistic in the way that it divides the process of anomaly detection into two phases, each of which aims to focus on solving one specific problem. The first phase is essentially an anomaly detection task run moderately, e.g., by setting thresholds to be more flexible and liberal than usual, to maximise detection. The output of Phase 1 is a set of possible anomalies with higher frequency of false positives than usual as the result of the less restrictive approach. The second phase is to recognise and eliminate false positives from Phase 1 output.
+
+ (1) general as any choice of anomaly detection methods is applicable
+Without changing the core algorithm of the detection method of our choice,
 
 \begin{figure}
 \centering
-  \begin{tikzpicture}
-    \node(input)  [simple] {1. Input dataset};
-    \node(phase1) [process, below of=input, node distance=3cm] {2. Phase 1: \\ Partition via Anomaly Detection};
+  \begin{tikzpicture}[node distance=2cm]
+    \node(in)  [simple] {Input data};
+    \node(p1)  [procs, below of=in] {Phase 1: Anomaly detection run moderately \\ to maximise detection rate};
+    \node(pa)  [simple, below of=p1] {Possible anomalies};
+    \node(p2)  [procs, below of=pa]    {Phase 2: False positive elimination \\ to minimise false positive rate};
+    \node(out) [simple, below of=p2] {Anomalies};
+    \draw [->] (in) to (p1);
+    \draw [->] (p1) to (pa);
+    \draw [->] (pa) to (p2);
+    \draw [->] (p2) to (out);
+  \end{tikzpicture}
+  \caption{General scheme}
+  \label{fig:methods-scheme}
+\end{figure}
+
+%As mentioned earlier in Chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to maximise detection rate, and (2) a clustering scheme is applied to identify the cluster of false positives which will be eliminated to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS whose schematic overview is represented in figure \ref{fig:overview}. A high-level system overview is as follows:
+
+
+%----------------------------------------------------------
+\newpage
+\section{High-level system overview}
+
+Implementing the general schematic discussed in Section \ref{methods:sec1}, 
+
+The rest of the section is divided into a concise high-level overview, phase-specific low-level overviews and comparison to an intial system design.
+
+\begin{figure}[!h]
+\centering
+  \begin{tikzpicture}[node distance = 2.3cm]
+    \node(start) [start] {\textsc{Start}};
+    \node(in)    [inout, below of=start] {Data \\ (numeric)};
+    \node(p1)    [procs, below of=in]    {Phase 1: \\ Anomaly detection};
+    \node(pa)    [inout, below of=p1]    {Possible \\ anomalies};
+    \node(p2)    [procs, below of=pa]    {Phase 2: \\ False positive \\ elimination};
+    \node(out)   [inout, below of=p2]    {Anomalies \\ (intrusions)};
+    \node(end)   [start, below of=out]   {\textsc{End}};
+    \draw [->] (start) to (in);
+    \draw [->] (in) to (p1);
+    \draw [->] (p1) to (pa);
+    \draw [->] (pa) to (p2);
+    \draw [->] (p2) to (out);
+    \draw [->] (out) to (end);
+  \end{tikzpicture}
+  \caption{High-level system overview}
+  \label{fig:methods-sys}
+\end{figure}
+
+The overall high-level system overview is as follows:
+
+\begin{itemize}
+  
+  \item The system commences with the numeric portion of a test dataset as the input for Phase 1 process.
+  
+  \item Phase 1 consists of five sub-processes which are tasked with:
+  
+  \begin{itemize}
+    \item density-based outlier scoring using the LOF algorithm, 
+    \item graph-based threshold determination, 
+    \item threshold-based data partitioning, 
+    \item random sampling of partitioned instances and 
+    \item merging of residual datasets.
+  \end{itemize}
+  
+  \item The output of Phase 1, which becomes the input for Phase 2, is a set of outliers (anomalous instances), false positives and randomly sampled inliers (non-intrusions).
+  
+  \item Phase 2 consists of three sub-processes which are tasked with:
+  
+  \begin{itemize}
+    \item density-based clustering, 
+    \item recognition of the cluster of false positives and 
+    \item removal of the members associated with the identified cluster from the rest of the input instances.
+  \end{itemize}
+  
+  \item The output of Phase 2 is a set of anomalous instances and the remaining false positives.
+  
+\end{itemize}
+
+%----------------------------------------------------------
+\newpage
+\section{Low-level, phase-specific overview}
+\subsection{Phase 1}
+
+The goal of Phase 1 is to detect \emph{every} anomalous instance associated with a test dataset. Our reasoning behind this goal is to
+
+
+\begin{figure}[!h]
+\centering
+  \begin{tikzpicture}[node distance=2.3cm]
+    \node(0) [start] {\textsc{Phase 1 start}};
+    \node(1) [inout, below of=0] {Data \\ (numeric)};
+    \node(2) [procs, below of=1] {(1) LOF};
+    \node(3) [inout, below of=2] {Scores};
+    \node(4) [procs, below of=3] {(2) Graph-based \\ threshold \\ determination};
+    \node(5) [decis, below of=4] {(3) Partition};
+    \node(6) [inout,  left of=5, node distance=6cm] {Non-intrusions};
+    \node(7) [procs, below of=6] {(4) Random sampling};
+    \node(8) [inout, below of=7] {Sampled \\ non-intrusions};
+    \node(9) [inout, right of=5, node distance=6cm] {Possible \\ anomalies};
+    \node(10) [procs, below of=5] {Merge};
+    \node(11) [inout, below of=10] {Final \\ output};
+    \node(12) [start, below of=11] {\textsc{Phase 1 end}};
+    \draw [->] (0) to (1);
+    \draw [->] (1) to (2);
+    \draw [->] (2) to (3);
+    \draw [->] (3) to (4);
+    \draw [->] (4) to (5);
+    \draw [->] (5) --node[anchor=south] {$<$ threshold} (6);
+    \draw [->] (6) to (7);
+    \draw [->] (7) to (8);
+    \draw [->] (8) to (10);
+    \draw [->] (10) to (11);
+    \draw [->] (5) --node[anchor=south] {$\geq$ threshold} (9);
+    \draw [->] (9) |- (11);
+    \draw [->] (11) to (12);
+  \end{tikzpicture}
+  \caption{Phase 1 overview}
+  \label{fig:methods-p1}
+\end{figure}
+
+
+\subsubsection{Phase 2}
+
+
+
+
+
+
+
+
+
+
+%----------------------------------------------------------
+\newpage
+\section{Comparison to initial design}
+
+\begin{figure}
+\centering
+  \begin{tikzpicture}[node distance = 2cm]
+    \node(input)  [simple] {1. Input data (numeric)};
+    \node(phase1) [procs, below of=input] {2. Phase 1: \\ Anomaly Detection};
+%     \node(PA) [simple, below of=phase1] {3. Possible anomalies with false positives};
+%     \node(phase2) [procs, below of=PA] {4. Phase 2: \\ False positive elimination};
+%     \node(output) [simple, below of=phase2] {5. Anomalies};
     \node(NI) [simple,  below left of=phase1, node distance=5cm] {3(a). Non-Intrusion instances \\ (NI set)};
     \node(PA) [simple,  below right of=phase1, node distance=5cm] {3(b). Possibly Anomalous instances \\ (PA set)};
-    \node(phase2) [process, below of=PA, node distance=3cm] {4. Phase 2: \\ False Positive Elimination};
+    \node(phase2) [procs, below of=PA, node distance=3cm] {4. Phase 2: \\ False Positive Elimination};
     \node(output) [simple,  below of=phase2, node distance=3cm] {5. Possible anomalies with \\ false positive eliminated \\ (ePA set)};
-%     \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
+    \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
     
     \draw [->] (input)   to (phase1);
+%     \draw [->] (phase1) to (PA);
+%     \draw [->] (PA) to (phase2);
+%     \draw [->] (phase2) to (output);
     \draw [->] (phase1)  to (NI);
     \draw [->] (phase1)  to (PA);
     \draw [->] (PA) to (phase2);
     \draw [->, dotted] (NI.300) |- (phase2);
     \draw [->] (phase2)  to (output);
-%     \draw [->] (NI.240) |- (final);
-%     \draw [->] (output) |- (final);
+    \draw [->] (NI.240) |- (final);
+    \draw [->] (output) |- (final);
   \end{tikzpicture}
-  \caption{System overview}
+  \caption{High-level system overview}
   \label{fig:overview}
 \end{figure}
 
+
+\subsubsection{what I found and why it didn't work}
+
+\subsubsection{Phase 1. Partition via anomaly detection}
+
+\subsubsection{Phase 2. False positive elimination via clustering}
+
+
+
+
+%----------------------------------------------------------
+
+\newpage
 \begin{enumerate}
-\item The numeric portion of a test dataset is used as input for Phase 1.
-
-\item Possible anomalies, present in the input dataset, are identified via the density-based anomaly detection algorithm, Local Outlier Factor (LOF). Then the dataset is partitioned into two subsets of `normal', i.e., non-intrusion, instances, 3(a), and possible anomalies, i.e., intrusion instances, 3(b).
-
-It should be noted that the first subset is almost entirely composed of non-intrusion instances and therefore will be referred to as a Non-Intrusion (NI) set while the second subset consists of true positive and false positive instances as a result of the anomaly detection and will be referred to as a Possibly Anomalous (PA) set. Also the terms, \emph{outlier} and \emph{anomaly}, are used interchangeably to mean the same throughout the report.
-
-\item The output of Phase 1 are the NI and PA sets.
-
-\item The direct input of Phase 2 is the PA set where the anomalous instances are clustered using the X-Means algorithm. Each of the resulting clusters is compared with the profile of the NI set, as indirect input, to find the most dissimilar cluster. This cluster, which is the most distinct relative to the NI set, is defined to be the false positive cluster. Then the false positive cluster is eliminated from the PA set and the remaining instances will be referred to as an eliminated PA (ePA) set.
-\item The final output, ePA set, contains the intrusion instances associated with the original data with the reduced number of  false positive instances.
-%\item The output of Phase 2 is the merged set which consists of the NI and the eliminated sets.
+\item Phase 1 input is the numeric portion of a test dataset.
+\item An anomaly detectino scheme is applied on the input dataset.
+\item 
+\item 
+\item 
 \end{enumerate}
+
+% \begin{enumerate}
+% \item The numeric portion of a test dataset is used as input for Phase 1.
+% 
+% \item Possible anomalies, present in the input dataset, are identified via the density-based anomaly detection algorithm, Local Outlier Factor (LOF). Then the dataset is partitioned into two subsets of `normal', i.e., non-intrusion, instances, 3(a), and possible anomalies, i.e., intrusion instances, 3(b).
+% 
+% It should be noted that the first subset is almost entirely composed of non-intrusion instances and therefore will be referred to as a Non-Intrusion (NI) set while the second subset consists of true positive and false positive instances as a result of the anomaly detection and will be referred to as a Possibly Anomalous (PA) set. Also the terms, \emph{outlier} and \emph{anomaly}, are used interchangeably to mean the same throughout the report.
+% 
+% \item The output of Phase 1 are the NI and PA sets.
+% 
+% \item The direct input of Phase 2 is the PA set where the anomalous instances are clustered using the X-Means algorithm. Each of the resulting clusters is compared with the profile of the NI set, as indirect input, to find the most dissimilar cluster. This cluster, which is the most distinct relative to the NI set, is defined to be the false positive cluster. Then the false positive cluster is eliminated from the PA set and the remaining instances will be referred to as an eliminated PA (ePA) set.
+% \item The final output, ePA set, contains the intrusion instances associated with the original data with the reduced number of  false positive instances.
+% %\item The output of Phase 2 is the merged set which consists of the NI and the eliminated sets.
+% \end{enumerate}
 
 The rest of this chapter is divided into two sections to bring detailed discussion for each phase.
 
 
 %----------------------------------------------------------
+\newpage
 \section{Phase 1: Partition via Anomaly Detection}
 
 An anomaly, or a statistical outlier, is defined to be an object that deviates significantly from the rest of data that the object is sampled from. The behaviour or the distribution of the anomalies is significantly different to that of the rest of the data such that they are assumed to be directly translated to some kind of irregularity. The goal of anomaly-based intrusion detection is to identify such irregularity that is considered to be intrusions. It is of the fundamental assumption that a test dataset, to which an anomaly detection technique is applied, is primarily made up of `normal' instances so that their pattern is more accurately captured to provide a clear distinction between the `normal` and anomalous instances. All of these ideas are used to form a basis that Phase 1 is constructed upon.
