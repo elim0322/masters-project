@@ -2,15 +2,17 @@
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
+%----------------------------------------------------------
 \chapter{Methods}
 \label{ch:methods}
 
-%Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the possibility of detecting novel threats without a need for attack labels. The most crucial aspect of securing a network or a system is probably in the ability to prevent further losses from the attacks of previously known characteristics. What is of an equal, or possibly greater, importance is the ability to identify previously unknown threats before any harm is inflicted. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the intelligence to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised approach into our method.
+Our decision to pursue the implementation of an unsupervised anomaly detection task into an intrusion detection system (IDS) has led us to face two major caveats associated with the unsupervised learning: (1) inferior detection capability and (2) high prevalence of false positives, in comparison to its supervised counterpart. As a countermeasure to those obstacles, we have conceptualised a simple two-phase schematic which we have followed closely in developing the system. More detailed discussion of the abstract scheme can be found in Section \ref{methods:sec1}.
 
-%Supervised and semi-supervised anomaly detection techniques are not considered in our method as they require a labelled training dataset from which a classifier or a model is constructed. Since the desired outcome of this research is a network intrusion detection system (NIDS) with the novelty detection capability, any labels in a dataset are treated as non-existent and are only used for system evaluation.
+% Use better expression for below paragraphs:
+As the core concept of our IDS closely resembles that of the previously mentioned two-phase scheme, the internal structure of the overall system adopts two top-level phases of sub-processes. The system overview along with phase-specific discussion can be found in Sections \ref{methods:sec2} and \ref{methods:sec3}, respectively.
 
+Lastly, the system is compared with an intial hypothetical design that was intuitively drafted in the final section of the chapter.
 
-Our initial concern was the inferior performance often associated with unsupervised anomaly detection methods due to their nature of disregarding labels in the responses of data. The core mechanism of these methods relies on the use of patterns, in data, portrayed by one or more uniquely defined similarity measures for each method, rather than utilising the labels to aid in building more accurate models like their supervised counterparts. Because of this, unsupervised learning tasks are bound to yield relatively poor results, which raises an intuitive question: could an unsupervised anomaly detection method ever produce results comparable to its supervised counterpart?
 
 
 %----------------------------------------------------------
@@ -18,36 +20,44 @@ Our initial concern was the inferior performance often associated with unsupervi
 \section{General schematic}
 \label{methods:sec1}
 
-To answer the question, we have drafted a general scheme that could work as an extension of any chosen threshold-based anomaly detection methods that could potentially circumvent the performance-related caveats associated with the unsupervised detection. The main idea of our hypothetical scheme is simple, that is to focus on solving problems separately by assigning one specific task to address one specific problem. In the context of anomaly detection, one task for maximising detection capability and another for minimising the prevalence of false positives would be the ideal elements in the scheme. While there should be numerous possible solutions to achieve this, such as modifying and tweaking the algorithm of a chosen detection method, the one that we have decided to examine is as seen in Figure \ref{fig:methods-scheme}.
-
-The main idea of the scheme, which can be seen in Figure \ref{fig:methods-scheme}, is simplistic in the way that it divides the process of anomaly detection into two phases, each of which aims to focus on solving one specific problem. The first phase is essentially an anomaly detection task run moderately, e.g., by setting thresholds to be more flexible and liberal than usual, to maximise detection. The output of Phase 1 is a set of possible anomalies with higher frequency of false positives than usual as the result of the less restrictive approach. The second phase is to recognise and eliminate false positives from Phase 1 output.
-
- (1) general as any choice of anomaly detection methods is applicable
-Without changing the core algorithm of the detection method of our choice,
-
-\begin{figure}
+\begin{figure}[!h]
 \centering
   \begin{tikzpicture}[node distance=2cm]
-    \node(in)  [simple] {Input data};
-    \node(p1)  [procs, below of=in] {Phase 1: Anomaly detection run moderately \\ to maximise detection rate};
+    \node(in)  [simple] {Test data};
+    \node(p1)  [procs,  below of=in, minimum width=6cm] {Phase 1: \\ unsupervised anomaly detection};
     \node(pa)  [simple, below of=p1] {Possible anomalies};
-    \node(p2)  [procs, below of=pa]    {Phase 2: False positive elimination \\ to minimise false positive rate};
+    \node(p2)  [procs,  below of=pa, minimum width=6cm] {Phase 2: \\ false positive elimination};
     \node(out) [simple, below of=p2] {Anomalies};
-    \draw [->] (in) to (p1);
-    \draw [->] (p1) to (pa);
-    \draw [->] (pa) to (p2);
-    \draw [->] (p2) to (out);
+    \draw [arrow] (in) to (p1);
+    \draw [arrow] (p1) to (pa);
+    \draw [arrow] (pa) to (p2);
+    \draw [arrow] (p2) to (out);
   \end{tikzpicture}
   \caption{General scheme}
   \label{fig:methods-scheme}
 \end{figure}
 
+Our initial concern was the inferior performance associated with unsupervised learning. A question that naturally came after was 
+%The inferior performance associated with unsupervised anomaly detection methods is due to their nature of completely disregarding the labels of responses in data. This type of machine learning methods relies on the analysis of one or more uniquely defined similarity measures under two major assumptions: (1) the majority of the instances in a test data consists of non-anomalous, ``normal", instances and (2) they are more similar to one another than to anomalous instances.
+
+%The nature of unsupervised learning is that labelled responses are not required as the labels are completely disregarded. Rather than using the labels as an aid in building more accurate models like its supervised counterpart, the unsupervised learning instead relies on the analysis of patterns in data portrayed by one or more uniquely defined similarity measures.
+
+%Our initial concern was the inferior performance often associated with unsupervised anomaly detection methods due to their nature of disregarding labels in the responses of data. The core mechanism of these methods relies on the use of patterns, in data, portrayed by one or more uniquely defined similarity measures for each method, rather than utilising the labels to aid in building more accurate models like their supervised counterparts. Because of this, unsupervised learning tasks are bound to yield relatively less promising results, which raises an intuitive question: could an unsupervised anomaly detection method ever produce results comparable to its supervised counterpart?
+
+%To answer the question, we have drafted a general scheme that could work as an extension of any chosen threshold-based anomaly detection methods that could potentially circumvent the performance-related caveats associated with the unsupervised detection. The main idea of our hypothetical scheme is simple, that is to focus on solving problems separately by assigning one specific task to address one specific problem. In the context of anomaly detection, one task for maximising detection capability and another for minimising the prevalence of false positives would be the ideal elements in the scheme. While there should be numerous possible solutions to achieve this, such as modifying and tweaking the algorithm of a chosen detection method, the one that we have decided to examine is as seen in Figure \ref{fig:methods-scheme}.
+
+%The main idea of the scheme, which can be seen in Figure \ref{fig:methods-scheme}, is simplistic in the way that it divides the process of anomaly detection into two phases, each of which aims to focus on solving one specific problem. The first phase is essentially an anomaly detection task run moderately, e.g., by setting thresholds to be more flexible and liberal than usual, to maximise detection. The output of Phase 1 is a set of possible anomalies with higher frequency of false positives than usual as the result of the less restrictive approach. The second phase is to recognise and eliminate false positives from Phase 1 output.
+
+% (1) general as any choice of anomaly detection methods is applicable.. Without changing the core algorithm of the detection method of our choice,
+
 %As mentioned earlier in Chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to maximise detection rate, and (2) a clustering scheme is applied to identify the cluster of false positives which will be eliminated to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS whose schematic overview is represented in figure \ref{fig:overview}. A high-level system overview is as follows:
+
 
 
 %----------------------------------------------------------
 \newpage
 \section{High-level system overview}
+\label{methods:sec2}
 
 Implementing the general schematic discussed in Section \ref{methods:sec1}, 
 
@@ -57,18 +67,18 @@ The rest of the section is divided into a concise high-level overview, phase-spe
 \centering
   \begin{tikzpicture}[node distance = 2.3cm]
     \node(start) [start] {\textsc{Start}};
-    \node(in)    [inout, below of=start] {Data \\ (numeric)};
+    \node(in)    [io, below of=start] {Data \\ (numeric)};
     \node(p1)    [procs, below of=in]    {Phase 1: \\ Anomaly detection};
-    \node(pa)    [inout, below of=p1]    {Possible \\ anomalies};
+    \node(pa)    [io, below of=p1]    {Possible \\ anomalies};
     \node(p2)    [procs, below of=pa]    {Phase 2: \\ False positive \\ elimination};
-    \node(out)   [inout, below of=p2]    {Anomalies \\ (intrusions)};
+    \node(out)   [io, below of=p2]    {Anomalies \\ (intrusions)};
     \node(end)   [start, below of=out]   {\textsc{End}};
-    \draw [->] (start) to (in);
-    \draw [->] (in) to (p1);
-    \draw [->] (p1) to (pa);
-    \draw [->] (pa) to (p2);
-    \draw [->] (p2) to (out);
-    \draw [->] (out) to (end);
+    \draw [arrow] (start) to (in);
+    \draw [arrow] (in) to (p1);
+    \draw [arrow] (p1) to (pa);
+    \draw [arrow] (pa) to (p2);
+    \draw [arrow] (p2) to (out);
+    \draw [arrow] (out) to (end);
   \end{tikzpicture}
   \caption{High-level system overview}
   \label{fig:methods-sys}
@@ -77,36 +87,31 @@ The rest of the section is divided into a concise high-level overview, phase-spe
 The overall high-level system overview is as follows:
 
 \begin{itemize}
-  
   \item The system commences with the numeric portion of a test dataset as the input for Phase 1 process.
-  
   \item Phase 1 consists of five sub-processes which are tasked with:
-  
-  \begin{itemize}
-    \item density-based outlier scoring using the LOF algorithm, 
-    \item graph-based threshold determination, 
-    \item threshold-based data partitioning, 
-    \item random sampling of partitioned instances and 
-    \item merging of residual datasets.
-  \end{itemize}
-  
+    \begin{itemize}
+      \item density-based outlier scoring using the LOF algorithm, 
+      \item graph-based threshold determination, 
+      \item threshold-based data partitioning, 
+      \item random sampling of partitioned instances and 
+      \item merging of residual datasets.
+    \end{itemize}
   \item The output of Phase 1, which becomes the input for Phase 2, is a set of outliers (anomalous instances), false positives and randomly sampled inliers (non-intrusions).
-  
   \item Phase 2 consists of three sub-processes which are tasked with:
-  
-  \begin{itemize}
-    \item density-based clustering, 
-    \item recognition of the cluster of false positives and 
-    \item removal of the members associated with the identified cluster from the rest of the input instances.
-  \end{itemize}
-  
+    \begin{itemize}
+      \item density-based clustering, 
+      \item recognition of the cluster of false positives and 
+      \item removal of the members associated with the identified cluster from the rest of the input instances.
+    \end{itemize}
   \item The output of Phase 2 is a set of anomalous instances and the remaining false positives.
-  
 \end{itemize}
+
 
 %----------------------------------------------------------
 \newpage
 \section{Low-level, phase-specific overview}
+\label{methods:sec3}
+
 \subsection{Phase 1}
 
 The goal of Phase 1 is to detect \emph{every} anomalous instance associated with a test dataset. Our reasoning behind this goal is to
@@ -116,31 +121,32 @@ The goal of Phase 1 is to detect \emph{every} anomalous instance associated with
 \centering
   \begin{tikzpicture}[node distance=2.3cm]
     \node(0) [start] {\textsc{Phase 1 start}};
-    \node(1) [inout, below of=0] {Data \\ (numeric)};
+    \node(1) [io, below of=0] {Data \\ (numeric)};
     \node(2) [procs, below of=1] {(1) LOF};
-    \node(3) [inout, below of=2] {Scores};
+    \node(3) [io, below of=2] {Scores};
     \node(4) [procs, below of=3] {(2) Graph-based \\ threshold \\ determination};
     \node(5) [decis, below of=4] {(3) Partition};
-    \node(6) [inout,  left of=5, node distance=6cm] {Non-intrusions};
+    % left=3cm of 5 also works
+    \node(6) [io,  left of=5, node distance=6cm] {Non-intrusions};
     \node(7) [procs, below of=6] {(4) Random sampling};
-    \node(8) [inout, below of=7] {Sampled \\ non-intrusions};
-    \node(9) [inout, right of=5, node distance=6cm] {Possible \\ anomalies};
+    \node(8) [io, below of=7] {Sampled \\ non-intrusions};
+    \node(9) [io, right of=5, node distance=6cm] {Possible \\ anomalies};
     \node(10) [procs, below of=5] {Merge};
-    \node(11) [inout, below of=10] {Final \\ output};
+    \node(11) [io, below of=10] {Final \\ output};
     \node(12) [start, below of=11] {\textsc{Phase 1 end}};
-    \draw [->] (0) to (1);
-    \draw [->] (1) to (2);
-    \draw [->] (2) to (3);
-    \draw [->] (3) to (4);
-    \draw [->] (4) to (5);
-    \draw [->] (5) --node[anchor=south] {$<$ threshold} (6);
-    \draw [->] (6) to (7);
-    \draw [->] (7) to (8);
-    \draw [->] (8) to (10);
-    \draw [->] (10) to (11);
-    \draw [->] (5) --node[anchor=south] {$\geq$ threshold} (9);
-    \draw [->] (9) |- (11);
-    \draw [->] (11) to (12);
+    \draw [arrow] (0) to (1);
+    \draw [arrow] (1) to (2);
+    \draw [arrow] (2) to (3);
+    \draw [arrow] (3) to (4);
+    \draw [arrow] (4) to (5);
+    \draw [arrow] (5) --node[anchor=south] {$<$ threshold} (6);
+    \draw [arrow] (6) to (7);
+    \draw [arrow] (7) to (8);
+    \draw [arrow] (8) to (10);
+    \draw [arrow] (10) to (11);
+    \draw [arrow] (5) --node[anchor=south] {$\geq$ threshold} (9);
+    \draw [arrow] (9) |- (11);
+    \draw [arrow] (11) to (12);
   \end{tikzpicture}
   \caption{Phase 1 overview}
   \label{fig:methods-p1}
@@ -161,6 +167,7 @@ The goal of Phase 1 is to detect \emph{every} anomalous instance associated with
 %----------------------------------------------------------
 \newpage
 \section{Comparison to initial design}
+\label{methods:sec4}
 
 \begin{figure}
 \centering
@@ -176,17 +183,17 @@ The goal of Phase 1 is to detect \emph{every} anomalous instance associated with
     \node(output) [simple,  below of=phase2, node distance=3cm] {5. Possible anomalies with \\ false positive eliminated \\ (ePA set)};
     \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
     
-    \draw [->] (input)   to (phase1);
-%     \draw [->] (phase1) to (PA);
-%     \draw [->] (PA) to (phase2);
-%     \draw [->] (phase2) to (output);
-    \draw [->] (phase1)  to (NI);
-    \draw [->] (phase1)  to (PA);
-    \draw [->] (PA) to (phase2);
-    \draw [->, dotted] (NI.300) |- (phase2);
-    \draw [->] (phase2)  to (output);
-    \draw [->] (NI.240) |- (final);
-    \draw [->] (output) |- (final);
+    \draw [arrow] (input)   to (phase1);
+%     \draw [arrow] (phase1) to (PA);
+%     \draw [arrow] (PA) to (phase2);
+%     \draw [arrow] (phase2) to (output);
+    \draw [arrow] (phase1)  to (NI);
+    \draw [arrow] (phase1)  to (PA);
+    \draw [arrow] (PA) to (phase2);
+    \draw [arrow, dotted] (NI.300) |- (phase2);
+    \draw [arrow] (phase2)  to (output);
+    \draw [arrow] (NI.240) |- (final);
+    \draw [arrow] (output) |- (final);
   \end{tikzpicture}
   \caption{High-level system overview}
   \label{fig:overview}
@@ -207,7 +214,7 @@ The goal of Phase 1 is to detect \emph{every} anomalous instance associated with
 \newpage
 \begin{enumerate}
 \item Phase 1 input is the numeric portion of a test dataset.
-\item An anomaly detectino scheme is applied on the input dataset.
+\item An anomaly detection scheme is applied on the input dataset.
 \item 
 \item 
 \item 
