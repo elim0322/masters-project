@@ -16,3 +16,8 @@ has attracted much attention due to its ability to detect novel attacks which
 There are 
 
 The intrusion detection scheme that we propose is a two-phase method that falls within the domain of unsupervised anomaly detection. 
+
+%Our aim is to detect hostile connections within a network with minimal false alarm occurrence through an unsupervised anomaly detection technique. As introduced in Chapter [REF intro], the domain of unsupervised anomaly detection is, especially, attractive to the field of network intrusion detection as it allows the possibility of detecting novel threats without a need for attack labels. The most crucial aspect of securing a network or a system is probably in the ability to prevent further losses from the attacks of previously known characteristics. What is of an equal, or possibly greater, importance is the ability to identify previously unknown threats before any harm is inflicted. As with any forms of crime, new trends of cyber-crime are constantly emerging for a need to fortify networks and systems with the intelligence to cope with any possible novelty. This has given us a sounding reason to pursue the idea of implementing an unsupervised approach into our method.
+
+%Supervised and semi-supervised anomaly detection techniques are not considered in our method as they require a labelled training dataset from which a classifier or a model is constructed. Since the desired outcome of this research is a network intrusion detection system (NIDS) with the novelty detection capability, any labels in a dataset are treated as non-existent and are only used for system evaluation.
+
