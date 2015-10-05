@@ -6,6 +6,7 @@ Writing/**/*.concordance.tex
 Writing/**/*.log
 Writing/**/*.pdf
 Writing/**/*.synctex.gz
+Writing/**/*.aux
 Writing/**/*.tex
 
 Writing/**/*.csv
