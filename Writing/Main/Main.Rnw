@@ -13,9 +13,10 @@
       % minimum width={width("Possible anomalies")+2pt}
       \tikzstyle{simple} = [minimum width=3cm, minimum height=1cm, outer sep=0pt, text centered, align=center]
       \tikzstyle{start}  = [minimum width=3cm, minimum height=1cm, rectangle, rounded corners, draw=black, text centered, align=center, fill=gray!30]
-      \tikzstyle{io}     = [minimum width=3cm, minimum height=1cm, trapezium, trapezium left angle=70, trapezium right angle=110, draw=black, text centered, align=center]
+      \tikzstyle{io}     = [minimum width=3cm, minimum height=1cm, trapezium, trapezium left angle=70, trapezium right angle=110, inner sep=8pt, draw=black, text centered, align=center]
       \tikzstyle{procs}  = [minimum width=3cm, minimum height=1cm, rectangle, draw=black, text centered, align=center]
-      \tikzstyle{decis}  = [minimum width=3cm, minimum height=1cm, diamond,   draw=black, text centered, align=center]
+      \tikzstyle{decis}  = [minimum width=3cm, minimum height=1cm, diamond, draw=black, inner sep=0pt, text centered, align=center]
+      \tikzstyle{merge}  = [minimum width=3cm, minimum height=1cm, regular polygon, regular polygon sides=3, shape border rotate=180, inner sep=0pt, draw=black, text centered, align=center]
       \tikzstyle{arrow}  = [thick,->,>=stealth]
 \newtheorem{definition}{Definition}
 

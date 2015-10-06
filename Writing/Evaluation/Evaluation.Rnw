@@ -7,11 +7,7 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 The dataset we have chosen for evaluating our system is the one used in KDD Cup 1999 [CITE]. There are a few issues associated with the dataset such as the presence of redundant features and duplicated instances, mentioned by Tavallaee et al. who also proposed an improved version of the dataset called NSL-KDD. Despite the issues, our decision to proceed with KDD'99 is because it is a real world data captured at MIT Lincoln Labs which means it is more likely to be accurate at describing the characteristics of real world connections compared to those described by the processed data, NSL-KDD. Another possible limitation with KDD'99 dataset is its age. Because the dataset is dated, there is high possibility that the characteristics of modern attacks may be different to those described in the dataset. However it is the only real world dataset with complete attack labels to remain as the most popular choice as a benchmarking medium for any IDS evaluation. The lack of other public network data appears to be due to the highly sensitive nature associated with network information. Technical description of KDD'99 dataset is presented in Section \ref{sec:evaluation-data}.
 
-The experimental setup for the evaluation is described in Section \ref{sec:evaluation-setup}.
-
-Phase-specific evaluation results are presented in Section \ref{}, along with our choice of performance measures.
-
-System evaluation results are presented in Section \ref{}.
+The rest of this chapther includes the experimental setup for the evaluation in Section \ref{sec:evaluation-setup}, phase-specific evaluation results in Section \ref{sec:evaluation-phase} and system evaluation results  in Section \ref{sec:evaluation-system}, along with our choice of performance measures.
 
 
 %----------------------------------------------------------
@@ -72,7 +68,7 @@ The proposed detection scheme is evaluated under the following framework:
 
 %----------------------------------------------------------
 \section{Phase-specific Evaluation}
-\label{}
+\label{sec:evaluation-phase}
 
 \subsection{Phase 1}
 
@@ -266,6 +262,7 @@ print(xtab, booktabs = TRUE)
 
 %----------------------------------------------------------
 \section{System Evaluation}
+\label{sec:evaluation-system}
 
 Table \ref{tab:phase2-first3} is the result of the overall system evaluation. There are 61 occasions where the clusters of non-intrusion instances are correctly identified by being the closest to the non-intrusion centroid to result in the detection rates that are all above 96\%. For the remaining 39 occasions, the clusters are incorrectly identified to result in the detection rates below 81\%. For these 39 cases, the clusters of intrusions are identified as being the closest to the non-intrusion centroid while the actual clusters of non-intrusion instances that we want to identify are further away. The reason is because there are multiple clusters of non-intrusion instances present in the dataset. These non-intrusion instances behave abnormally relative to the majority of the other non-intrusion instances to the extent that they are detected as possible anomalies.
 
