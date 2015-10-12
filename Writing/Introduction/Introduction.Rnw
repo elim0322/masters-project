@@ -5,6 +5,12 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 \chapter{Introduction}
 \label{ch:intro}
 
+The particular nature of input data in network intrusion detection is that of a mixed type, that is it consists of numeric, binary and categorical features.
+
+Also, it is not a spatial data, where each instance is given positional information, nor a graph data, where each instance is represented as a vertex or a node.
+
+
+\neapge
 An intrusion detection system (IDS) can fall under two main categories: a signature-based and an anomaly-based IDS where the former detects threats by matching connections with a database of previously known hostile connections and the latter by treating the threats as anomalies. In comparison to the anomaly-based IDS, the signature-based IDS is associated with superior performance through higher detection rate with minimal false alarm rate in a similar manner
 
 
