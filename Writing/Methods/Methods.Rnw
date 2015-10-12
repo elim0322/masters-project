@@ -2,12 +2,12 @@
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
-%----------------------------------------------------------
 \chapter{Methods}
 \label{ch:methods}
 
-The main problem of unsupervised anomaly detection methods is the incidence of a high false positive (or alarm) rate, that is the proportion of normal instances erroneously classified as anomalous (also known as false positives or false alarms). The issue is usually the result of violating one of the most fundamental assumptions in anomaly detection that normal instances are much more frequent than anomalies in a test dataset as it then becomes more difficult for a given method to distinguish between the normal and abnormal instances. A method's adequacy for a given test dataset also has an impact on the prevalence of false positives.
+One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed system is closely based on. Discussions on the choice of concepts used for the scheme, etc. are in Section \ref{methods:sec1}.
 
+%The main problem of unsupervised anomaly detection methods is the incidence of a high false positive (or alarm) rate, that is the proportion of normal instances erroneously classified as anomalous (also known as false positives or false alarms). The issue is usually the result of violating one of the most fundamental assumptions in anomaly detection that normal instances are much more frequent than anomalies in a test dataset as it then becomes more difficult for a given method to distinguish between the normal and abnormal instances. A method's adequacy for a given test dataset also has an impact on the prevalence of false positives.
 
 %Our decision to pursue the implementation of an unsupervised anomaly detection task into an intrusion detection system (IDS) has led us to face two major caveats associated with the unsupervised learning: (1) inferior detection capability and (2) high prevalence of false positives, in comparison to its supervised counterpart. As a countermeasure to those obstacles, we have conceptualised a simple two-phase schematic which we have followed closely in developing the system. More detailed discussion of the abstract scheme can be found in Section \ref{methods:sec1}.
 
@@ -16,28 +16,58 @@ The main problem of unsupervised anomaly detection methods is the incidence of a
 
 %Lastly, the system is compared with an intial hypothetical design that was intuitively drafted in the final section of the chapter.
 
+
+%----------------------------------------------------------
+%----------------------------------------------------------
 %----------------------------------------------------------
 \newpage
-\section{General schematic}
+\section{General scheme}
 \label{methods:sec1}
 
-An initial problem to be solved was the high false positive rate 
+This section describes the core concept and schematic overview of the general scheme in Sections \ref{methods:sec1.1} and \ref{methods:sec1.2}, respectively.
 
-to identify false positives resulted in 
+
+%----------------------------------------------------------
+%----------------------------------------------------------
+\subsection{Core concept}
+\label{methods:sec1.1}
+
+The core concept of the general scheme is similar to that of \emph{min-maxing}, that is an attempt to achieve a notion of ``best" by maximising highly desirable traits while minimising undesirable ones. The measures that are maximised and minimised are the detection and false positive rates as these are the ultimate performance measures to estimate the capability of an intrusion detection system. Other measures such as time and space complexities, which are useful in evaluating the applicability of a system, are ignored at this stage and are possible candidates for future work.
+
+There are two ideas that contribute towards the core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are expected. These ideas are used in conceptualising the ways in which the the two rates can be respectively maximised and minimised and their in-depth discussion is followed by the rest of the section.
+
+
+%----------------------------------------------------------
+\subsubsection{Positive correlation between detection and false positive rates}
+Without going into the algorithmic level of a method and modifying it, the most simplistic approach in achieving a higher detection rate is to set a more permissive, insensitive threshold such that potential anomalies, whose similarity measures have been less distinctive otherwise, could be classified. More false positives will also be included in the result to suggest that the detection and false positive rates are positively correlated when adjusted in this manner. Using this idea, it is possible to set a threshold as liberal as possible to allow every anomaly in a test dataset to be classified, that is essentially equivalent to maximising the detection rate of the given method.
+
+%----------------------------------------------------------
+\subsubsection{Expected prevalence of false positives}
+For an unsupervised anomaly detection method, the root cause of the problem associated with relatively high incidence of false positives can be a few such as the violation of the fundamental assumption that normal instances are much more frequent than anomalies in a test dataset. In a truly unsupervised fashion, one cannot discover the number of normal, or abnormal, instances in a test dataset, due to the absence of response labels, and must therefore expect a few false positives in the result. In addition to the problem, the previously described maximisation of a detection rate, through the setting of a liberal threshold, is strongly expected to generate a high frequency of false positives in the result. So in any case, false positives are inevitably expected. If the prevalence of the false positives is imminent, it may be advisable to let it happen and find a solution to eliminate them, that is to focus more on resolution than prevention.
+
 
 
 %Our initial concern has been the inferior performance associated with unsupervised learning. It is a generally well-established idea that a supervised or semi-supervised learning task outperforms its unsupervised counterpart due to its nature of utilising response labels in a data for building more accurate models. For the case of anomaly detection, it is of no exception to observe a similar circumstance which would be best avoided if possible. An interesting question is then whether the performance of an unsupervised anomaly detection method can ever be improved.
 
 %A simple concept, that we have found relevant in answering the question, is to decompose problems into an individual level which can then be independently and specifically addressed for a possible solution. In the context of the anomaly detection, such problems are the feeble detection capability and high prevalence of false positives mentioned in the previous section. Each of these two difficulties is targeted in a schematic we have abstracted in Figure \ref{fig:methods-scheme}. The idea is, in a way, similar to that of \emph{min-maxing}, that is maximising highly desirable traits such as the detection power while mininsing unwanted ones such the false positive incidences, in order to improve overall performance.
 
+
+
+%----------------------------------------------------------
+%----------------------------------------------------------
+\subsection{Schematic overview}
+\label{methods:sec1.2}
+
+Figure \ref{fig:methods-scheme} represents the general scheme which forms the basis of our proposed system. The word, \emph{general}, is used as the scheme is closely followed in building the prototypes of the proposed system and is theoretically possible to be generalised for different application domains of unsupervised anomaly detection. An experiment to assess the generalisability of the system is a potential future work.
+
 \begin{figure}[!h]
 \centering
   \begin{tikzpicture}[node distance=2cm]
-    \node(in)  [simple] {Test data};
-    \node(p1)  [procs,  below of=in, minimum width=6cm] {Phase 1: \\ unsupervised anomaly detection};
-    \node(pa)  [simple, below of=p1] {All possible anomalies};
-    \node(p2)  [procs,  below of=pa, minimum width=6cm] {Phase 2: \\ false positive elimination};
-    \node(out) [simple, below of=p2] {All anomalies};
+    \node(in)  [simple] {test data};
+    \node(p1)  [procs,  below of=in, minimum width=8cm] {Phase 1: \\ liberal unsupervised anomaly detection \\ (maximise detection)};
+    \node(pa)  [simple, below of=p1] {all possible anomalies};
+    \node(p2)  [procs,  below of=pa, minimum width=8cm] {Phase 2: \\ false positive recognition and elimination \\ (minimise false positives)};
+    \node(out) [simple, below of=p2] {all anomalies};
     \draw [arrow] (in) to (p1);
     \draw [arrow] (p1) to (pa);
     \draw [arrow] (pa) to (p2);
@@ -47,9 +77,19 @@ to identify false positives resulted in
   \label{fig:methods-scheme}
 \end{figure}
 
-%The goal of Phase 1 is to detect \emph{every} anomalous instance in a data. The way we have decided to achieve this is to run a chosen anomaly detection method in a liberal manner, by setting a more permissive threshold for example, to allow the anomalies that are otherwise less distinguishable from non-anomalous instances to be identified. Because the algorithmic structure of the method is untouched, Phase 1 can be general to any threshold-based anomaly detection methods in theory, which means different methods can be tested, based on domain knowledge and intuitions. A limitation of Phase 1 is that its results contain a higher number of false positives caused by the flexibly defined threshold.
 
-%The correspondingly high number of false positive is the focus of Phase 2 to be minimised. Recognition of the false positives can be achieved via a clustering method under the assumption that instances for each label are more similar to each other than to those for the other labels. An effective clustering method can be selected for Phase 2 so that one or more clusters of the false positives can be output and removed from the set of possible anomalies. Final output is then expected to consist of \emph{all} the anomalies associated with a test data along with a minimal number of false positives.
+%----------------------------------------------------------
+\subsubsection{Phase 1}
+
+The purpose of Phase 1 is to maximise detection by using a liberal threshold in order to allow anomalies, that are otherwise less distinguishable from normal instances, to be classified. This approach can effectively classify anomalies that are embedded in clusters of normal instances and less distinctive. 
+
+Because the algorithmic structure of the method is untouched, Phase 1 can be general to any threshold-based anomaly detection methods. An example is to apply a lower threshold on a set of distances to $k^{th}$ nearest neighbour so that less distant instances, classified as normal otherwise, may be classified as potential anomalies. 
+
+
+%----------------------------------------------------------
+\subsubsection{Phase 2}
+
+The correspondingly high number of false positive is the focus of Phase 2 to be minimised. Recognition of the false positives can be achieved via a clustering method under the assumption that instances for each label are more similar to each other than to those for the other labels. An effective clustering method can be selected for Phase 2 so that one or more clusters of the false positives can be output and removed from the set of possible anomalies. Final output is then expected to consist of \emph{all} the anomalies associated with a test data along with a minimal number of false positives.
 
 
 %The inferior performance associated with unsupervised anomaly detection methods is due to their nature of completely disregarding the labels of responses in data. This type of machine learning methods relies on the analysis of one or more uniquely defined similarity measures under two major assumptions: (1) the majority of the instances in a test data consists of non-anomalous, ``normal", instances and (2) they are more similar to one another than to anomalous instances.
