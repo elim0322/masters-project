@@ -1,0 +1,9 @@
+<<set-parent, echo=FALSE, cache=FALSE>>=
+knitr::set_parent(parent = "../Main/Main.Rnw")
+@
+
+\chapter{Discussion}
+\label{ch:discussion}
+
+We can speed up by using the algorithm proposed by Jin et al. [2001], an incremental variant of LOF (future work)
+
