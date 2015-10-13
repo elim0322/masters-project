@@ -1,0 +1,11 @@
+<<set-parent, echo=FALSE, cache=FALSE>>=
+knitr::set_parent(parent = "../Main/Main.Rnw")
+@
+
+\chapter{Background}
+\label{ch:background}
+
+Explain the various types of unsupervised anomaly detection methods mentioned by Chandola et al. (2009) and why I chose LOF
+
+
+
