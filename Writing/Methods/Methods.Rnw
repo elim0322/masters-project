@@ -5,7 +5,12 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 \chapter{Methods}
 \label{ch:methods}
 
-One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed system is closely based on. Discussions on the choice of concepts used for the scheme, etc. are in Section \ref{methods:sec1}.
+One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed system is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
+
+The rest of this chapter is divided into sections that provide high-level overview of our proposed intrusion detection system in Section \ref{methods:sec2}, low-level and phase-specific discussion in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a minimal demonstration of the system in Section \ref{methods:sec5}.
+
+
+
 
 %The main problem of unsupervised anomaly detection methods is the incidence of a high false positive (or alarm) rate, that is the proportion of normal instances erroneously classified as anomalous (also known as false positives or false alarms). The issue is usually the result of violating one of the most fundamental assumptions in anomaly detection that normal instances are much more frequent than anomalies in a test dataset as it then becomes more difficult for a given method to distinguish between the normal and abnormal instances. A method's adequacy for a given test dataset also has an impact on the prevalence of false positives.
 
@@ -20,7 +25,6 @@ One of the problems associated with unsupervised anomaly detection methods is th
 %----------------------------------------------------------
 %----------------------------------------------------------
 %----------------------------------------------------------
-\newpage
 \section{General scheme}
 \label{methods:sec1}
 
@@ -32,19 +36,20 @@ This section describes the core concept and schematic overview of the general sc
 \subsection{Core concept}
 \label{methods:sec1.1}
 
-The core concept of the general scheme is similar to that of \emph{min-maxing}, that is an attempt to achieve a notion of ``best" by maximising highly desirable traits while minimising undesirable ones. The measures that are maximised and minimised are the detection and false positive rates as these are the ultimate performance measures to estimate the capability of an intrusion detection system. Other measures such as time and space complexities, which are useful in evaluating the applicability of a system, are ignored at this stage and are possible candidates for future work.
+The core concept of the general scheme is similar to that of \emph{min-maxing}, that is an attempt to achieve a notion of ``best" by maximising highly desirable traits while minimising undesirable ones. The traits of an intrusion detection system to be \emph{maximised} is the sensitivity, or strength, of detection ---because it is directly related to the intention and purpose of the system, and provides an estimate of its usefulness--- and to be \emph{minimised} is the incidence of false positives ---because a low false positive rate is required for the system to be precise. There are two ideas that contribute towards this core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are always expected. These ideas are used in conceptualising the ways in which the two traits of an unsupervised anomaly detection method can be respectively maximised and minimised. The in-depth discussions of the ideas is followed by the rest of the section.
 
-There are two ideas that contribute towards the core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are expected. These ideas are used in conceptualising the ways in which the the two rates can be respectively maximised and minimised and their in-depth discussion is followed by the rest of the section.
+%Other measures such as time and space complexities, which are useful in evaluating the applicability of a system, are ignored at this stage and are possible candidates for future work.
+
 
 
 %----------------------------------------------------------
 \subsubsection{Positive correlation between detection and false positive rates}
-Without going into the algorithmic level of a method and modifying it, the most simplistic approach in achieving a higher detection rate is to set a more permissive, insensitive threshold such that potential anomalies, whose similarity measures have been less distinctive otherwise, could be classified. More false positives will also be included in the result to suggest that the detection and false positive rates are positively correlated when adjusted in this manner. Using this idea, it is possible to set a threshold as liberal as possible to allow every anomaly in a test dataset to be classified, that is essentially equivalent to maximising the detection rate of the given method.
+Without going into the algorithmic level of a method and modifying it, the most simplistic approach in achieving a higher detection rate is to set a more permissive, insensitive threshold such that potential anomalies, whose similarity measures have been less distinctive otherwise, could be classified. More false positives will also be included in the result to suggest that the detection and false positive rates are positively correlated when adjusted in this manner. Using this idea, it is possible to set a threshold as liberal as possible to allow every anomaly in a test dataset to be classified, that is essentially equivalent to maximising the sensitivity of the given anomaly detection method.
+
 
 %----------------------------------------------------------
 \subsubsection{Expected prevalence of false positives}
-For an unsupervised anomaly detection method, the root cause of the problem associated with relatively high incidence of false positives can be a few such as the violation of the fundamental assumption that normal instances are much more frequent than anomalies in a test dataset. In a truly unsupervised fashion, one cannot discover the number of normal, or abnormal, instances in a test dataset, due to the absence of response labels, and must therefore expect a few false positives in the result. In addition to the problem, the previously described maximisation of a detection rate, through the setting of a liberal threshold, is strongly expected to generate a high frequency of false positives in the result. So in any case, false positives are inevitably expected. If the prevalence of the false positives is imminent, it may be advisable to let it happen and find a solution to eliminate them, that is to focus more on resolution than prevention.
-
+For an unsupervised anomaly detection method, the root cause of the problem associated with relatively high incidence of false positives can be a few such as the violation of the fundamental assumption that normal instances are much more frequent than anomalies in a test dataset. In a truly unsupervised fashion, one cannot discover the number of normal, or abnormal, instances in a test dataset, due to the absence of response labels, and must therefore expect a few false positives in the result. In addition to the problem, the previously described maximisation of sensitivity, through the setting of a liberal threshold, is strongly expected to generate a high frequency of false positives in the result. So in any case, the false positives are inevitably expected. If the prevalence of the false positives is imminent, it may be advisable to let it happen and find a solution to eliminate them, that is to focus more on resolution than prevention. In other words, rather than trying to prevent the type I errors, minimising false positives (or maximising the precision of a method, from a different perspective) can be achieved by identifying them and removing those instances from a set of possible anomalies.
 
 
 %Our initial concern has been the inferior performance associated with unsupervised learning. It is a generally well-established idea that a supervised or semi-supervised learning task outperforms its unsupervised counterpart due to its nature of utilising response labels in a data for building more accurate models. For the case of anomaly detection, it is of no exception to observe a similar circumstance which would be best avoided if possible. An interesting question is then whether the performance of an unsupervised anomaly detection method can ever be improved.
@@ -58,15 +63,15 @@ For an unsupervised anomaly detection method, the root cause of the problem asso
 \subsection{Schematic overview}
 \label{methods:sec1.2}
 
-Figure \ref{fig:methods-scheme} represents the general scheme which forms the basis of our proposed system. The word, \emph{general}, is used as the scheme is closely followed in building the prototypes of the proposed system and is theoretically possible to be generalised for different application domains of unsupervised anomaly detection. An experiment to assess the generalisability of the system is a potential future work.
+Figure \ref{fig:methods-scheme} represents the general scheme which forms the foundation of our proposed system. The word, \emph{general}, is used as the scheme is closely followed in building the prototypes of the proposed system and is theoretically possible to be generalised for different application domains of unsupervised anomaly detection. An experiment to assess the generalisability of the system is a potential future work.
 
 \begin{figure}[!h]
 \centering
   \begin{tikzpicture}[node distance=2cm]
     \node(in)  [simple] {test data};
-    \node(p1)  [procs,  below of=in, minimum width=8cm] {Phase 1: \\ liberal unsupervised anomaly detection \\ (maximise detection)};
+    \node(p1)  [procs,  below of=in, minimum width=6.2cm] {Phase 1: \\ unsupervised anomaly detection \\ with extra permissive thresholds \\ (maximise sensitivity of detection)};
     \node(pa)  [simple, below of=p1] {all possible anomalies};
-    \node(p2)  [procs,  below of=pa, minimum width=8cm] {Phase 2: \\ false positive recognition and elimination \\ (minimise false positives)};
+    \node(p2)  [procs,  below of=pa, minimum width=6.2cm] {Phase 2: \\ false positive recognition and \\ elimination using clustering \\ (minimise false positives)};
     \node(out) [simple, below of=p2] {all anomalies};
     \draw [arrow] (in) to (p1);
     \draw [arrow] (p1) to (pa);
@@ -80,16 +85,12 @@ Figure \ref{fig:methods-scheme} represents the general scheme which forms the ba
 
 %----------------------------------------------------------
 \subsubsection{Phase 1}
-
-The purpose of Phase 1 is to maximise detection by using a liberal threshold in order to allow anomalies, that are otherwise less distinguishable from normal instances, to be classified. This approach can effectively classify anomalies that are embedded in clusters of normal instances and less distinctive. 
-
-Because the algorithmic structure of the method is untouched, Phase 1 can be general to any threshold-based anomaly detection methods. An example is to apply a lower threshold on a set of distances to $k^{th}$ nearest neighbour so that less distant instances, classified as normal otherwise, may be classified as potential anomalies. 
+The aim of Phase 1 is to maximise the sensitivity of detection by using a liberal threshold in order to allow anomalies, that are otherwise less distinguishable from normal instances, to be classified. This approach can effectively classify anomalies that are embedded in clusters of normal instances and less distinctive. Another possible advantage is that the phase can be general to any threshold-based anomaly detection methods because the algorithmic structure of the method is untouched. An example would be to apply a lower threshold on a set of distances to $k^{th}$ nearest neighbour so that less distant instances, classified as normal otherwise, may be classified as potential anomalies.
 
 
 %----------------------------------------------------------
 \subsubsection{Phase 2}
-
-The correspondingly high number of false positive is the focus of Phase 2 to be minimised. Recognition of the false positives can be achieved via a clustering method under the assumption that instances for each label are more similar to each other than to those for the other labels. An effective clustering method can be selected for Phase 2 so that one or more clusters of the false positives can be output and removed from the set of possible anomalies. Final output is then expected to consist of \emph{all} the anomalies associated with a test data along with a minimal number of false positives.
+The aim of Phase 2 is to minimise the number of false positives by firstly identifying which instances are the false positives and secondly eliminating them from the set of possible anomalies output from Phase 1. The approach we have found relevant in classifying false positives is through clustering because it provides (1) unsupervised classification of instances and (2) grouping of false positives for painless elimination. One underlying assumption must be made for the clustering approach to be effective, that is the instances for each label, including false positives, are more similar to one another than to those for the other labels. If the assumption is violated, e.g., false positives are indistinguishable from normal instances, classifying anomalies and false positives in unsupervised manner becomes impossible for any methods.
 
 
 %The inferior performance associated with unsupervised anomaly detection methods is due to their nature of completely disregarding the labels of responses in data. This type of machine learning methods relies on the analysis of one or more uniquely defined similarity measures under two major assumptions: (1) the majority of the instances in a test data consists of non-anomalous, ``normal", instances and (2) they are more similar to one another than to anomalous instances.
@@ -109,13 +110,15 @@ The correspondingly high number of false positive is the focus of Phase 2 to be 
 
 
 %----------------------------------------------------------
-\newpage
+%----------------------------------------------------------
 \section{High-level system overview}
 \label{methods:sec2}
 
+This section describes and summarises the high-level overview of our proposed system.
+
 \begin{figure}[h]
 \centering
-  \begin{tikzpicture}[node distance = 2.3cm]
+  \begin{tikzpicture}[node distance = 2.3cm, scale=0.8]
     \node(start) [start] {\textsc{Start}};
     \node(in)    [io, below of=start]  {Data \\ (numeric)};
     \node(p1)    [procs, below of=in, minimum width=8cm]  {Phase 1: \\ Density-based anomaly detection};
@@ -134,15 +137,15 @@ The correspondingly high number of false positive is the focus of Phase 2 to be 
   \label{fig:methods-sys}
 \end{figure}
 
-Using the scheme in the previous section, a two-phase IDS is built as in Figure \ref{fig:methods-sys}. The overall high-level system overview is as follows:
+Using the general scheme described in the previous section, our proposed two-phase intrusion detection system is built as represented in Figure \ref{fig:methods-sys}. The overall high-level structure of the system is identical to that of the previous schematic with two phases tasked with the same objectives: (1) maximise sensitivity and (2) minimise false positives. A major difference is that the phases of the system consist of sub-processes that collectively accomplish the set objectives. The overall high-level system overview is summarised as follows:
 
 \begin{itemize}
   \item The system commences with the numeric portion of a test dataset as the input for Phase 1 process.
   
   \item The primary objective of Phase 1 is to execute anomaly detection on the input through five sub-processes which are tasked with:
     \begin{itemize}
-      \item density-based outlier scoring using the LOF algorithm, 
-      \item graph-based threshold determination, 
+      \item density-based anomaly scoring using the Local Outlier Factor algorithm, 
+      \item kernel function-based threshold determination, 
       \item threshold-based input data partitioning, 
       \item random sampling of partitioned instances and 
       \item merging of residual partitioned datasets.
@@ -161,31 +164,39 @@ Using the scheme in the previous section, a two-phase IDS is built as in Figure 
   
 \end{itemize}
 
-The reasoning behind our choice of the density-based methods and the flow of the processes is discussed in the next section.
+
 
 
 
 %----------------------------------------------------------
-\newpage
+%----------------------------------------------------------
+%----------------------------------------------------------
 \section{Phase-specific overview}
 \label{methods:sec3}
 
-\subsection{Phase 1}
+This section presents the overview and the low-level discussion of each phase.
+
+
+%----------------------------------------------------------
+%----------------------------------------------------------
+\subsection{Phase 1: density-based anomaly detection}
+
+The input for Phase 1 process is the numeric portion of a test dataset and the output is a set of possible anomalies that include actual anomalies (true positives) and incorrectly classified anomalies (false positives). There are five sub-processes, each of which is described in the rest of this section.
 
 \begin{figure}[!h]
 \centering
   \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
     \node(0) [start] {\textsc{Phase 1 start}};
-    \node(1) [io,    below=1cm of 0] {Data \\ (numeric)};
-    \node(2) [procs, below=1cm of 1] {(1) LOF};
-    \node(3) [io,    below=1cm of 2] {Scores};
-    \node(4) [procs, below=1cm of 3] {(2) Graph-based \\ threshold \\ determination};
-    \node(5) [decis, below=1cm of 4] {(3) Partition};
-    \node(6) [io,     left=3cm of 5] {Non-intrusions};
-    \node(7) [procs, below=1cm of 6] {(4) Random sampling};
-    \node(8) [io,    below=1cm of 7] {Sampled \\ non-intrusions};
-    \node(9) [io,    right=3cm of 5] {Possible \\ anomalies};
-    \node(10) [merge] at (8-|5) {Merge};
+    \node(1) [io,    below=1cm of 0]   {Data \\ (numeric)};
+    \node(2) [procs, below=1cm of 1]   {(1) LOF};
+    \node(3) [io,    below=1cm of 2]   {Scores};
+    \node(4) [procs, below=1cm of 3]   {(2) Kernel function-based \\ threshold \\ determination};
+    \node(5) [decis, below=1cm of 4]   {(3) Partition};
+    \node(6) [io,     left=3cm of 5]   {Non-intrusions};
+    \node(7) [procs, below=1cm of 6]   {(4) Random sampling \\ with sample size of $n$};
+    \node(8) [io,    below=1cm of 7]   {Sampled \\ non-intrusions};
+    \node(9) [io,    right=3cm of 5]   {Possible \\ anomalies};
+    \node(10) [merge] at (8-|5)        {(5) Merge};
     \node(11) [io,    below=1cm of 10] {Final \\ output};
     \node(12) [start, below=1cm of 11] {\textsc{Phase 1 end}};
     \draw [arrow] (0) to (1);
@@ -206,51 +217,85 @@ The reasoning behind our choice of the density-based methods and the flow of the
   \label{fig:methods-p1}
 \end{figure}
 
+
+%----------------------------------------------------------
 \subsubsection{(1) LOF}
-
-The concept of the \emph{local} approach in finding anomalies within a dataset is first introduced in the LOF algorithm. By measuring the local density, or deviation, of an object with respect to its neighbours, the algorithm is not restricted on the overall shape of the dataset. Whether there exist clusters of arbitrary shapes and varying sizes in the data, LOF can effectively score each instance with the degree of being an outlier with respect to its neighbours.
-
-
-\subsubsection{(2) Graph-based threshold determination}
-Provided that a given dataset satisfies two assumptions which are the majority of the dataset is consisted of non-anomalous instances and anomalies are statistically distinct from the non-anomalous instances, a set of LOF scores produced from the previous process is expected to include a range of highly frequent values. In other words, if 70\% of the dataset corresponds to non-anomalous then approximately 70\% of the computed LOF scores would be 
+The Local Outlier Factor algorithm is run on the input data to score each instance a degree of being an anomaly. As mentioned in Chapter [background], a normal instance will have a score close to one while an anomalous instance will have a score much greater than one.
 
 
+%----------------------------------------------------------
+\subsubsection{(2) Kernel function-based threshold determination}
+Provided that a given dataset satisfies two assumptions which are the majority of the dataset consists of normal instances and anomalies are statistically distinct from the normal instances, a set of LOF scores produced from the previous step is expected to include a range of highly frequent values. In other words, if 70\% of the dataset corresponds to normal then approximately 70\% of the computed LOF scores would be close to one.
+
+In order to assess the range of scores that the majority of the instances fall into, kernel density estimation is used to estimate the probability density of the scores and its estimated function is plotted. Then a threshold for the scores is set at the value where the curvature of the largest probability around the score of one ends.
 
 
+%----------------------------------------------------------
 \subsubsection{(3) Partitioning}
+Instances whose scores are below the threshold are partitioned as non-intrusions and those whose scores are greater or equal to the threshold are partitioned as possible anomalies. The clean partitioning is possible because all anomalies associated with a test data are classified.
 
 
+%----------------------------------------------------------
 \subsubsection{(4) Random sampling}
+A random sample of the non-intrusion instances is taken to avoid introduction of any sampling bias, that is a bias against, or toward, certain instances being more likely to be selected. The sample size, $n$, is by default equal to the number of possible anomalies computed in the previous steps with intention to even out the number of instances belonging to each label for a more efficient clustering task in Phase 2. When the random sample is merged with the set of possible anomalies to produce a new dataset, at least half of it will correspond to normal.
 
 
+%----------------------------------------------------------
 \subsubsection{(5) Merging}
-
-
-
-
+The random sample of non-intrusion instances is merged with the set of possible anomalies. This \emph{increases} the overall size of normal instances in the merged dataset such that a clustering task to be performed in Phase 2 can be more effective at grouping them.
 
 
 
 
 %----------------------------------------------------------
-\newpage
-\subsection{Phase 2}
+%----------------------------------------------------------
+\subsection{Phase 2: clustering-based false positive elimination}
+
+The input for Phase 2 process is the merged dataset output from Phase 1 and the output is the intrusion instances defined as anomalies. There are two sub-processes, each of which is described in the rest of this section.
+
+\begin{figure}[!h]
+\centering
+  \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
+    \node(0) [start] {\textsc{Phase 2 start}};
+    \node(1) [io,    below=1cm of 0] {Merged dataset \\ output from Phase 1};
+    \node(2) [procs, below=1cm of 1] {(1) DBSCAN};
+    \node(3) [io,    below=1cm of 2] {Clusters of instances};
+    \node(4) [decis, below=1cm of 3] {(2) Select a cluster \\ based on its size};
+    \node(5) [io,     left=2cm of 4] {Intrusions};
+    \node(6) [io,    below=1cm of 5] {Final \\ output};
+    \node(7) [start, below=1cm of 6] {\textsc{Phase 2 end}};
+    \node(8) [io,    right=2cm of 4] {Non-intrusions};
+    \draw [arrow] (0) to (1);
+    \draw [arrow] (1) to (2);
+    \draw [arrow] (2) to (3);
+    \draw [arrow] (3) to (4);
+    \draw [arrow] (4) --node[anchor=south] {$<n$} (5);
+    \draw [arrow] (5) to (6);
+    \draw [arrow] (6) to (7);
+    \draw [arrow] (4) --node[anchor=south] {$\geq n$} (8);
+  \end{tikzpicture}
+  \caption{Phase 1 overview}
+  \label{fig:methods-p1}
+\end{figure}
+
+
+\subsubsection{(1) DBSCAN}
+The clustering algorithm, Density-Based Spatial Clustering of Applications with Noise, is based on the idea of local, or relative, density similar to LOF. The advantage of DBSCAN is that it can effectively cluster data of an arbitrary shape.
+
+
+\subsubsection{(2) Cluster selection}
 
 
 
 
-
-
-
-
-
-
+%----------------------------------------------------------
+%----------------------------------------------------------
 %----------------------------------------------------------
 \newpage
 \section{Comparison to initial design}
 \label{methods:sec4}
 
-\begin{figure}
+\begin{figure}[!h]
 \centering
   \begin{tikzpicture}[node distance = 2cm]
     \node(input)  [simple] {1. Input data (numeric)};
@@ -281,7 +326,7 @@ Provided that a given dataset satisfies two assumptions which are the majority o
 \end{figure}
 
 
-\subsubsection{what I found and why it didn't work}
+%\subsubsection{what I found and why it didn't work}
 
 \subsubsection{Phase 1. Partition via anomaly detection}
 
@@ -291,374 +336,389 @@ Provided that a given dataset satisfies two assumptions which are the majority o
 
 
 %----------------------------------------------------------
-
-\newpage
-\begin{enumerate}
-\item Phase 1 input is the numeric portion of a test dataset.
-\item An anomaly detection scheme is applied on the input dataset.
-\item 
-\item 
-\item 
-\end{enumerate}
-
-% \begin{enumerate}
-% \item The numeric portion of a test dataset is used as input for Phase 1.
-% 
-% \item Possible anomalies, present in the input dataset, are identified via the density-based anomaly detection algorithm, Local Outlier Factor (LOF). Then the dataset is partitioned into two subsets of `normal', i.e., non-intrusion, instances, 3(a), and possible anomalies, i.e., intrusion instances, 3(b).
-% 
-% It should be noted that the first subset is almost entirely composed of non-intrusion instances and therefore will be referred to as a Non-Intrusion (NI) set while the second subset consists of true positive and false positive instances as a result of the anomaly detection and will be referred to as a Possibly Anomalous (PA) set. Also the terms, \emph{outlier} and \emph{anomaly}, are used interchangeably to mean the same throughout the report.
-% 
-% \item The output of Phase 1 are the NI and PA sets.
-% 
-% \item The direct input of Phase 2 is the PA set where the anomalous instances are clustered using the X-Means algorithm. Each of the resulting clusters is compared with the profile of the NI set, as indirect input, to find the most dissimilar cluster. This cluster, which is the most distinct relative to the NI set, is defined to be the false positive cluster. Then the false positive cluster is eliminated from the PA set and the remaining instances will be referred to as an eliminated PA (ePA) set.
-% \item The final output, ePA set, contains the intrusion instances associated with the original data with the reduced number of  false positive instances.
-% %\item The output of Phase 2 is the merged set which consists of the NI and the eliminated sets.
-% \end{enumerate}
-
-The rest of this chapter is divided into two sections to bring detailed discussion for each phase.
-
-
 %----------------------------------------------------------
-\newpage
-\section{Phase 1: Partition via Anomaly Detection}
-
-An anomaly, or a statistical outlier, is defined to be an object that deviates significantly from the rest of data that the object is sampled from. The behaviour or the distribution of the anomalies is significantly different to that of the rest of the data such that they are assumed to be directly translated to some kind of irregularity. The goal of anomaly-based intrusion detection is to identify such irregularity that is considered to be intrusions. It is of the fundamental assumption that a test dataset, to which an anomaly detection technique is applied, is primarily made up of `normal' instances so that their pattern is more accurately captured to provide a clear distinction between the `normal` and anomalous instances. All of these ideas are used to form a basis that Phase 1 is constructed upon.
-
-The main purpose of Phase 1 is to detect every anomalous instance associated with a dataset so that the dataset can be exclusively partitioned into two subsets of `normal' instances and possible anomalies. Hence the target detection rate of LOF, given by the number of anomalous instances detected by the algorithm, i.e., true positive, over the total number of anomalous instances, is one. In order to achieve such a high detection rate, a compromise has been made for the false alarm rate of the detection, denoted by the number of `normal' instances detected as anomalous, i.e., false positive, over the total number of `normal' instances.
-
-It is highly desireable for any detection system to attain a high detection rate while maintaining a low false alarm rate. But the two rate measures are directly proportional to one another, or positively correlated in statistical sense, to result in an increase in one measure to be inevitably followed by an increase in another measure. Therefore it must be noted that the final output of Phase 1 is expected to produce a relatively high false alarm rate than it should under normal circumstances. Keeping this fact in mind, the high level overview of Phase 1 is listed as follows:
-
-\begin{enumerate}
-\item \emph{Outlier score computation using LOF}: the intial step of Phase 1 is to score every instance a degree of being an outlier using the algorithm, LOF.
-
-\item \emph{Threshold determination using KDE}: the non-parametric density estimation method, KDE, is used to estimate the probability density function of the set of LOF scores from the previous step to find an optimal threshold.
-\end{enumerate}
-
-The rest of this section discusses each of the steps in more detail.
-
-% It is highly desirable for any detection system to attain a high detection rate while maintaing a low false alarm rate. However it is extremely difficult to do so due to the relationship between the two rates. There is a strong positive correlation between them to cause an increase in the detection rate to be inevitably followed by a corresponding increase in the false alarm rate. To visualise this, consider a univariate sample from a normal distribution to represent some metric computed for a dataset, such as distance or density, that is used in an arbitrary anomaly detection method. If the detection threshold is $\theta_1$ and an anomaly is defined to be any object whose said metric is below $\theta_1$, then the detection rate is $p_1$ given by the area under the curve to the left of $\theta_1$ and the false alarm rate is the number of false positive instances in this area over the total number of false positive instances in the dataset. If the threshold is increased to $\theta_2$ to attain a higher detection rate of 0.95, the amount of false positive instances in this new area must be added to that in the previous area to result in an increased false alarm rate.
-% 
-% To achieve such a high detection rate means that the resulting false alarm rate will be correspondingly high as the two rate measures are usually positively correlated. An attempt to attain a higher detection rate often involves changing a certain threshold, on which detection criteria are based, that will in turn allow more false positives to be included in the result. As an example, consider a univariate random sample, $X$, from a normal distribution with the mean of 0 and variance of 4, whose probability distribution function is as shown in figure \ref{fig:rate-example}. Supposing the detection criterion for this particular example is such that an object, $o$, is an anomaly if $o \leq \theta_1$. Then the detection rate, as indicated by the area under the curve to the left of $\theta_1$, is $p_1$ and the false alarm rate is determined by the amount of false positives scattered in this area. To achieve a higher detection rate, the initial threshold, $\theta_1$, can be increased to $\theta_2$ which will increase the previous detection rate by $p_2$ to produce an overall detection rate of 0.95. Also the amount of false positives in the new area will be added to that of the previous area to result in a higher overall false alarm rate. Thus the result of phase 1 is expected to have a relatively high false positive rate which is to be reduced in phase 2.
-% 
-% <<rate-example, echo=FALSE, fig.align='center', fig.cap="Density of a random sample, $X \\sim N(\\mu = 0, \\sigma^2 = 4)$", out.width="0.6\\linewidth">>=
-% set.seed(2)
-% den = density(rnorm(100, sd = 2))
-% plot(den, xlab = "", ylab = "", main = "", yaxt = "n", xaxs = "i", yaxs = "i", type = "n")
-% 
-% t0 = which.min(abs(den$x-0))
-% polygon(x = c(den$x[1], den$x[1:t0], den$x[t0]), y = c(0, den$y[1:t0], 0), col = "gray75", border = "gray75")
-% 
-% t1 = which.min(abs(den$x-4))
-% polygon(x = c(den$x[t0], den$x[t0:t1], den$x[t1]), y = c(0, den$y[t0:t1], 0), col = "gray80", border = "gray80")
-% 
-% lines(x = c(den$x[t0], den$x[t0]), c(0, den$y[t0]), lty = 2)
-% text(0, 0.01, labels = expression(theta[1]), pos = 4, cex = 1.2)
-% lines(x = c(den$x[t1], den$x[t1]), c(0., den$y[t1]), lty = 2)
-% text(4, 0.01, labels = expression(theta[2]), pos = 4, cex = 1.2)
-% 
-% p1 = round(sfsmisc::integrate.xy(den$x[1:t0], den$y[1:t0]), digits = 2)
-% p2 = round(sfsmisc::integrate.xy(den$x[t0:t1], den$y[t0:t1]), digits = 2)
-% 
-% text(-2, 0.04, labels = bquote(p[1] == .(p1)), cex = 1.3)
-% text(2, 0.04, labels = bquote(p[2] == .(p2)), cex = 1.3)
-% 
-% lines(den)
-% box()
-% @
-
-\subsubsection{1. Outlier score computation using LOF}
-
-The algorithm, LOF, is a density-based anomaly detection technique which defines an anomaly to be an object that is relatively sparse compared to the densities of its neighbouring objects. The result of LOF is a score that describes the degree of an object being an outlier and this measure, termed the \emph{local outlier factor} by the authors, is given by
-\begin{equation}
-\label{eq:methods1}
-LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
-\end{equation}
-where $LOF_{k}(p)$ is the \emph{local outlier factor} of object $p$, $k$ is the number of neighbours around $p$, $N_{k}(p)$ is the set of $k$ closest neighbours of $p$, and $lrd_{k}(p)$ and $lrd_{k}(o)$ are the local reachability densities of objects $o$ and $p$, respectively. Since the summation is over the objects in the set of $k$ closest neighbours of $p$, the equation \ref{eq:methods1} can be simplified further into
-\begin{equation}
-\label{eq:methods2}
-LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)},
-\end{equation}
-where the numerator is the average of the local reachability densities of the neighbours. Therefore the local outlier factor of an object is the ratio of the mean of the local densities of the object's $k$ closest neighbours and the local density of the object. It is clear from the equation \ref{eq:methods2} that a score less than or equal to one indicates that the local density of $p$, given by the denominator, is more dense or equal to those of its neighbours, given by the numerator, and therefore $p$ is not an outlier. Similarly, a score greater than one indicates an outlier as the local density of $p$ is relatively smaller than that of its neighbours.
-
-It may be intuitive to set up a threshold to be one so that the instances whose scores are above it are detected as possible anomalies. However such threshold can only suffice in an ideal situation, where all local densities are constant. In reality, they are more likely to fluctuate to affect the average density of the neighbours, which brings to the second step of Phase 1.
-
-\subsubsection{2. Threshold determination using KDE}
-
-The mean, or the average, is one of the most popular measures to estimate the central location of a set of continous values. A notable limitation of the mean is its sensitivity to extreme values. The presence of an extreme value can shift the mean considerably to result in a bias. With reference to LOF, the average local density of an object's $k$ closest neighbours can also be affected by the presence of an extreme local density. More specifically, the presence of a single extremely dense neighbour of an object can increase the average local density of the neighbourhood, which in turn increases the local outlier factor for the object to end up being detected as an anomaly. Likewise an extremely sparse neighbour can result in a small local outlier factor. Hence it is possible to observe a non-anomalous instance to have an LOF score greater than one. What this means is that an optimal threshold can vary between samples and there must be a flexible way to find an adaptive threshold.
-
-A solution we have found to be relevant is to estimate the probability density function (PDF) of the local outlier factors using kernel density estimation (KDE). Then the estimated probability distribution is used to help determine an optimal threshold for that specific distribution. Relying on the assumption that a test dataset contains more `normal' instances than anomalies, we can expect to observe from the estimated PDF that there is an area of probability roughly as high as the percentage of the `normal' instances in the dataset. In other words, an area of a significantly high probability should represent the density of `normal' instances. A threshold can then be set up such that it divides between this area and the rest of the PDF.
-
-Figure \ref{fig:kde-example} is the estimated PDF of sample LOF scores. The global maximum near the LOF score of one and the quadratic curvature associated with it represent the density of `normal' instances. Since the boundary of the curvature is rather ambiguous, we have defined the domain of the curvature to be between the minimum of the scores and the score where the first local minimum occurs. There is a high possibility that this domain includes true positive instances therefore our threshold is set to be slightly lower than the first local minimum to allow the true positives to be detected. The score that is ten percent shy of the first local minimum from the global maximum is arbitrarily chosen to be our threshold. Then the instances whose LOF scores are below this threshold are partitioned as the NI set and the remaining instances are partitioned as the PA set.
-
-<<kde-example, echo=FALSE, fig.align='center', fig.cap="", out.width="0.6\\linewidth">>=
-load(file = "lof_scores.RData")
-d = density(lof_30p, bw = "nrd", kernel = "gaussian")
-plot(d, xlab = "LOF scores", main = "Probability distribution of a sample LOF scores")
-local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)
-local_max = min(which(diff(sign(diff(d$y))) ==  -2) + 1)
-abline(v = d$x[local_min]-diff(c(d$x[local_max], d$x[local_min]))*0.1, lty = 5, col = "grey20")
-legend("topright", "threshold", lty = 5, col = "grey20")
-@
-
-
-\newpage
-(To be included in Background)
-A kernel density estimate of a set of independent and identically distributed sample, $(x_1, x_2, \dots, x_n)$, is
-\[
-f_n(x) = \int_{-\infty}^{\infty} \frac{1}{h} K \left( \frac{x-y}{h} \right) dF_n(y) = \frac{1}{nh} \sum_{j=1}^n K\left( \frac{x-X_j}{h} \right),
-\]
-as given by the equation 1.7 in Emanuel Parzen 1962 [REF], where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. Because the result of KDE can vary according to the choice of $h$ and $K(\cdot)$ we have chosen consistent measures for those parameters. For the smoothing parameter, $h$, we have chosen the one suggested by Scott (1992) over the one by Silverman (1986). The suggestion by Silverman, as given by the equation \ref{eq:methods3}, tends to produce an under-smoothed density where as that by Scott, as given by the equation \ref{eq:methods4}, seems to provide more appropriate smoothing. For the kernel, the Gaussian kernel is chosen as it is considered adequate for univariate data. Figure \ref{fig:hist-example} is two identical histograms of an example set of LOF scores with different density curves superimposed upon.
-
-%Figure \ref{fig:kde-example} shows the histogram of an example set of LOF scores along with the two different density curves superimposed upon. For the kernel, $K$, the Gaussian kernel is chosen.
-
-\begin{align}
-h = 0.9 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods3}
-\\
-h = 1.06 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods4}
-\end{align}
-
-<<hist-example, echo=FALSE, fig.align='center', fig.cap='Histograms of an example set of LOF scores, superimposed with two different density curves produced using the suggestions of Silverman and Scott respectively.', out.width="0.45\\linewidth", fig.show='hold'>>=
-load(file = "lof_scores.RData")
-hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Silverman's density curve")
-lines(density(lof_30p, bw = "nrd0")) # silverman
-
-hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Scott's density curve")
-lines(density(lof_30p, bw = "nrd")) # scott
-@
-
-
-% The rest of this section is divided into subsections that discuss other notable anomaly detection techniques and whether they can be plausible alternatives to the LOF algorithm.
-% 
-% \subsection{Other anomaly detection techniques}
-% \subsubsection{Statistical model-based approach}
-% A classical approach using statistical models is to compute the Mahalanobis distance of all points in a dataset, given by
-% \[ D_M(x) = \sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}, \]
-% where $\mu$ and $\Sigma$ denote the vector of means and covariance matrix of the points, respectively. Under the multivariate normality assumption, the Mahalanobis distance follows a $\chi^{2}_{k}$-distribution, where $k$ is the degrees of freedom associated with the dataset. Hence a point whose $D_M$ is greater than the 97.5th percentile of the corresponding $\chi^{2}_{k}$ quantile function is a statistical outlier. The main problem with this approach is that it is extremely difficult to satisfy the multivariate normality assumption for any real life data which tend to be skewed most of the time. Another problem is that the mean of a set of points is extremely sensitive to outlier itself to result in a bias. Obtaining the inverse of a covariance matrix is also problematic when the matrix is singular, which could happen when the dataset contains duplicates. Other possible problem to note is that the Mahalanobis distance metric is heavily affected by the curse of dimensionality.
-% 
-% \subsubsection{Neighbourhood-based approach}
-% The LOF algorithm has advantages over some of the neighbourhood-based anomaly detection techniques. The main advantage is that anomalous objects are detected by a local approach rather than global. Figure \ref{fig:lof-example} illustrates this point. Suppose a dataset with two clusters, one being extremely dense and the other being sparse. Distance-based nearest neighbour approaches such as the $k$-th Nearest Neighbour ($k$NN) will fail to detect the outlier, $p$, as the distance between any point in the sparse cluster to its nearest neighbours is always greater than the distance between $p$ and its nearest neighbours. Hence the distance involving $p$ can never be significantly greater than the other distances to be detected as an outlier. Hence the simple distance-based nearest neighbour approaches do not perform well when there are clusters of varying densities in a dataset whereas the LOF algorithm is designed for such scenario.
-% 
-% <<lof-example, echo=FALSE, fig.align='center', fig.cap="Advantages of the LOF algorithm", out.width="0.6\\linewidth">>=
-% set.seed(3)
-% a = cbind(rnorm(30, mean = 10, sd = 4), rnorm(30, mean = 10, sd = 4))
-% set.seed(3)
-% b = cbind(rnorm(100, mean = 1, sd = 0.4), rnorm(100, mean = 1, sd = 0.4))
-% 
-% xmin = min(c(min(a[,1]), min(b[,1])))
-% xmax = max(c(max(a[,1]), max(b[,1])))
-% ymin = min(c(min(a[,2]), min(b[,2])))
-% ymax = max(c(max(a[,2]), max(b[,2])))
-% 
-% plot(a, xlim = c(xmin, xmax), ylim = c(ymin, ymax), xlab = "", ylab = "", xaxt = "n", yaxt = "n")
-% points(b)
-% points(x = max(b[,1])+0.3, y = max(b[,2])+0.2, pch = 4, cex = 1.1, col = "blue")
-% text(x = max(b[,1])+0.3, y = max(b[,2])+0.2, labels = "p", pos = 3, family = "sans", cex = 1.1, col = "blue")
-% @
-
-%The LOF algorithm overcomes this problem by comparing local densities given by the distance between objects and their $k$-th nearest neighbours. The local density, or deviation, of an object is measured with respect to its neighbours so that sparse objects, relative to the densities of their neighbours, can be identified as outliers. The result of LOF is a score for every object in a dataset to indicate whether an object is an outlier. Because the algorithm implements the local approach, the LOF score of an object does not imply the degree of outlierness of the object. The scores are dependent on the local environment, or the neighbourhood, associated with individual objects. The difficulty in interpreting the result can be avoided by assigning the Local Outlier Probability (LoOP) [CITE] for each object. The probability can provide reasonable and comparative indication of an object's outlierness due to its normalised nature but this is beyond the scope of our research as pure detection is what we are after.
-
-% \subsubsection{Clustering-based approach}
-% The $k$-means clustering is a popular clustering technique that is efficient with reasonable performance. However its drawbacks include (1) using variance as a measure of cluster scatter which can be sensitive to outliers, (2) requirement of the input parameter, $k$, which can affect the result and (3) most notably the convergence to local minima to produce incorrect results. 
-% 
-% Some of these limitations can be prevented by using the $X$-means clustering but the fundamental problems associated with any distance-based clustering techniques, such as the adequacy of the distance metric, are still present.
-% 
-% Unsupervised clustering techniques such as the PCA-based method... (more reading)
-
-
 %----------------------------------------------------------
-\newpage
-\section{Phase 2: False Positive Elimination}
-
-The purpose of Phase 2 is to identify false positive instances, that is `normal' instances incorrectly detected as anomalies, from the set of possible anomalies, which we have called the PA set. Two possible approaches for identifying the false positive instances from the PA set are:
-
-\begin{enumerate}
-
-\item \emph{Running a second LOF}
-
-\item \emph{Clustering}
-
-\end{enumerate}
-
-The rest of this section discusses each approach in more detail.
+\section{Minimal demonstration}
+\label{methods:sec5}
 
 
-\subsubsection{1. Running a second LOF}
-
-The concept of locality used in LOF algorithm means that it is adaptive to the presence of different magnitudes of densities. Whether a dataset is dense or sparse, LOF can perform well to detect anomalies as the objects of low densities. Similarly, LOF can be run on the PA set which we can assume to be sparse as a result of the intial LOF from Phase 1. There are no reasons against using LOF on the PA set.
-
-However there is a limitation with this approach that the detection is strictly limited to the density metric. Only the sparse instances will be detected as possible anomalies when they may not be good representatives of either `normal' or intrusion instances. Difficulties exist in obtaining a prior knowledge for the PA set whether the `normal' instances should have higher density than the intrusion instances, or vice versa. It is entirely possible that some proportions of high and low densities both correspond to intrusion instances, for example. A less serious limitation is related to specifying an adequate value for the input parameter of LOF, $k$. This is a rather small obstacle because a large enough value for $k$, which can be specified proportionally to sample size, should suffice. If $k$ is set to be too low the result will contain more false positive instances than usual, which should be avoided.
-
-Therefore this approach should only be used if it is of absolute certainty that the patterns for `normal' and intrusion instances are entirely based on density.
 
 
-\subsubsection{2. Clustering}
-
-Since the overall system that we propose is intended as an unsupervised learning scheme, we have to consider the overall distribution of the PA set as a whole rather than individual patterns for labelled groups of instances. But a problem may be that finding well represented patterns from the multivariate distribution is often difficult without involving dimensionaity reduction techniques.
-
-A possible method to overcome this problem is clustering. By grouping instances such that the distances within the groups are minimised and the distances between the groups are maximised, the instances can have the same effect as being `labelled' into appropriate clustering. Each clustering can then have a unique pattern described by its centroid when using $k$-means or by its medoid when using $k$-medoids.
-
-The dataset that we expect to test our system on is likely to contain features of different scales, which means normalisation is required as a pre-processing step to adjust the dataset to be scale-invariant. The distribution of the normalised data will then be restricted inside the unit hypercube and, because of this, the effect of extreme values will be reduced. Because extreme values are not a concern, $k$-medoids and $k$-medians, which are more robust than $k$-means in presence of extreme values, are not required.
-
-In our method, an extension of $k$-means known as $X$-means is used as the latter is capable of estimating the appropriate number of centers, $k$, under the Bayesian information criterion. The Euclidean distance between the centroid of each clustering and that of the NI set is computed and the clustering associated with the smallest Euclidean distance is considered to be the most similar to the `normal' instances. Therefore the members in this clustering will be false positive instances from Phase 1 and removed from the PA set.
 
 
+
+
+
+
+
+% %----------------------------------------------------------
 % \newpage
-% The output of phase 1 are two subsets of the input dataset, first of which represents 
-% 
-% The collection of anomalous instances detected from phase 1 contains a relatively high volume of false positives, that is the set of normal instances incorrectly identified as anomalies, due to the effect of the generosity in the phase 1 detection. In fact, it should be noted that the major composition of this detected set is now the false positive while the minority is the true positive. Our goal in phase 2 is to: (1) identify the false positive instances within the detected set and (2) remove them to reduce the overall system false alarm rate.
-% 
-% Identification of a false positive instance can be accomplished using two approaches. The first approach is to apply the idea of anomaly detection once again to identify which instances are dissimilar to the majority of the dataset, with expectation that possible anomalies are now normal instances. While this approach provides consistency with phase 1 in terms of the use of anomaly detection, and therefore over the whole system, it also introduces a couple of obstacles:
-% 
 % \begin{enumerate}
-% 
-% \item \emph{Randomness}: When a detected set, from phase 1, poses random patterns in a sense that those patterns cannot be modelled effectively, it may be extremely difficult to recognise false positive instances. Suppose a two-dimensional snythetic dataset such as shown in the top left plot of Figure \ref{fig:phase2-example1} that resembles a densely packed circle with a few obvious outliers. Imagine an arbitrary anomaly detection scheme has been applied to the dataset and possible anomalous instances are marked with crosses under the particular detection criteria of that scheme. Then these marked points, as seen in the top right plot, represent the detected set of this particular dataset that we may face in phase 2. It may still be arguable that the true outliers in the detected set are distinguishable as they are reasonably isolated from the false positive instances that are favourably clumped together. However the idea of anomaly detection would not be so successful in a more serious situation, as shown in the bottom right plot, where false positive instances are rather sparse without obvious patterns. A quick glance at the plot by itself can contribute towards raising an intuition that there appears to be no apprant patterns but a random scatter of points that hinders effective model construction.
-% 
-% <<phase2-example-data, echo=FALSE, cache=TRUE>>=
-% set.seed(1)
-% # t1.a = runif(250, 0.03, 0.65)
-% t1.a = runif(500, 0.03, 0.5*pi)
-% set.seed(2)
-% r1.a = sqrt(runif(250, min = 0.004)) * 0.8
-% a.1 = cbind(r1.a*cos(t1.a), r1.a*sin(t1.a))
-% 
-% set.seed(1)
-% t1.b = runif(500, 0.5*pi+0.08, pi-0.04)
-% set.seed(2)
-% r1.b = sqrt(runif(500, min = 0.004)) * 0.8
-% a.2 = cbind(r1.b*cos(t1.b), r1.b*sin(t1.b))
-% 
-% set.seed(1)
-% t1.c = runif(250, pi+0.04, 5/4*pi-0.04)
-% set.seed(2)
-% r1.c = sqrt(runif(250, min = 0.004)) * 0.8
-% a.3 = cbind(r1.c*cos(t1.c), r1.c*sin(t1.c))
-% 
-% set.seed(1)
-% t1.d = runif(250, 5/4*pi+0.04, 3/2*pi-0.04)
-% set.seed(2)
-% r1.d = sqrt(runif(250, min = 0.004)) * 0.8
-% a.4 = cbind(r1.d*cos(t1.d), r1.d*sin(t1.d))
-% 
-% set.seed(1)
-% t1.e = runif(250, 3/2*pi+0.06, 7/4*pi-0.03)
-% set.seed(2)
-% r1.e = sqrt(runif(250, min = 0.004)) * 0.8
-% a.5 = cbind(r1.e*cos(t1.e), r1.e*sin(t1.e))
-% 
-% set.seed(1)
-% t1.f = runif(250, 7/4*pi+0.03, 2*pi-0.03)
-% set.seed(2)
-% r1.f = sqrt(runif(250, min = 0.004)) * 0.8
-% a.6 = cbind(r1.f*cos(t1.f), r1.f*sin(t1.f))
-% 
-% a = rbind(a.1, a.2, a.3, a.4, a.5, a.6)
-% # max(sqrt(a[,1]^2 + a[,2]^2))
-% 
-% set.seed(2)
-% r2 = runif(100, 0.83, 0.85)
-% t2 = runif(100, 0, 2*pi)
-% b = cbind(r2*cos(t2), r2*sin(t2))
-% 
-% set.seed(2)
-% r3 = 1.1
-% t3 = runif(5, 0, 2*pi)
-% c = cbind(r3*cos(t3), r3*sin(t3))
-% d = rbind(a, b, c)
-% e = numeric()
-% for (i in 1:nrow(c)) {
-%     dis = apply(d[1:2100, ], 1, function(x) sqrt((x[1]-c[i,1])^2 + (x[2]-c[i,2])^2))
-%     ord = order(dis, decreasing = FALSE)[2:10]
-%     e = c(e, ord[ord > 2000])
-% }
-% @
-% 
-% <<phase2-example1, echo=FALSE, fig.align='center', fig.cap="Synthetic dataset where consecutive anomaly detection may be ineffective.", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
-% plot(d, xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic data", asp = 1)
-% 
-% plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic data processed with arbitrary anomaly detection", asp = 1)
-% points(d[1:2000, ], col = "grey70")
-% points(d[c(2101:2105, e), ], pch = 4)
-% legend("topleft", "detected instances", pch = 4, adj = c(0, 0.5), cex = 1.3, pt.cex = 1)
-% 
-% plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic, detected data", asp = 1)
-% points(d[2101:2105, ], pch = 4)
-% points(d[e, ])
-% legend("topleft", c("True positive", "False positive"), pch = c(4, 1), adj = c(0, 0.5), cex = 1.3, pt.cex = 1)
-% 
-% plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Extreme case", asp = 1)
-% points(d[2101:2105, ], pch = 4)
-% #order(d[e, 1])
-% points(d[e[16], 1], d[e[16], 2], pch = 4)
-% points(d[e[15], 1], d[e[15], 2], pch = 4)
-% points(d[e[11], 1], d[e[11], 2], pch = 4)
-% points(d[e[10], 1], d[e[10], 2], pch = 4)
-% 
-% points(d[e[9], 1], d[e[9], 2], pch = 4)
-% points(d[e[23], 1], d[e[23], 2], pch = 4)
-% 
-% points(d[e[29], 1], d[e[29], 2], pch = 4)
-% points(d[e[28], 1], d[e[28], 2], pch = 4)
-% @
-% 
-% \item \emph{Outlierness within outliers}: One must reconsider using an additional anomaly detection scheme to a dataset that has been previously detected as possible outliers. In our case, the density-based anomaly detection algorithm, LOF, has been applied in phase 1 to provide a set of data points that are considered to be highly sparse and isolated from one another. The sparsity and the extent of isolation among these points are directly related to the fact that the points are distant from one another as well as to the rest of the data. This means that the use of distance, which happens to be what most anomaly detection methods rely on, will not be so advantageous in identifying false positive instances. Involving further density-based anomaly detection will obviously be ineffective due to the presence of false positive instances which is a strong indication that their local densities are most likely homogenous.
-% 
+% \item Phase 1 input is the numeric portion of a test dataset.
+% \item An anomaly detection scheme is applied on the input dataset.
+% \item 
+% \item 
+% \item 
 % \end{enumerate}
 % 
-% \noindent
-% The second approach is to apply a clustering scheme to group similar instances into clusters. The resulting clusters can then be compared with the actual normal instances, i.e., the undetected, normal set from phase 1, in an unsupervised learning fashion. Even when a random scatter is present as we have seen in Figure \ref{fig:phase2-example1}, the data points can still be effectively clustered as shown in Figure \ref{fig:phase2-example2}. Similarly, normal instances could also be clustered to capture more than one patterns that may be present among them. Then each of the detected clusters can be compared with each of the undetected clusters using permutation.
+% % \begin{enumerate}
+% % \item The numeric portion of a test dataset is used as input for Phase 1.
+% % 
+% % \item Possible anomalies, present in the input dataset, are identified via the density-based anomaly detection algorithm, Local Outlier Factor (LOF). Then the dataset is partitioned into two subsets of `normal', i.e., non-intrusion, instances, 3(a), and possible anomalies, i.e., intrusion instances, 3(b).
+% % 
+% % It should be noted that the first subset is almost entirely composed of non-intrusion instances and therefore will be referred to as a Non-Intrusion (NI) set while the second subset consists of true positive and false positive instances as a result of the anomaly detection and will be referred to as a Possibly Anomalous (PA) set. Also the terms, \emph{outlier} and \emph{anomaly}, are used interchangeably to mean the same throughout the report.
+% % 
+% % \item The output of Phase 1 are the NI and PA sets.
+% % 
+% % \item The direct input of Phase 2 is the PA set where the anomalous instances are clustered using the X-Means algorithm. Each of the resulting clusters is compared with the profile of the NI set, as indirect input, to find the most dissimilar cluster. This cluster, which is the most distinct relative to the NI set, is defined to be the false positive cluster. Then the false positive cluster is eliminated from the PA set and the remaining instances will be referred to as an eliminated PA (ePA) set.
+% % \item The final output, ePA set, contains the intrusion instances associated with the original data with the reduced number of  false positive instances.
+% % %\item The output of Phase 2 is the merged set which consists of the NI and the eliminated sets.
+% % \end{enumerate}
 % 
-% (make another dataset...)
-% 
-% <<phase2-example2, echo=FALSE, fig.align='center', fig.cap="Clustering approach.", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
-% f = rbind(d[2101:2105, ], d[e[c(16,15,11,10,9,23,29,28)], ])
-% set.seed(1)
-% g = kmeans(f, 4, nstart = 20)
-% set.seed(2)
-% h = kmeans(a, 9, nstart = 50)
-% 
-% plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic, detected data with clustering", asp = 1)
-% points(f[g$cluster==1, ], pch = 3)
-% points(f[g$cluster==4, ], pch = 0)
-% points(f[g$cluster==2, ], pch = 2)
-% points(f[g$cluster==3, ], pch = 4)
-% 
-% plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Snythetic data with clustering", asp = 1)
-% points(f[g$cluster==1, ], pch = 3)
-% points(f[g$cluster==4, ], pch = 0)
-% points(f[g$cluster==2, ], pch = 2)
-% points(f[g$cluster==3, ], pch = 4)
-% points(a[h$cluster==1, ], pch = 0, col = "grey70")
-% points(a[h$cluster==2, ], pch = 1, col = "grey90")
-% points(a[h$cluster==3, ], pch = 1, col = "grey90")
-% points(a[h$cluster==4, ], pch = 2, col = "grey70")
-% points(a[h$cluster==5, ], pch = 1, col = "grey90")
-% points(a[h$cluster==6, ], pch = 1, col = "grey90")
-% points(a[h$cluster==7, ], pch = 4, col = "grey70")
-% points(a[h$cluster==8, ], pch = 3, col = "grey70")
-% points(a[h$cluster==9, ], pch = 1, col = "grey90")
-% @
-% 
-% 
-% \subsection{X-Means Clustering}
-% NOTE: k-means and k-medoids are the most efficient and reasonably well accepted clustering schemes (and that's why we chose them):
-% 
-% 1. Talk about k-medoids' insensitivity to the presence of outliers but every instance in a detected set is already a possible outlier under the LOF algorithm. It doesn't make sense that we need to be careful about them when we are essentially trying to cluster them!
-% 
-% 2. k-means could have been used but x-means is chosen in this case to get rid of having to consider the adequacy of the parameter, $k$. X-means chooses the number of centres that makes the most sense under the Bayesian information criterion. It makes our method truely unsupervised.. etc.
+% The rest of this chapter is divided into two sections to bring detailed discussion for each phase.
 % 
 % 
 % %----------------------------------------------------------
-% \subsection{Cluster Identification}
+% \newpage
+% \section{Phase 1: Partition via Anomaly Detection}
 % 
-% The decision to use distance metrics as a similarity measure is to be consistent with X-Means which is partially based on a distance metric, namely Euclidean. If the performance of X-Means is reasonable, i.e., purity for each cluster is high enough -> then the distance metric used in the X-Means must qualify as adequately as the value of purity itself.
+% An anomaly, or a statistical outlier, is defined to be an object that deviates significantly from the rest of data that the object is sampled from. The behaviour or the distribution of the anomalies is significantly different to that of the rest of the data such that they are assumed to be directly translated to some kind of irregularity. The goal of anomaly-based intrusion detection is to identify such irregularity that is considered to be intrusions. It is of the fundamental assumption that a test dataset, to which an anomaly detection technique is applied, is primarily made up of `normal' instances so that their pattern is more accurately captured to provide a clear distinction between the `normal` and anomalous instances. All of these ideas are used to form a basis that Phase 1 is constructed upon.
 % 
-% Talk about the use of different distance metrics such as the Euclidean, Chebyshev, Mahalanobis and Minkowski distances:
+% The main purpose of Phase 1 is to detect every anomalous instance associated with a dataset so that the dataset can be exclusively partitioned into two subsets of `normal' instances and possible anomalies. Hence the target detection rate of LOF, given by the number of anomalous instances detected by the algorithm, i.e., true positive, over the total number of anomalous instances, is one. In order to achieve such a high detection rate, a compromise has been made for the false alarm rate of the detection, denoted by the number of `normal' instances detected as anomalous, i.e., false positive, over the total number of `normal' instances.
 % 
-% 1. Chebyshev, $max(|p-q|)$: "measures distance assuming only the most significant dimension is relevant.
+% It is highly desireable for any detection system to attain a high detection rate while maintaining a low false alarm rate. But the two rate measures are directly proportional to one another, or positively correlated in statistical sense, to result in an increase in one measure to be inevitably followed by an increase in another measure. Therefore it must be noted that the final output of Phase 1 is expected to produce a relatively high false alarm rate than it should under normal circumstances. Keeping this fact in mind, the high level overview of Phase 1 is listed as follows:
 % 
-% 2. Mahalanobis, $\sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}$: normalises based on a covariance matrix to make the distance metric scale-invariant. The dataset is normalised prior to X-Means, which means each data point has equal contribution.
+% \begin{enumerate}
+% \item \emph{Outlier score computation using LOF}: the intial step of Phase 1 is to score every instance a degree of being an outlier using the algorithm, LOF.
 % 
-% 3. Minkowski distance: generalisation that unites Euclidean, Manhattan and Chebyshev distances.
+% \item \emph{Threshold determination using KDE}: the non-parametric density estimation method, KDE, is used to estimate the probability density function of the set of LOF scores from the previous step to find an optimal threshold.
+% \end{enumerate}
+% 
+% The rest of this section discusses each of the steps in more detail.
+% 
+% % It is highly desirable for any detection system to attain a high detection rate while maintaing a low false alarm rate. However it is extremely difficult to do so due to the relationship between the two rates. There is a strong positive correlation between them to cause an increase in the detection rate to be inevitably followed by a corresponding increase in the false alarm rate. To visualise this, consider a univariate sample from a normal distribution to represent some metric computed for a dataset, such as distance or density, that is used in an arbitrary anomaly detection method. If the detection threshold is $\theta_1$ and an anomaly is defined to be any object whose said metric is below $\theta_1$, then the detection rate is $p_1$ given by the area under the curve to the left of $\theta_1$ and the false alarm rate is the number of false positive instances in this area over the total number of false positive instances in the dataset. If the threshold is increased to $\theta_2$ to attain a higher detection rate of 0.95, the amount of false positive instances in this new area must be added to that in the previous area to result in an increased false alarm rate.
+% % 
+% % To achieve such a high detection rate means that the resulting false alarm rate will be correspondingly high as the two rate measures are usually positively correlated. An attempt to attain a higher detection rate often involves changing a certain threshold, on which detection criteria are based, that will in turn allow more false positives to be included in the result. As an example, consider a univariate random sample, $X$, from a normal distribution with the mean of 0 and variance of 4, whose probability distribution function is as shown in figure \ref{fig:rate-example}. Supposing the detection criterion for this particular example is such that an object, $o$, is an anomaly if $o \leq \theta_1$. Then the detection rate, as indicated by the area under the curve to the left of $\theta_1$, is $p_1$ and the false alarm rate is determined by the amount of false positives scattered in this area. To achieve a higher detection rate, the initial threshold, $\theta_1$, can be increased to $\theta_2$ which will increase the previous detection rate by $p_2$ to produce an overall detection rate of 0.95. Also the amount of false positives in the new area will be added to that of the previous area to result in a higher overall false alarm rate. Thus the result of phase 1 is expected to have a relatively high false positive rate which is to be reduced in phase 2.
+% % 
+% % <<rate-example, echo=FALSE, fig.align='center', fig.cap="Density of a random sample, $X \\sim N(\\mu = 0, \\sigma^2 = 4)$", out.width="0.6\\linewidth">>=
+% % set.seed(2)
+% % den = density(rnorm(100, sd = 2))
+% % plot(den, xlab = "", ylab = "", main = "", yaxt = "n", xaxs = "i", yaxs = "i", type = "n")
+% % 
+% % t0 = which.min(abs(den$x-0))
+% % polygon(x = c(den$x[1], den$x[1:t0], den$x[t0]), y = c(0, den$y[1:t0], 0), col = "gray75", border = "gray75")
+% % 
+% % t1 = which.min(abs(den$x-4))
+% % polygon(x = c(den$x[t0], den$x[t0:t1], den$x[t1]), y = c(0, den$y[t0:t1], 0), col = "gray80", border = "gray80")
+% % 
+% % lines(x = c(den$x[t0], den$x[t0]), c(0, den$y[t0]), lty = 2)
+% % text(0, 0.01, labels = expression(theta[1]), pos = 4, cex = 1.2)
+% % lines(x = c(den$x[t1], den$x[t1]), c(0., den$y[t1]), lty = 2)
+% % text(4, 0.01, labels = expression(theta[2]), pos = 4, cex = 1.2)
+% % 
+% % p1 = round(sfsmisc::integrate.xy(den$x[1:t0], den$y[1:t0]), digits = 2)
+% % p2 = round(sfsmisc::integrate.xy(den$x[t0:t1], den$y[t0:t1]), digits = 2)
+% % 
+% % text(-2, 0.04, labels = bquote(p[1] == .(p1)), cex = 1.3)
+% % text(2, 0.04, labels = bquote(p[2] == .(p2)), cex = 1.3)
+% % 
+% % lines(den)
+% % box()
+% % @
+% 
+% \subsubsection{1. Outlier score computation using LOF}
+% 
+% The algorithm, LOF, is a density-based anomaly detection technique which defines an anomaly to be an object that is relatively sparse compared to the densities of its neighbouring objects. The result of LOF is a score that describes the degree of an object being an outlier and this measure, termed the \emph{local outlier factor} by the authors, is given by
+% \begin{equation}
+% \label{eq:methods1}
+% LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
+% \end{equation}
+% where $LOF_{k}(p)$ is the \emph{local outlier factor} of object $p$, $k$ is the number of neighbours around $p$, $N_{k}(p)$ is the set of $k$ closest neighbours of $p$, and $lrd_{k}(p)$ and $lrd_{k}(o)$ are the local reachability densities of objects $o$ and $p$, respectively. Since the summation is over the objects in the set of $k$ closest neighbours of $p$, the equation \ref{eq:methods1} can be simplified further into
+% \begin{equation}
+% \label{eq:methods2}
+% LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)},
+% \end{equation}
+% where the numerator is the average of the local reachability densities of the neighbours. Therefore the local outlier factor of an object is the ratio of the mean of the local densities of the object's $k$ closest neighbours and the local density of the object. It is clear from the equation \ref{eq:methods2} that a score less than or equal to one indicates that the local density of $p$, given by the denominator, is more dense or equal to those of its neighbours, given by the numerator, and therefore $p$ is not an outlier. Similarly, a score greater than one indicates an outlier as the local density of $p$ is relatively smaller than that of its neighbours.
+% 
+% It may be intuitive to set up a threshold to be one so that the instances whose scores are above it are detected as possible anomalies. However such threshold can only suffice in an ideal situation, where all local densities are constant. In reality, they are more likely to fluctuate to affect the average density of the neighbours, which brings to the second step of Phase 1.
+% 
+% \subsubsection{2. Threshold determination using KDE}
+% 
+% The mean, or the average, is one of the most popular measures to estimate the central location of a set of continous values. A notable limitation of the mean is its sensitivity to extreme values. The presence of an extreme value can shift the mean considerably to result in a bias. With reference to LOF, the average local density of an object's $k$ closest neighbours can also be affected by the presence of an extreme local density. More specifically, the presence of a single extremely dense neighbour of an object can increase the average local density of the neighbourhood, which in turn increases the local outlier factor for the object to end up being detected as an anomaly. Likewise an extremely sparse neighbour can result in a small local outlier factor. Hence it is possible to observe a non-anomalous instance to have an LOF score greater than one. What this means is that an optimal threshold can vary between samples and there must be a flexible way to find an adaptive threshold.
+% 
+% A solution we have found to be relevant is to estimate the probability density function (PDF) of the local outlier factors using kernel density estimation (KDE). Then the estimated probability distribution is used to help determine an optimal threshold for that specific distribution. Relying on the assumption that a test dataset contains more `normal' instances than anomalies, we can expect to observe from the estimated PDF that there is an area of probability roughly as high as the percentage of the `normal' instances in the dataset. In other words, an area of a significantly high probability should represent the density of `normal' instances. A threshold can then be set up such that it divides between this area and the rest of the PDF.
+% 
+% Figure \ref{fig:kde-example} is the estimated PDF of sample LOF scores. The global maximum near the LOF score of one and the quadratic curvature associated with it represent the density of `normal' instances. Since the boundary of the curvature is rather ambiguous, we have defined the domain of the curvature to be between the minimum of the scores and the score where the first local minimum occurs. There is a high possibility that this domain includes true positive instances therefore our threshold is set to be slightly lower than the first local minimum to allow the true positives to be detected. The score that is ten percent shy of the first local minimum from the global maximum is arbitrarily chosen to be our threshold. Then the instances whose LOF scores are below this threshold are partitioned as the NI set and the remaining instances are partitioned as the PA set.
+% 
+% <<kde-example, echo=FALSE, fig.align='center', fig.cap="", out.width="0.6\\linewidth">>=
+% load(file = "lof_scores.RData")
+% d = density(lof_30p, bw = "nrd", kernel = "gaussian")
+% plot(d, xlab = "LOF scores", main = "Probability distribution of a sample LOF scores")
+% local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)
+% local_max = min(which(diff(sign(diff(d$y))) ==  -2) + 1)
+% abline(v = d$x[local_min]-diff(c(d$x[local_max], d$x[local_min]))*0.1, lty = 5, col = "grey20")
+% legend("topright", "threshold", lty = 5, col = "grey20")
+% @
+% 
+% 
+% \newpage
+% (To be included in Background)
+% A kernel density estimate of a set of independent and identically distributed sample, $(x_1, x_2, \dots, x_n)$, is
+% \[
+% f_n(x) = \int_{-\infty}^{\infty} \frac{1}{h} K \left( \frac{x-y}{h} \right) dF_n(y) = \frac{1}{nh} \sum_{j=1}^n K\left( \frac{x-X_j}{h} \right),
+% \]
+% as given by the equation 1.7 in Emanuel Parzen 1962 [REF], where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. Because the result of KDE can vary according to the choice of $h$ and $K(\cdot)$ we have chosen consistent measures for those parameters. For the smoothing parameter, $h$, we have chosen the one suggested by Scott (1992) over the one by Silverman (1986). The suggestion by Silverman, as given by the equation \ref{eq:methods3}, tends to produce an under-smoothed density where as that by Scott, as given by the equation \ref{eq:methods4}, seems to provide more appropriate smoothing. For the kernel, the Gaussian kernel is chosen as it is considered adequate for univariate data. Figure \ref{fig:hist-example} is two identical histograms of an example set of LOF scores with different density curves superimposed upon.
+% 
+% %Figure \ref{fig:kde-example} shows the histogram of an example set of LOF scores along with the two different density curves superimposed upon. For the kernel, $K$, the Gaussian kernel is chosen.
+% 
+% \begin{align}
+% h = 0.9 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods3}
+% \\
+% h = 1.06 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods4}
+% \end{align}
+% 
+% <<hist-example, echo=FALSE, fig.align='center', fig.cap='Histograms of an example set of LOF scores, superimposed with two different density curves produced using the suggestions of Silverman and Scott respectively.', out.width="0.45\\linewidth", fig.show='hold'>>=
+% load(file = "lof_scores.RData")
+% hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Silverman's density curve")
+% lines(density(lof_30p, bw = "nrd0")) # silverman
+% 
+% hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Scott's density curve")
+% lines(density(lof_30p, bw = "nrd")) # scott
+% @
+% 
+% 
+% % The rest of this section is divided into subsections that discuss other notable anomaly detection techniques and whether they can be plausible alternatives to the LOF algorithm.
+% % 
+% % \subsection{Other anomaly detection techniques}
+% % \subsubsection{Statistical model-based approach}
+% % A classical approach using statistical models is to compute the Mahalanobis distance of all points in a dataset, given by
+% % \[ D_M(x) = \sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}, \]
+% % where $\mu$ and $\Sigma$ denote the vector of means and covariance matrix of the points, respectively. Under the multivariate normality assumption, the Mahalanobis distance follows a $\chi^{2}_{k}$-distribution, where $k$ is the degrees of freedom associated with the dataset. Hence a point whose $D_M$ is greater than the 97.5th percentile of the corresponding $\chi^{2}_{k}$ quantile function is a statistical outlier. The main problem with this approach is that it is extremely difficult to satisfy the multivariate normality assumption for any real life data which tend to be skewed most of the time. Another problem is that the mean of a set of points is extremely sensitive to outlier itself to result in a bias. Obtaining the inverse of a covariance matrix is also problematic when the matrix is singular, which could happen when the dataset contains duplicates. Other possible problem to note is that the Mahalanobis distance metric is heavily affected by the curse of dimensionality.
+% % 
+% % \subsubsection{Neighbourhood-based approach}
+% % The LOF algorithm has advantages over some of the neighbourhood-based anomaly detection techniques. The main advantage is that anomalous objects are detected by a local approach rather than global. Figure \ref{fig:lof-example} illustrates this point. Suppose a dataset with two clusters, one being extremely dense and the other being sparse. Distance-based nearest neighbour approaches such as the $k$-th Nearest Neighbour ($k$NN) will fail to detect the outlier, $p$, as the distance between any point in the sparse cluster to its nearest neighbours is always greater than the distance between $p$ and its nearest neighbours. Hence the distance involving $p$ can never be significantly greater than the other distances to be detected as an outlier. Hence the simple distance-based nearest neighbour approaches do not perform well when there are clusters of varying densities in a dataset whereas the LOF algorithm is designed for such scenario.
+% % 
+% % <<lof-example, echo=FALSE, fig.align='center', fig.cap="Advantages of the LOF algorithm", out.width="0.6\\linewidth">>=
+% % set.seed(3)
+% % a = cbind(rnorm(30, mean = 10, sd = 4), rnorm(30, mean = 10, sd = 4))
+% % set.seed(3)
+% % b = cbind(rnorm(100, mean = 1, sd = 0.4), rnorm(100, mean = 1, sd = 0.4))
+% % 
+% % xmin = min(c(min(a[,1]), min(b[,1])))
+% % xmax = max(c(max(a[,1]), max(b[,1])))
+% % ymin = min(c(min(a[,2]), min(b[,2])))
+% % ymax = max(c(max(a[,2]), max(b[,2])))
+% % 
+% % plot(a, xlim = c(xmin, xmax), ylim = c(ymin, ymax), xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+% % points(b)
+% % points(x = max(b[,1])+0.3, y = max(b[,2])+0.2, pch = 4, cex = 1.1, col = "blue")
+% % text(x = max(b[,1])+0.3, y = max(b[,2])+0.2, labels = "p", pos = 3, family = "sans", cex = 1.1, col = "blue")
+% % @
+% 
+% %The LOF algorithm overcomes this problem by comparing local densities given by the distance between objects and their $k$-th nearest neighbours. The local density, or deviation, of an object is measured with respect to its neighbours so that sparse objects, relative to the densities of their neighbours, can be identified as outliers. The result of LOF is a score for every object in a dataset to indicate whether an object is an outlier. Because the algorithm implements the local approach, the LOF score of an object does not imply the degree of outlierness of the object. The scores are dependent on the local environment, or the neighbourhood, associated with individual objects. The difficulty in interpreting the result can be avoided by assigning the Local Outlier Probability (LoOP) [CITE] for each object. The probability can provide reasonable and comparative indication of an object's outlierness due to its normalised nature but this is beyond the scope of our research as pure detection is what we are after.
+% 
+% % \subsubsection{Clustering-based approach}
+% % The $k$-means clustering is a popular clustering technique that is efficient with reasonable performance. However its drawbacks include (1) using variance as a measure of cluster scatter which can be sensitive to outliers, (2) requirement of the input parameter, $k$, which can affect the result and (3) most notably the convergence to local minima to produce incorrect results. 
+% % 
+% % Some of these limitations can be prevented by using the $X$-means clustering but the fundamental problems associated with any distance-based clustering techniques, such as the adequacy of the distance metric, are still present.
+% % 
+% % Unsupervised clustering techniques such as the PCA-based method... (more reading)
+% 
+% 
+% %----------------------------------------------------------
+% \newpage
+% \section{Phase 2: False Positive Elimination}
+% 
+% The purpose of Phase 2 is to identify false positive instances, that is `normal' instances incorrectly detected as anomalies, from the set of possible anomalies, which we have called the PA set. Two possible approaches for identifying the false positive instances from the PA set are:
+% 
+% \begin{enumerate}
+% 
+% \item \emph{Running a second LOF}
+% 
+% \item \emph{Clustering}
+% 
+% \end{enumerate}
+% 
+% The rest of this section discusses each approach in more detail.
+% 
+% 
+% \subsubsection{1. Running a second LOF}
+% 
+% The concept of locality used in LOF algorithm means that it is adaptive to the presence of different magnitudes of densities. Whether a dataset is dense or sparse, LOF can perform well to detect anomalies as the objects of low densities. Similarly, LOF can be run on the PA set which we can assume to be sparse as a result of the intial LOF from Phase 1. There are no reasons against using LOF on the PA set.
+% 
+% However there is a limitation with this approach that the detection is strictly limited to the density metric. Only the sparse instances will be detected as possible anomalies when they may not be good representatives of either `normal' or intrusion instances. Difficulties exist in obtaining a prior knowledge for the PA set whether the `normal' instances should have higher density than the intrusion instances, or vice versa. It is entirely possible that some proportions of high and low densities both correspond to intrusion instances, for example. A less serious limitation is related to specifying an adequate value for the input parameter of LOF, $k$. This is a rather small obstacle because a large enough value for $k$, which can be specified proportionally to sample size, should suffice. If $k$ is set to be too low the result will contain more false positive instances than usual, which should be avoided.
+% 
+% Therefore this approach should only be used if it is of absolute certainty that the patterns for `normal' and intrusion instances are entirely based on density.
+% 
+% 
+% \subsubsection{2. Clustering}
+% 
+% Since the overall system that we propose is intended as an unsupervised learning scheme, we have to consider the overall distribution of the PA set as a whole rather than individual patterns for labelled groups of instances. But a problem may be that finding well represented patterns from the multivariate distribution is often difficult without involving dimensionaity reduction techniques.
+% 
+% A possible method to overcome this problem is clustering. By grouping instances such that the distances within the groups are minimised and the distances between the groups are maximised, the instances can have the same effect as being `labelled' into appropriate clustering. Each clustering can then have a unique pattern described by its centroid when using $k$-means or by its medoid when using $k$-medoids.
+% 
+% The dataset that we expect to test our system on is likely to contain features of different scales, which means normalisation is required as a pre-processing step to adjust the dataset to be scale-invariant. The distribution of the normalised data will then be restricted inside the unit hypercube and, because of this, the effect of extreme values will be reduced. Because extreme values are not a concern, $k$-medoids and $k$-medians, which are more robust than $k$-means in presence of extreme values, are not required.
+% 
+% In our method, an extension of $k$-means known as $X$-means is used as the latter is capable of estimating the appropriate number of centers, $k$, under the Bayesian information criterion. The Euclidean distance between the centroid of each clustering and that of the NI set is computed and the clustering associated with the smallest Euclidean distance is considered to be the most similar to the `normal' instances. Therefore the members in this clustering will be false positive instances from Phase 1 and removed from the PA set.
+% 
+% 
+% % \newpage
+% % The output of phase 1 are two subsets of the input dataset, first of which represents 
+% % 
+% % The collection of anomalous instances detected from phase 1 contains a relatively high volume of false positives, that is the set of normal instances incorrectly identified as anomalies, due to the effect of the generosity in the phase 1 detection. In fact, it should be noted that the major composition of this detected set is now the false positive while the minority is the true positive. Our goal in phase 2 is to: (1) identify the false positive instances within the detected set and (2) remove them to reduce the overall system false alarm rate.
+% % 
+% % Identification of a false positive instance can be accomplished using two approaches. The first approach is to apply the idea of anomaly detection once again to identify which instances are dissimilar to the majority of the dataset, with expectation that possible anomalies are now normal instances. While this approach provides consistency with phase 1 in terms of the use of anomaly detection, and therefore over the whole system, it also introduces a couple of obstacles:
+% % 
+% % \begin{enumerate}
+% % 
+% % \item \emph{Randomness}: When a detected set, from phase 1, poses random patterns in a sense that those patterns cannot be modelled effectively, it may be extremely difficult to recognise false positive instances. Suppose a two-dimensional snythetic dataset such as shown in the top left plot of Figure \ref{fig:phase2-example1} that resembles a densely packed circle with a few obvious outliers. Imagine an arbitrary anomaly detection scheme has been applied to the dataset and possible anomalous instances are marked with crosses under the particular detection criteria of that scheme. Then these marked points, as seen in the top right plot, represent the detected set of this particular dataset that we may face in phase 2. It may still be arguable that the true outliers in the detected set are distinguishable as they are reasonably isolated from the false positive instances that are favourably clumped together. However the idea of anomaly detection would not be so successful in a more serious situation, as shown in the bottom right plot, where false positive instances are rather sparse without obvious patterns. A quick glance at the plot by itself can contribute towards raising an intuition that there appears to be no apprant patterns but a random scatter of points that hinders effective model construction.
+% % 
+% % <<phase2-example-data, echo=FALSE, cache=TRUE>>=
+% % set.seed(1)
+% % # t1.a = runif(250, 0.03, 0.65)
+% % t1.a = runif(500, 0.03, 0.5*pi)
+% % set.seed(2)
+% % r1.a = sqrt(runif(250, min = 0.004)) * 0.8
+% % a.1 = cbind(r1.a*cos(t1.a), r1.a*sin(t1.a))
+% % 
+% % set.seed(1)
+% % t1.b = runif(500, 0.5*pi+0.08, pi-0.04)
+% % set.seed(2)
+% % r1.b = sqrt(runif(500, min = 0.004)) * 0.8
+% % a.2 = cbind(r1.b*cos(t1.b), r1.b*sin(t1.b))
+% % 
+% % set.seed(1)
+% % t1.c = runif(250, pi+0.04, 5/4*pi-0.04)
+% % set.seed(2)
+% % r1.c = sqrt(runif(250, min = 0.004)) * 0.8
+% % a.3 = cbind(r1.c*cos(t1.c), r1.c*sin(t1.c))
+% % 
+% % set.seed(1)
+% % t1.d = runif(250, 5/4*pi+0.04, 3/2*pi-0.04)
+% % set.seed(2)
+% % r1.d = sqrt(runif(250, min = 0.004)) * 0.8
+% % a.4 = cbind(r1.d*cos(t1.d), r1.d*sin(t1.d))
+% % 
+% % set.seed(1)
+% % t1.e = runif(250, 3/2*pi+0.06, 7/4*pi-0.03)
+% % set.seed(2)
+% % r1.e = sqrt(runif(250, min = 0.004)) * 0.8
+% % a.5 = cbind(r1.e*cos(t1.e), r1.e*sin(t1.e))
+% % 
+% % set.seed(1)
+% % t1.f = runif(250, 7/4*pi+0.03, 2*pi-0.03)
+% % set.seed(2)
+% % r1.f = sqrt(runif(250, min = 0.004)) * 0.8
+% % a.6 = cbind(r1.f*cos(t1.f), r1.f*sin(t1.f))
+% % 
+% % a = rbind(a.1, a.2, a.3, a.4, a.5, a.6)
+% % # max(sqrt(a[,1]^2 + a[,2]^2))
+% % 
+% % set.seed(2)
+% % r2 = runif(100, 0.83, 0.85)
+% % t2 = runif(100, 0, 2*pi)
+% % b = cbind(r2*cos(t2), r2*sin(t2))
+% % 
+% % set.seed(2)
+% % r3 = 1.1
+% % t3 = runif(5, 0, 2*pi)
+% % c = cbind(r3*cos(t3), r3*sin(t3))
+% % d = rbind(a, b, c)
+% % e = numeric()
+% % for (i in 1:nrow(c)) {
+% %     dis = apply(d[1:2100, ], 1, function(x) sqrt((x[1]-c[i,1])^2 + (x[2]-c[i,2])^2))
+% %     ord = order(dis, decreasing = FALSE)[2:10]
+% %     e = c(e, ord[ord > 2000])
+% % }
+% % @
+% % 
+% % <<phase2-example1, echo=FALSE, fig.align='center', fig.cap="Synthetic dataset where consecutive anomaly detection may be ineffective.", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
+% % plot(d, xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic data", asp = 1)
+% % 
+% % plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic data processed with arbitrary anomaly detection", asp = 1)
+% % points(d[1:2000, ], col = "grey70")
+% % points(d[c(2101:2105, e), ], pch = 4)
+% % legend("topleft", "detected instances", pch = 4, adj = c(0, 0.5), cex = 1.3, pt.cex = 1)
+% % 
+% % plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic, detected data", asp = 1)
+% % points(d[2101:2105, ], pch = 4)
+% % points(d[e, ])
+% % legend("topleft", c("True positive", "False positive"), pch = c(4, 1), adj = c(0, 0.5), cex = 1.3, pt.cex = 1)
+% % 
+% % plot(d, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Extreme case", asp = 1)
+% % points(d[2101:2105, ], pch = 4)
+% % #order(d[e, 1])
+% % points(d[e[16], 1], d[e[16], 2], pch = 4)
+% % points(d[e[15], 1], d[e[15], 2], pch = 4)
+% % points(d[e[11], 1], d[e[11], 2], pch = 4)
+% % points(d[e[10], 1], d[e[10], 2], pch = 4)
+% % 
+% % points(d[e[9], 1], d[e[9], 2], pch = 4)
+% % points(d[e[23], 1], d[e[23], 2], pch = 4)
+% % 
+% % points(d[e[29], 1], d[e[29], 2], pch = 4)
+% % points(d[e[28], 1], d[e[28], 2], pch = 4)
+% % @
+% % 
+% % \item \emph{Outlierness within outliers}: One must reconsider using an additional anomaly detection scheme to a dataset that has been previously detected as possible outliers. In our case, the density-based anomaly detection algorithm, LOF, has been applied in phase 1 to provide a set of data points that are considered to be highly sparse and isolated from one another. The sparsity and the extent of isolation among these points are directly related to the fact that the points are distant from one another as well as to the rest of the data. This means that the use of distance, which happens to be what most anomaly detection methods rely on, will not be so advantageous in identifying false positive instances. Involving further density-based anomaly detection will obviously be ineffective due to the presence of false positive instances which is a strong indication that their local densities are most likely homogenous.
+% % 
+% % \end{enumerate}
+% % 
+% % \noindent
+% % The second approach is to apply a clustering scheme to group similar instances into clusters. The resulting clusters can then be compared with the actual normal instances, i.e., the undetected, normal set from phase 1, in an unsupervised learning fashion. Even when a random scatter is present as we have seen in Figure \ref{fig:phase2-example1}, the data points can still be effectively clustered as shown in Figure \ref{fig:phase2-example2}. Similarly, normal instances could also be clustered to capture more than one patterns that may be present among them. Then each of the detected clusters can be compared with each of the undetected clusters using permutation.
+% % 
+% % (make another dataset...)
+% % 
+% % <<phase2-example2, echo=FALSE, fig.align='center', fig.cap="Clustering approach.", out.width="0.45\\linewidth", fig.show='hold', cache=TRUE, dependson="phase2-example-data">>=
+% % f = rbind(d[2101:2105, ], d[e[c(16,15,11,10,9,23,29,28)], ])
+% % set.seed(1)
+% % g = kmeans(f, 4, nstart = 20)
+% % set.seed(2)
+% % h = kmeans(a, 9, nstart = 50)
+% % 
+% % plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Synthetic, detected data with clustering", asp = 1)
+% % points(f[g$cluster==1, ], pch = 3)
+% % points(f[g$cluster==4, ], pch = 0)
+% % points(f[g$cluster==2, ], pch = 2)
+% % points(f[g$cluster==3, ], pch = 4)
+% % 
+% % plot(f, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = "Snythetic data with clustering", asp = 1)
+% % points(f[g$cluster==1, ], pch = 3)
+% % points(f[g$cluster==4, ], pch = 0)
+% % points(f[g$cluster==2, ], pch = 2)
+% % points(f[g$cluster==3, ], pch = 4)
+% % points(a[h$cluster==1, ], pch = 0, col = "grey70")
+% % points(a[h$cluster==2, ], pch = 1, col = "grey90")
+% % points(a[h$cluster==3, ], pch = 1, col = "grey90")
+% % points(a[h$cluster==4, ], pch = 2, col = "grey70")
+% % points(a[h$cluster==5, ], pch = 1, col = "grey90")
+% % points(a[h$cluster==6, ], pch = 1, col = "grey90")
+% % points(a[h$cluster==7, ], pch = 4, col = "grey70")
+% % points(a[h$cluster==8, ], pch = 3, col = "grey70")
+% % points(a[h$cluster==9, ], pch = 1, col = "grey90")
+% % @
+% % 
+% % 
+% % \subsection{X-Means Clustering}
+% % NOTE: k-means and k-medoids are the most efficient and reasonably well accepted clustering schemes (and that's why we chose them):
+% % 
+% % 1. Talk about k-medoids' insensitivity to the presence of outliers but every instance in a detected set is already a possible outlier under the LOF algorithm. It doesn't make sense that we need to be careful about them when we are essentially trying to cluster them!
+% % 
+% % 2. k-means could have been used but x-means is chosen in this case to get rid of having to consider the adequacy of the parameter, $k$. X-means chooses the number of centres that makes the most sense under the Bayesian information criterion. It makes our method truely unsupervised.. etc.
+% % 
+% % 
+% % %----------------------------------------------------------
+% % \subsection{Cluster Identification}
+% % 
+% % The decision to use distance metrics as a similarity measure is to be consistent with X-Means which is partially based on a distance metric, namely Euclidean. If the performance of X-Means is reasonable, i.e., purity for each cluster is high enough -> then the distance metric used in the X-Means must qualify as adequately as the value of purity itself.
+% % 
+% % Talk about the use of different distance metrics such as the Euclidean, Chebyshev, Mahalanobis and Minkowski distances:
+% % 
+% % 1. Chebyshev, $max(|p-q|)$: "measures distance assuming only the most significant dimension is relevant.
+% % 
+% % 2. Mahalanobis, $\sqrt{(x-\mu)^{T}\Sigma^{-1}(x-\mu)}$: normalises based on a covariance matrix to make the distance metric scale-invariant. The dataset is normalised prior to X-Means, which means each data point has equal contribution.
+% % 
+% % 3. Minkowski distance: generalisation that unites Euclidean, Manhattan and Chebyshev distances.
 
 
 
