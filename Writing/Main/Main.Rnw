@@ -57,6 +57,6 @@ I would like to acknowledge and thank: ...
 
 \backmatter
 \bibliographystyle{plain}
-%\bibliography{bibliography}
+\bibliography{bibliography}
 
 \end{document}

@@ -7,7 +7,7 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed system is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
 
-The rest of this chapter is divided into sections that provide high-level overview of our proposed intrusion detection system in Section \ref{methods:sec2}, low-level and phase-specific discussion in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a minimal demonstration of the system in Section \ref{methods:sec5}.
+The rest of this chapter is divided into sections that provide high-level overview of our proposed intrusion detection system (IDS) in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a demonstration of the system in Section \ref{methods:sec5}.
 
 
 
@@ -28,7 +28,7 @@ The rest of this chapter is divided into sections that provide high-level overvi
 \section{General scheme}
 \label{methods:sec1}
 
-This section describes the core concept and schematic overview of the general scheme in Sections \ref{methods:sec1.1} and \ref{methods:sec1.2}, respectively.
+This section describes the core concept, including underlying supplementary ideas, and a schematic overview of the general scheme in Sections \ref{methods:sec1.1} and \ref{methods:sec1.2}, respectively.
 
 
 %----------------------------------------------------------
@@ -36,7 +36,9 @@ This section describes the core concept and schematic overview of the general sc
 \subsection{Core concept}
 \label{methods:sec1.1}
 
-The core concept of the general scheme is similar to that of \emph{min-maxing}, that is an attempt to achieve a notion of ``best" by maximising highly desirable traits while minimising undesirable ones. The traits of an intrusion detection system to be \emph{maximised} is the sensitivity, or strength, of detection ---because it is directly related to the intention and purpose of the system, and provides an estimate of its usefulness--- and to be \emph{minimised} is the incidence of false positives ---because a low false positive rate is required for the system to be precise. There are two ideas that contribute towards this core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are always expected. These ideas are used in conceptualising the ways in which the two traits of an unsupervised anomaly detection method can be respectively maximised and minimised. The in-depth discussions of the ideas is followed by the rest of the section.
+The core concept of the general scheme comes from a variation of the minmax principle 
+
+The core concept of the general scheme is similar to that of \emph{min-maxing}, that is an attempt to grant an entity a notion of being ``best" by maximising highly desirable traits while minimising undesirable ones. The traits of an intrusion detection system to be \emph{maximised} is the sensitivity, or strength, of detection ---because it is directly related to the intention and purpose of the system, and provides an estimate of its usefulness--- and to be \emph{minimised} is the incidence of false positives ---because a low false positive rate is required for the system to be precise. There are two ideas that contribute towards this core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are always expected. These ideas are used in conceptualising the ways in which the two traits of an unsupervised anomaly detection method can be respectively maximised and minimised. The in-depth discussions of the ideas is followed by the rest of the section.
 
 %Other measures such as time and space complexities, which are useful in evaluating the applicability of a system, are ignored at this stage and are possible candidates for future work.
 
@@ -181,7 +183,7 @@ This section presents the overview and the low-level discussion of each phase.
 %----------------------------------------------------------
 \subsection{Phase 1: density-based anomaly detection}
 
-The input for Phase 1 process is the numeric portion of a test dataset and the output is a set of possible anomalies that include actual anomalies (true positives) and incorrectly classified anomalies (false positives). There are five sub-processes, each of which is described in the rest of this section.
+The input for Phase 1 process is the numeric portion of a test dataset and the output is a set of possible anomalies that include actual anomalies (true positives) and incorrectly classified anomalies (false positives). There are five sub-processes, each of which is described in the rest of this section. The schematic overview of Phase 1 in low-level is represented in Figure \ref{fig:methods-p1}.
 
 \begin{figure}[!h]
 \centering
@@ -213,7 +215,7 @@ The input for Phase 1 process is the numeric portion of a test dataset and the o
     \draw [arrow] (9) |- (10);
     \draw [arrow] (11) to (12);
   \end{tikzpicture}
-  \caption{Phase 1 overview}
+  \caption{Low-level Phase 1 overview.}
   \label{fig:methods-p1}
 \end{figure}
 
@@ -251,7 +253,7 @@ The random sample of non-intrusion instances is merged with the set of possible 
 %----------------------------------------------------------
 \subsection{Phase 2: clustering-based false positive elimination}
 
-The input for Phase 2 process is the merged dataset output from Phase 1 and the output is the intrusion instances defined as anomalies. There are two sub-processes, each of which is described in the rest of this section.
+The input for Phase 2 process is the merged dataset output from Phase 1 and the output is the intrusion instances defined as anomalies. There are two sub-processes, each of which is described in the rest of this section. The schematic overview of Phase 2 in low-level is represented in Figure \ref{fig:methods-p2}.
 
 \begin{figure}[!h]
 \centering
@@ -260,7 +262,7 @@ The input for Phase 2 process is the merged dataset output from Phase 1 and the 
     \node(1) [io,    below=1cm of 0] {Merged dataset \\ output from Phase 1};
     \node(2) [procs, below=1cm of 1] {(1) DBSCAN};
     \node(3) [io,    below=1cm of 2] {Clusters of instances};
-    \node(4) [decis, below=1cm of 3] {(2) Select a cluster \\ based on its size};
+    \node(4) [decis, below=1cm of 3] {(2) Cluster size};
     \node(5) [io,     left=2cm of 4] {Intrusions};
     \node(6) [io,    below=1cm of 5] {Final \\ output};
     \node(7) [start, below=1cm of 6] {\textsc{Phase 2 end}};
@@ -274,17 +276,17 @@ The input for Phase 2 process is the merged dataset output from Phase 1 and the 
     \draw [arrow] (6) to (7);
     \draw [arrow] (4) --node[anchor=south] {$\geq n$} (8);
   \end{tikzpicture}
-  \caption{Phase 1 overview}
-  \label{fig:methods-p1}
+  \caption{Low-level Phase 2 overview}
+  \label{fig:methods-p2}
 \end{figure}
 
 
 \subsubsection{(1) DBSCAN}
-The clustering algorithm, Density-Based Spatial Clustering of Applications with Noise, is based on the idea of local, or relative, density similar to LOF. The advantage of DBSCAN is that it can effectively cluster data of an arbitrary shape.
+The clustering algorithm, Density-Based Spatial Clustering of Applications with Noise, is based on the idea of local, or relative, density similar to LOF. Because of the local approach, the advantage of DBSCAN lies in its ability to effectively cluster data of an arbitrary shape. The two input parameters, Eps and MinPts, can be adjusted accordingly to domain knowledge for more accurate and precise clustering.
 
 
 \subsubsection{(2) Cluster selection}
-
+It is established in the previous phase that (1) the number of instances for each label is roughly balanced and (2) false positives, i.e., non-intrusions, will correspond to the most frequent label. Based on this establishment, a cluster of size greater than the random sample size, $n$, will be that of false positives and a cluster of size smaller than $n$ will be intrusions. The final stage is to simply disregard the cluster of false positives, as they are non-intrusive, and report the members in the cluster of intrusions.
 
 
 
@@ -292,10 +294,13 @@ The clustering algorithm, Density-Based Spatial Clustering of Applications with 
 %----------------------------------------------------------
 %----------------------------------------------------------
 \newpage
-\section{Comparison to initial design}
+\section{Comparison to initial prototype design}
 \label{methods:sec4}
 
-\begin{figure}[!h]
+%\subsubsection{what I found and why it didn't work}
+This section provides a comparison of our proposed intrusion detection system to an initial prototype system. Our intuitions and logic behind the initial design of the system is discussed for each phase in Sections \ref{methods:sec4.1} and \ref{methods:sec4.2}, respectively. The schematic overview of the intial prototype is represented in Figure \ref{fig:methods-prototype}.
+
+\begin{figure}[h]
 \centering
   \begin{tikzpicture}[node distance = 2cm]
     \node(input)  [simple] {1. Input data (numeric)};
@@ -321,16 +326,39 @@ The clustering algorithm, Density-Based Spatial Clustering of Applications with 
     \draw [arrow] (NI.240) |- (final);
     \draw [arrow] (output) |- (final);
   \end{tikzpicture}
-  \caption{High-level system overview}
-  \label{fig:overview}
+  \caption{High-level intial prototype overview}
+  \label{fig:methods-prototype}
 \end{figure}
 
 
-%\subsubsection{what I found and why it didn't work}
+%----------------------------------------------------------
+%----------------------------------------------------------
+\subsection{Phase 1: Partition via anomaly detection}
+\label{methods:sec4.1}
+The initial design of Phase 1 is to partition a given input dataset into a set of non-intrusion instances, which we have termed a NI set, and a set of possible anomalies, which we have termed a PA set. Our intuitive approach is to use the NI set as a ``training" set of normal instances so that its pattern or behaviour can be compared with clusters of the PA set in Phase 2. Then the cluster that matches the profile of the NI set most closely, i.e., a cluster most similar to the members of the NI set, will be associated with non-intrusion (or normal) instances, that is the false positives. From one perspective, the mode of this approach resembles that of a semi-supervised learning task as the training labels are essentially available for use. And the availability of the label is an invaluable piece of information that could facilitate the classification of false positives. However there is a limitation in the way the NI and PA sets are generated that ultimately hinders the performance of the system.
 
-\subsubsection{Phase 1. Partition via anomaly detection}
+The limitation exists as the potential anomalies in a PA set is generated as the product of the relative density-based algorithm LOF. Hence these instances lie in a relatively sparse region compared to their neighbours, i.e., they are isolated from the rest of the entire dataset. On the other hand, the instances associated with a NI set lie in a dense region. This means that the profile of the NI set cannot be compared with that of the PA set as the sparse instances could lie in arbitrary positions relative to the dense instances. The hypothesis of this limitation is supported by the result that there is only 50\% chance, on average, that the cluster of false positives is correctly identified for this approach.
 
-\subsubsection{Phase 2. False positive elimination via clustering}
+
+
+%----------------------------------------------------------
+%----------------------------------------------------------
+\subsection{Phase 2: False positive elimination via clustering}
+\label{methods:sec4.2}
+
+\subsubsection{X-means}
+The initial choice of the clustering method was X-means. Despite its limitations, the algorithm was suitable for quickly testing out our hypothesis for its simplicity yet accetable performance. We have used the clustering purity metric at an individual cluster level to evaluate the effectiveness of the clustering method. We have found that the cluster purity measures per run are usually averaged to a range between 0.7 and 0.8, which indicate that the chosen clustering method is subjectively adequate but not perfect. From this finding, a hypothesis on this behaviour is established to be caused by an arbitrary shape of the data, which the X-means algorithm cannot cope with.
+
+\subsubsection{Similarity measures}
+
+FIX THIS:
+\\
+There have been numerous similarity measures: (1)
+The similarty measure to be used as a comparison
+
+
+
+
 
 
 
@@ -338,8 +366,24 @@ The clustering algorithm, Density-Based Spatial Clustering of Applications with 
 %----------------------------------------------------------
 %----------------------------------------------------------
 %----------------------------------------------------------
-\section{Minimal demonstration}
+\newpage
+\section{Demonstration}
 \label{methods:sec5}
+
+test \cite{von2007}
+
+\bibliographystyle{plain}
+\bibliography{../Main/bibliography}
+
+
+
+
+
+
+
+
+
+
 
 
 
