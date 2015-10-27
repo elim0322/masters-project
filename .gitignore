@@ -8,6 +8,7 @@ Writing/**/*.pdf
 Writing/**/*.synctex.gz
 Writing/**/*.aux
 Writing/**/*.tex
+Writing/**/*.blg
 Writing/**/cache
 
 Writing/**/*.csv
