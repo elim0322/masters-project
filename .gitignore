@@ -11,7 +11,8 @@ Writing/**/*.tex
 Writing/**/*.blg
 Writing/**/cache
 
-Writing/**/*.csv
 Writing/**/*.bbl
+
+*.csv
 
 .Rproj.user
