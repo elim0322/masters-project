@@ -15,6 +15,7 @@ evaluate = function(score, test, e = 0.1) {
     
 }
 
+# 
 #--- find threshold based on density of score ---#
 threshold = function(score, e = 0.1, graph = FALSE) {
     
