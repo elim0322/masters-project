@@ -2,16 +2,16 @@
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
-% ------------------
+% -----------------
 % CHAPTER: Methods
-%------------------
+% -----------------
 
 \chapter{Methods}
 \label{ch:methods}
 
 One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed intrusion detection system (IDS) is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
 
-The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a demonstration of the system in Section \ref{methods:sec5}.
+% The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a demonstration of the system in Section \ref{methods:sec5}.
 
 The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3} and a demonstration of the system in Section \ref{methods:sec5}.
 
@@ -26,9 +26,9 @@ The rest of this chapter is divided into sections that provide a high-level over
 %Lastly, the system is compared with an intial hypothetical design that was intuitively drafted in the final section of the chapter.
 
 
-%---------------------------
+% --------------------------
 % SECTION 1: General scheme
-%---------------------------
+% --------------------------
 \section{General scheme}
 \label{methods:sec1}
 

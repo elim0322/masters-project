@@ -6,17 +6,19 @@
     \usepackage{amssymb}
     \usepackage{moreverb}
     \usepackage{booktabs}
+    
+    % my package loading:
+    \usepackage{url}
     \usepackage{tikz}
       \usetikzlibrary{decorations.text, arrows}  % decoration for for curved text
       \usetikzlibrary{positioning}  % for positioning nodes
-      \usetikzlibrary{shapes.geometric}
-      % minimum width={width("Possible anomalies")+2pt}
+      \usetikzlibrary{shapes.geometric} % minimum width={width("Possible anomalies")+2pt}
       \tikzstyle{simple} = [minimum width=3cm, minimum height=1cm, outer sep=0pt, text centered, align=center]
-      \tikzstyle{start}  = [minimum width=3cm, minimum height=1cm, rectangle, rounded corners, draw=black, text centered, align=center, fill=grey!5]
+      \tikzstyle{start}  = [minimum width=3cm, minimum height=1cm, rectangle, rounded corners, draw=black, text centered, align=center, fill=gray!5]
       \tikzstyle{io}     = [minimum width=3cm, minimum height=1cm, trapezium, trapezium left angle=70, trapezium right angle=110, inner sep=8pt, draw=black, text centered, align=center]
-      \tikzstyle{procs}  = [minimum width=3cm, minimum height=1cm, rectangle, draw=black, text centered, align=center, fill=grey!20]
-      \tikzstyle{decis}  = [minimum width=3cm, minimum height=1cm, diamond, draw=black, inner sep=0pt, text centered, align=center, fill=grey!20]
-      \tikzstyle{merge}  = [minimum width=3cm, minimum height=1cm, regular polygon, regular polygon sides=3, shape border rotate=180, inner sep=-5pt, draw=black, text centered, align=center, fill=grey!20]
+      \tikzstyle{procs}  = [minimum width=3cm, minimum height=1cm, rectangle, draw=black, text centered, align=center, fill=gray!20]
+      \tikzstyle{decis}  = [minimum width=3cm, minimum height=1cm, diamond, draw=black, inner sep=0pt, text centered, align=center, fill=gray!20]
+      \tikzstyle{merge}  = [minimum width=3cm, minimum height=1cm, regular polygon, regular polygon sides=3, shape border rotate=180, inner sep=-5pt, draw=black, text centered, align=center, fill=gray!20]
       \tikzstyle{arrow}  = [thick,->,>=stealth]
 \newtheorem{definition}{Definition}
 

@@ -2,332 +2,637 @@
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
+% --------------------
+% CHAPTER: Evaluation
+% --------------------
+
 \chapter{Evaluation}
 \label{ch:evaluation}
 
-The dataset we have chosen for evaluating our system is the one used in KDD Cup 1999 [CITE]. There are a few issues associated with the dataset such as the presence of redundant features and duplicated instances, mentioned by Tavallaee et al. who also proposed an improved version of the dataset called NSL-KDD. Despite the issues, our decision to proceed with KDD'99 is because it is a real world data captured at MIT Lincoln Labs which means it is more likely to be accurate at describing the characteristics of real world connections compared to those described by the processed data, NSL-KDD. Another possible limitation with KDD'99 dataset is its age. Because the dataset is dated, there is high possibility that the characteristics of modern attacks may be different to those described in the dataset. However it is the only real world dataset with complete attack labels to remain as the most popular choice as a benchmarking medium for any IDS evaluation. The lack of other public network data appears to be due to the highly sensitive nature associated with network information. Technical description of KDD'99 dataset is presented in Section \ref{sec:evaluation-data}.
+% Maybe write this in discussion/conclusion?
+%The dataset chosen for benchmarking our intrusion detection system is the KDD Cup 1999 data \cite{kdd99}. There are a few issues associated with the dataset such as the presence of redundant features and duplicated instances, mentioned by Tavallaee et al. \cite{tav09} who also proposed an improved version of the dataset called NSL-KDD. Despite the issues, our decision to proceed with KDD'99 is because it is a real world data captured at MIT Lincoln Labs which means it is more likely to be accurate at describing the characteristics of real world connections compared to those described by the processed data, NSL-KDD. Another possible limitation with KDD'99 dataset is its age. Because the dataset is dated, there is high possibility that the characteristics of modern attacks may be different to those described in the dataset. However it is the only real world dataset with complete attack labels to remain as the most popular choice as a benchmarking medium for any IDS evaluation. The lack of other public network data appears to be due to the highly sensitive nature associated with network information. Technical description of KDD'99 dataset is presented in Section \ref{sec:evaluation-data}.
 
-The rest of this chapther includes the experimental setup for the evaluation in Section \ref{sec:evaluation-setup}, phase-specific evaluation results in Section \ref{sec:evaluation-phase} and system evaluation results  in Section \ref{sec:evaluation-system}, along with our choice of performance measures.
+In this chapter, we evaluate the strength of our NIDS in detecting intrusions in the well-known and widely used KDD Cup 1999 \cite{kdd99} data. For this, we are mainly interested in true and false positive rates, also known as TPR and FPR respectively, of the system to assess how accurately it can classify each instance as either an intrusion (attack) or a non-intrusion (normal). These two performance metrics are evaluted for other popular unsupervised NID techniques to compare our method against them.
 
-
-%----------------------------------------------------------
-\section{KDD'99 Data Description}
-\label{sec:evaluation-data}
-The KDD dataset is prepared by Stolfo et al. [CITE] based on a much larger dataset called DARPA'98 which consists of nine weeks of raw TCP dump data captured at MIT Lincoln Labs as a part of the 1988 DARPA Intrusion Evaluation Program [CITE]. %http://www.cs.columbia.edu/~wfan/PAPERS/JAM99.pdf
-There are approximately 4,900,000 connection records in KDD training dataset, each of which consists of 41 features and is labelled as either normal or an attack of 24 different types. KDD test dataset contains 14 unique attack types that are not present in the training set to allow the evaluation of detecting novel attacks.
-
-All of these attack types fall in one of the four main categories:
-
-\begin{enumerate}
-\item \textbf{Denial-of-service (DoS):} an attack to temporarily or indefinitely disable services of a host to its intended users by flooding memory resources.
-
-\item \textbf{Remote-to-local (R2L):} a situation where an attacker is able to send packets to a target machine over a network in order to gain access as a local user of the machine.
-
-\item \textbf{User-to-root (U2R):} an attempt by the attacker with precedent access to a target machine as a normal user to further gain control of root privileges.
-
-\item \textbf{Probing:} a type of surveillance attack to monitor a target network of a machine in order to gain information on possible vulnerabilities of the network. As a result, the probing attacks are usually followed up by a chain of attacks that exploit any identified network vulnerabilities.
-\end{enumerate}
-
-Each instance in KDD'99 is a connection record, that is a sequence of TCP packets for a data flow between a source IP address to a target IP address. There are 41 features in the dataset that can be categorized into three groups:
-
-\begin{enumerate}
-\item \textbf{Basic features:} 9 of the 41 features are basic features of individual TCP connections, such as the types of the protocol and network service.
-
-\item \textbf{Content features:} 13 of the 41 features are content features suggested by domain knowledge, such as the numbers of shell prompts, file creation operations and "root" accesses.
-%The DoS and probing attacks occur in bursts, i.e., these attacks involve many connections in an extremely short time period, to result in frequent sequential patterns for intrusions. On the other hand, the R2L and U2R attacks usually involve a single connection and are more difficult to detect using just the basic features. Hence the main purpose of the content features is to provide additional information that can be used to improve detection.
-
-\item \textbf{Traffic features:} 18 of the 41 features are traffic features computed using a two-second time window that can be further divided into two groups:
-    
-    \begin{enumerate}
-    \item \textbf{"same host" features:} statistics derived from the connections in the past two seconds that have the same destination host as the current connection
-    
-    \item \textbf{"same service" features:} similar statistics from the connections in the past two seconds that have the same service as the current connection
-    \end{enumerate}
-    
-\end{enumerate}
+Other interesting aspect of our system worthwhile investigating is the effect of the frequency of intrusions in data.
 
 
-%----------------------------------------------------------
-\section{Experimental Setup}
-\label{sec:evaluation-setup}
-
-The proposed detection scheme is evaluated under the following framework:
-
-\begin{enumerate}
-    
-    \item The 10\% subset of the complete KDD'99, provided by the competition, is used for the experiment.
-    
-    \item Each experiment is conducted using a random sample of 5,000 records as a testset. The ratio of intrusion and non-intrusion instances is varied in the testset to report the performance of the LOF algorithm between the differing ratios. The sample size of 5,000 is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
-    
-    \item The parameter $k$ for the LOF algorithm is varied to assess whether the value of $k$ has an impact on the performance of LOF.
-    
-    \item The experiment is repeated on 100 different testsets to account for the relatively small sample size. The random seed for each iteration of the repeated experiments is set to be a sequence from 1 to 100.
-    
-\end{enumerate}
 
 
-%----------------------------------------------------------
-\section{Phase-specific Evaluation}
-\label{sec:evaluation-phase}
-
-\subsection{Phase 1}
-
-The choice of the input parameter, $k$, heavily depends on the application domain and prior knowledge about data. Without knowing the actual sizes, or the local densities, of possible clusters in the data, $k$ can only be set arbitrarily. According to the authors of the LOF algorithm, $k$ must be large enough to avoid any statistical fluctuations in the computed scores. Also $k$ must be less than the size of the entire dataset to avoid including all the instances as the neighbourhood. What can be deducted from the examples given in the literature is that the choice of $k$ is related to the size of data that the algorithm is applied to. Therefore we have decided to set $k$ to be proportional to the size of a testset such that $k$ is appropriately high for a large dataset and vice versa.
-
-We have tested the performance of LOF on four different values of $k$, namely 500, 1,000, 1,500 and 2,000, that is 10\%, 20\%, 30\% and 40\% of the testset size of 5,000. The amount of intrusion instances, as denoted by \emph{p.attack}, in the testset is also varied to assess whether the adequacy of $k$ depends on the number of intrusion instances in the testset. Tables \ref{tab:phase1-detection}, \ref{tab:phase1-false} and \ref{tab:phase1-threshold} present the means of the detection and false alarm rates and thresholds from the 100 repeated experiments. The corresponding standard deviations are represented in brackets.
-
-<<phase1-data, cache=TRUE, echo = FALSE, results='asis'>>=
-load(file = "phase1_evaluation.RData")
-@
-
-<<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
-library(xtable)
-detection.rate = data.frame(rbind(
-    c(paste0(round(a10_10k$detection.rate[1], 3), " (", round(a10_10k$detection.rate[2], 2), ")"),
-      paste0(round(a10_20k$detection.rate[1], 3), " (", round(a10_20k$detection.rate[2], 2), ")"),
-      paste0(round(a10_30k$detection.rate[1], 3), " (", round(a10_30k$detection.rate[2], 2), ")"),
-      paste0(round(a10_40k$detection.rate[1], 3), " (", round(a10_40k$detection.rate[2], 2), ")")),
-    
-    c(paste0(round(a20_10k$detection.rate[1], 3), " (", round(a20_10k$detection.rate[2], 2), ")"),
-      paste0(round(a20_20k$detection.rate[1], 3), " (", round(a20_20k$detection.rate[2], 2), ")"),
-      paste0(round(a20_30k$detection.rate[1], 3), " (", round(a20_30k$detection.rate[2], 2), ")"),
-      paste0(round(a20_40k$detection.rate[1], 3), " (", round(a20_40k$detection.rate[2], 2), ")")),
-    
-    c(paste0(round(a30_10k$detection.rate[1], 3), " (", round(a30_10k$detection.rate[2], 2), ")"),
-      paste0(round(a30_20k$detection.rate[1], 3), " (", round(a30_20k$detection.rate[2], 2), ")"),
-      paste0(round(a30_30k$detection.rate[1], 3), " (", round(a30_30k$detection.rate[2], 2), ")"),
-      paste0(round(a30_40k$detection.rate[1], 3), " (", round(a30_40k$detection.rate[2], 2), ")")),
-    
-    c(paste0(round(a40_10k$detection.rate[1], 3), " (", round(a40_10k$detection.rate[2], 2), ")"),
-      paste0(round(a40_20k$detection.rate[1], 3), " (", round(a40_20k$detection.rate[2], 2), ")"),
-      paste0(round(a40_30k$detection.rate[1], 3), " (", round(a40_30k$detection.rate[2], 2), ")"),
-      paste0(round(a40_40k$detection.rate[1], 3), " (", round(a40_40k$detection.rate[2], 2), ")"))
-))
-
-colnames(detection.rate) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
-rownames(detection.rate) = c("p.attack = 10%", "p.attack = 20%", "p.attack = 30%", "p.attack = 40%")
-
-xtab        = xtable(detection.rate, caption = "Detection rate", label = "tab:phase1-detection")
-align(xtab) = "r|llll"
-print(xtab, booktabs = TRUE)
-@
-
-<<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
-library(xtable)
-false.alarm = data.frame(rbind(
-    c(paste0(round(a10_10k$false.alarm[1], 3), " (", round(a10_10k$false.alarm[2], 2), ")"),
-      paste0(round(a10_20k$false.alarm[1], 3), " (", round(a10_20k$false.alarm[2], 2), ")"),
-      paste0(round(a10_30k$false.alarm[1], 3), " (", round(a10_30k$false.alarm[2], 2), ")"),
-      paste0(round(a10_40k$false.alarm[1], 3), " (", round(a10_40k$false.alarm[2], 2), ")")),
-    
-    c(paste0(round(a20_10k$false.alarm[1], 3), " (", round(a20_10k$false.alarm[2], 2), ")"),
-      paste0(round(a20_20k$false.alarm[1], 3), " (", round(a20_20k$false.alarm[2], 2), ")"),
-      paste0(round(a20_30k$false.alarm[1], 3), " (", round(a20_30k$false.alarm[2], 2), ")"),
-      paste0(round(a20_40k$false.alarm[1], 3), " (", round(a20_40k$false.alarm[2], 2), ")")),
-    
-    c(paste0(round(a30_10k$false.alarm[1], 3), " (", round(a30_10k$false.alarm[2], 2), ")"),
-      paste0(round(a30_20k$false.alarm[1], 3), " (", round(a30_20k$false.alarm[2], 2), ")"),
-      paste0(round(a30_30k$false.alarm[1], 3), " (", round(a30_30k$false.alarm[2], 2), ")"),
-      paste0(round(a30_40k$false.alarm[1], 3), " (", round(a30_40k$false.alarm[2], 2), ")")),
-    
-    c(paste0(round(a40_10k$false.alarm[1], 3), " (", round(a40_10k$false.alarm[2], 2), ")"),
-      paste0(round(a40_20k$false.alarm[1], 3), " (", round(a40_20k$false.alarm[2], 2), ")"),
-      paste0(round(a40_30k$false.alarm[1], 3), " (", round(a40_30k$false.alarm[2], 2), ")"),
-      paste0(round(a40_40k$false.alarm[1], 3), " (", round(a40_40k$false.alarm[2], 2), ")"))
-))
-
-colnames(false.alarm) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
-rownames(false.alarm) = c("p.attack = 10%", "p.attack = 20%", "p.attack = 30%", "p.attack = 40%")
-
-xtab        = xtable(false.alarm, caption = "False alarm rate", label = "tab:phase1-false")
-align(xtab) = "r|llll"
-print(xtab, booktabs = TRUE)
-@
-
-<<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
-library(xtable)
-threshold = data.frame(rbind(
-    c(paste0(round(a10_10k$threshold[1], 3), " (", round(a10_10k$threshold[2], 2), ")"),
-      paste0(round(a10_20k$threshold[1], 3), " (", round(a10_20k$threshold[2], 2), ")"),
-      paste0(round(a10_30k$threshold[1], 3), " (", round(a10_30k$threshold[2], 2), ")"),
-      paste0(round(a10_40k$threshold[1], 3), " (", round(a10_40k$threshold[2], 2), ")")),
-    
-    c(paste0(round(a20_10k$threshold[1], 3), " (", round(a20_10k$threshold[2], 2), ")"),
-      paste0(round(a20_20k$threshold[1], 3), " (", round(a20_20k$threshold[2], 2), ")"),
-      paste0(round(a20_30k$threshold[1], 3), " (", round(a20_30k$threshold[2], 2), ")"),
-      paste0(round(a20_40k$threshold[1], 3), " (", round(a20_40k$threshold[2], 2), ")")),
-    
-    c(paste0(round(a30_10k$threshold[1], 3), " (", round(a30_10k$threshold[2], 2), ")"),
-      paste0(round(a30_20k$threshold[1], 3), " (", round(a30_20k$threshold[2], 2), ")"),
-      paste0(round(a30_30k$threshold[1], 3), " (", round(a30_30k$threshold[2], 2), ")"),
-      paste0(round(a30_40k$threshold[1], 3), " (", round(a30_40k$threshold[2], 2), ")")),
-    
-    c(paste0(round(a40_10k$threshold[1], 3), " (", round(a40_10k$threshold[2], 2), ")"),
-      paste0(round(a40_20k$threshold[1], 3), " (", round(a40_20k$threshold[2], 2), ")"),
-      paste0(round(a40_30k$threshold[1], 3), " (", round(a40_30k$threshold[2], 2), ")"),
-      paste0(round(a40_40k$threshold[1], 3), " (", round(a40_40k$threshold[2], 2), ")"))
-))
-
-colnames(threshold) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
-rownames(threshold) = c("p.attack = 10%", "p.attack = 20%", "p.attack = 30%", "p.attack = 40%")
-
-xtab        = xtable(threshold, caption = "Threshold", label = "tab:phase1-threshold")
-align(xtab) = "r|llll"
-print(xtab, booktabs = TRUE)
-@
-
-From the tables, a few observations can be made:
-
-\begin{itemize}
-
-\item As $k$ increases, the detection and false positive rates as well as the thresholds are more consistent, as shown by the decreases in their respective standard deviations. This suggests that $k$ should be adequately large to produce more stable results.
-
-\item As the number of intrusion instances, denoted by \emph{p.attack}, increases in the testset, the false alarm rates at $k = 10\%$ seems to increase. This mildly suggests that the LOF algorithm for this particular instance has performed well when the ratio between the numbers of intrusion and non-intrusion instances are further apart. However, the other rates vary widely between the different values of p.attack to support this claim.
-
-\item The thresholds fluctuate widely for the different testsets. This is expected as our threshold is set to be adaptive to the density curve of the computed scores.
-
-\item The performance seems to be at best for the case where p.attack = 10\% and $k = 40\%$, as indicated by the highest detection rate and the lowest false alarm rate. The density curves of the 100 sets of LOF scores can be seen in Figure \ref{fig:phase1-eval-density}.
-
-\end{itemize}
 
 
-<<phase1-eval-density, echo=FALSE, fig.align='center', fig.cap='The density curves of the 100 sets of the LOF scores computed for the testset of 4,500 non-intrusion and 500 intrusion instances at k = 2,000.', out.width="0.6\\linewidth">>=
-a10_40k_scores = read.csv("phase1_scores-10a-40k.csv")
-a10_40k_scores = as.matrix(a10_40k_scores)
 
-library(scales)
-plot(density(a10_40k_scores[1, ]), ylim = c(0, 4), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density curves for 100 sets of LOF scores")
-for (i in 2:99) {
-    lines(density(a10_40k_scores[i, ]), col = alpha("black", 0.1))
-}
-@
 
-%The input parameter, $k$, is set to be proportional to the size of the testset. We have tested the performance of LOF using $k$ values at 10\%, 20\%, 30\% and 40\% of the testset size, that is 500, 1,000, 1,500 and 2,000 respectively. The initial $k$ value of 500 may seem rather large but our intention is to avoid any statistical inconsistency by setting it too low, as mentioned by the authors of the LOF algorithm. Four different types of testsets are used, where the number of intrusion instances is varied between 2,000, 1,500, 1,000 and 500.
 
-% As discussed by the authors of the LOF algorithm, a set of LOF scores can fluctuate non-monotonically depending on the choice of the input parameter, $k$. What they have found was that the variation, measured by the standard deviation, in the scores computed for a random uniform sample stabilises for $k$ greater than 10. From this, they suggested a heuristic that $k$ should be greater than 10 to avoid any statistical inconsistency in the computed LOF scores. On the other hand, if $k$ is set to be too large, non-outliers can end up being detected as outliers because the size of the neighbourhood increases to potentially include non-outliers from other clusters as $k$ increases. The authors' suggestion is to compute LOF scores over a range of $k$ and take the maximum of the scores to report on the most outlying scores.
+% The dataset chosen for benchmarking our NIDS is the KDD Cup 1999 data \cite{kdd99} for its public availability with complete sets of labels. There have been a couple of datasets to replace the original KDD'99 data such as the NSL-KDD data \cite{tav09} and gureKddcup data \cite{per08}. The former dataset is essentially a carefully selected set of instances, mainly to avoid redundant features and duplicated entries, from the original KDD'99 data that does not introduce any novelty for us to be interested in. The latter dataset is generated equivalently as the original data with additional information on the payload of each connection record, that is the information of the transferred data. Because the payload data is processed as a sequence of bytes, for which sequential pattern mining is more appropriate, the gureKddcup data has not been a suitable choice for us. Other alternative datasets \cite{cre13} and \cite{shi12} were unavailable for access. All things considered, the KDD'99 data seems to remain as the most widely used dataset for the purpose of evaluating and benchmarking an IDS, especially because of the sheer number of literatures based on it. More technical description of the KDD'99 dataset is presented in Section \ref{evaluation:sec1}.
+
+% The rest of this chapther includes the experimental setup for the evaluation in Section \ref{evaluation:sec2}, phase-specific evaluation results in Section \ref{evaluation:sec3} and system evaluation results  in Section \ref{evaluation:sec4}, along with our choice of performance measures.
+
+
+% Data description should be in background along with other alternatives
+% ----------------------------
+% SECTION 1: data description
+% ----------------------------
+% \section{KDD'99 data description}
+% \label{evaluation:sec1}
+% The KDD dataset is prepared by Stolfo et al. \cite{sto00} based on a much larger dataset called DARPA'98 which consists of nine weeks of raw TCP dump data captured at MIT Lincoln Labs as a part of the 1988 DARPA Intrusion Evaluation Program. There are approximately 4,900,000 connection records in KDD training dataset, each of which consists of 41 features and is labelled as either normal or an attack of 22 different types. KDD test dataset contains 15 novel attack types that are not present in the training set to allow the evaluation of detecting novel attacks.
 % 
-% The difficulty to proceed with their heuristic is the computation time and memory resource consumption, both of which depend on the size of $k$ range. If $k$ is set to be over a wide range, the LOF algorithm is going to occur that much more compared to over a narrow range.
+% All of these attack types fall in one of the four main categories:
 % 
-% Hence, the size 
-
-
-\subsection{Phase 2}
-
-Since the main goal of the X-means clustering used for Phase 2 is to group instances of the same attack type, one of the external criteria of clustering quality, \emph{purity}, is measured, that is given by
-\[ purity = \frac{1}{N} \sum_{i=1}^{k} max_j |c_i \cap t_j |, \]
-where $N$ is the number of objects, $k$ is the number of clusters, $c_i$ is a cluster in $C$ and $t_j$ is the class $j$. Because purity is an average measure aggregated over all clusters, the presence of relatively large clusters can result in an increased purity. To avoid the bias, clustering purity is measured at an individual cluster level for Phase 2. The purity of the $i$th cluster is therefore measured by
-\[ purity_i = \frac{1}{n_i} max_j |c_i \cap t_j |, \]
-and the overall purity is then
-\[ purity = \frac{1}{k} \sum_{i=1}^{k} purity_i \]
-The main advantage of this purity is that the effect of large clusters is negated and the ability to compute the standard deviation amongst the individual purity measures to report on their variability.
-
-As an example, the most frequent class, its count, the size and the purity computed for the first iteration of the repeated experiment is presented in Table \ref{tab:phase2-first1}. The classical purity measure is $\frac{1}{1719}(349+957+261+28) = 0.9279$, which is slightly greater than our approach of $\frac{1}{4}(0.751+0.994+1+0.933) = 0.9195$. The standard deviation of our purity measure is about 0.1163, which gives us a measure of consistency between the individual purity.
-
-<<phase2-data, echo=FALSE, cache=TRUE>>=
-load(file = "phase2_evaluation.RData")
-@
-
-<<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
-library(xtable)
-tab = rbind(phase2_results$max_class[1, ], c(349,957,261,28), phase2_results$size[1, ], round(phase2_results$purity[1, ], 3))
-rownames(tab) = c("$class", "$count", "$size", "$purity")
-xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first1")
-align(xtab) = "r|llll"
-print(xtab, booktabs = TRUE)
-@
-
-Table \ref{tab:phase2-first2} presents the Euclidean distance to the centroid of the non-intrusion instances from the centroid of each cluster for the same iteration. Since the second cluster is the closest to the centroid of the non-intrusion instances, it is removed and the remaining three clusters will form the set of detected intrusions. The third cluster, which is purely of the non-intrusion instances, is counterintuitively distant from the non-intrusion centroid. It is more distant than the first cluster of the Smurf attacks and less distant than the fourth cluster of the Neptune attacks. It could be possible that the non-intrusion instances in this cluster are rather behaving as if they are anomalies. A simple example would be that a user who has forgotten his or her password could show similar behaviour as a dictionary attack by multiple attempts at logging into a system.
-
-<<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
-library(xtable)
-tab = matrix(round(phase2_results$distances[1, ], 3), nrow = 1)
-rownames(tab) = "$distance"
-xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first2")
-align(xtab) = "r|llll"
-print(xtab, booktabs = TRUE)
-@
-
-Finally, the mean and the standard deviation of 100 sets of purity measures are presented in Table \ref{tab:phase2-first3}.
-
-<<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
-library(xtable)
-tab = matrix(c(round(mean(phase2_results$purity), 4), round(sd(phase2_results$purity), 4)), nrow = 1)
-rownames(tab) = "$overall.purity"
-colnames(tab) = c("mean", "sd")
-xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first3", digits = 4)
-align(xtab) = "r|ll"
-print(xtab, booktabs = TRUE)
-@
-
-
-%----------------------------------------------------------
-\section{System Evaluation}
-\label{sec:evaluation-system}
-
-Table \ref{tab:phase2-first3} is the result of the overall system evaluation. There are 61 occasions where the clusters of non-intrusion instances are correctly identified by being the closest to the non-intrusion centroid to result in the detection rates that are all above 96\%. For the remaining 39 occasions, the clusters are incorrectly identified to result in the detection rates below 81\%. For these 39 cases, the clusters of intrusions are identified as being the closest to the non-intrusion centroid while the actual clusters of non-intrusion instances that we want to identify are further away. The reason is because there are multiple clusters of non-intrusion instances present in the dataset. These non-intrusion instances behave abnormally relative to the majority of the other non-intrusion instances to the extent that they are detected as possible anomalies.
-
-<<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
-library(xtable)
-tab = matrix(c(round(mean(phase2_results$detection.rate), 4), round(sd(phase2_results$detection.rate), 4),
-               round(mean(phase2_results$false.alarm.rate), 4), round(sd(phase2_results$false.alarm.rate), 4)), nrow = 2, byrow = TRUE)
-rownames(tab) = c("detection rate", "false alarm rate")
-colnames(tab) = c("mean", "sd")
-xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first3", digits = 4)
-align(xtab) = "r|ll"
-print(xtab, booktabs = TRUE)
-@
-
-The same experiment is conducted on the test dataset of KDD'99 where there are 14 unique attack types. The result is presented in Table \ref{tab:phase2-first4}. The similar situation mentioned previously is also present for the results using the test dataset.
-
-<<echo=FALSE, results='asis'>>=
-library(xtable)
-load(file = "system_testset.RData")
-tab = t(test_testdata$table)
-tab[1, 1] = as.numeric(tab[1, 1])
-tab[2, 1] = as.numeric(tab[2, 1])
-tab[1, 2] = as.numeric(gsub("[(]|[)]", "", tab[1, 2]))
-tab[2, 2] = as.numeric(gsub("[(]|[)]", "", tab[2, 2]))
-xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first3", digits = 4)
-align(xtab) = "r|ll"
-print(xtab, booktabs = TRUE)
-@
-
-
-
-
-% \subsection{Experimental Results}
+% \begin{enumerate}
+% \item \textbf{Denial-of-service (DoS):} an attack to temporarily or indefinitely disable services of a host to its intended users by flooding memory resources.
 % 
-% <<load_results, echo=FALSE>>=
-% load(file = "evaluation.results.RData")
+% \item \textbf{Remote-to-local (R2L):} a situation where an attacker is able to send packets to a target machine over a network in order to gain access as a local user of the machine.
+% 
+% \item \textbf{User-to-root (U2R):} an attempt by the attacker with precedent access to a target machine as a normal user to further gain control of root privileges.
+% 
+% \item \textbf{Probing:} a type of surveillance attack to monitor a target network of a machine in order to gain information on possible vulnerabilities of the network. As a result, the probing attacks are usually followed up by a chain of attacks that exploit any identified network vulnerabilities.
+% \end{enumerate}
+% 
+% Each instance in KDD'99 is a connection record, that is a sequence of TCP packets for a data flow between a source IP address to a target IP address. There are 41 features in the dataset that can be categorized into three groups:
+% 
+% \begin{enumerate}
+% \item \textbf{Basic features:} 9 of the 41 features are basic features of individual TCP connections, such as the types of the protocol and network service.
+% 
+% \item \textbf{Content features:} 13 of the 41 features are content features suggested by domain knowledge, such as the numbers of shell prompts, file creation operations and "root" accesses.
+% %The DoS and probing attacks occur in bursts, i.e., these attacks involve many connections in an extremely short time period, to result in frequent sequential patterns for intrusions. On the other hand, the R2L and U2R attacks usually involve a single connection and are more difficult to detect using just the basic features. Hence the main purpose of the content features is to provide additional information that can be used to improve detection.
+% 
+% \item \textbf{Traffic features:} 18 of the 41 features are traffic features computed using a two-second time window that can be further divided into two groups:
+%     
+%     \begin{enumerate}
+%     \item \textbf{"same host" features:} statistics derived from the connections in the past two seconds that have the same destination host as the current connection
+%     
+%     \item \textbf{"same service" features:} similar statistics from the connections in the past two seconds that have the same service as the current connection
+%     \end{enumerate}
+%     
+% \end{enumerate}
+
+
+
+% ------------------------------
+% SECTION 2: Experimental setup
+% ------------------------------
+%' \section{Experimental Setup}
+%' \label{evaluation:sec2}
+%' 
+%' The proposed IDS is evaluated under the following framework:
+%' 
+%' \begin{enumerate}
+%'     \item The 10 percent subset version of the complete KDD'99 is used for the experiment. Since our system operates under an unsupervised learning manner and the labels are available for both the training and test datasets, we treat them as two separate datasets and report results from those datasets separately. We refer to those datasets as \emph{dataset-1} and \emph{dataset-2} to avoid any confusion.
+%'     \item Each experiment, or run, is conducted using a random sample of 5,000 records as a testset. The ratio of intrusion and non-intrusion instances is varied in the testset to report the performance of the IDS between the differing ratios. The variation is specified for the percentage of intrusion instances in a test dataset at 10, 20, 30 and 40 percents. The sample size of 5,000 is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
+%'     \item The parameter $k$ for the LOF algorithm is varied to assess whether the value of $k$ has an impact on the performance of LOF.
+%'     \item The experiment is repeated on a hundred different testsets to account for the relatively small sample size. The random seed for each iteration of the repeated experiments is set to be a sequence from 1 to 100.
+%' \end{enumerate}
+%' 
+%' 
+%' 
+%' % -------------------------------------
+%' % SECTION 3: Phase-specific evaluation
+%' % -------------------------------------
+%' \section{Phase-specific Evaluation}
+%' \label{evaluation:sec3}
+%' 
+%' This section reports on results from the evaluation of each Phase. The main focus of Phase 1 evaluation is the kernel function-based threshold determination step where a threshold is determined from kernel density estimates and input data is partitioned into sets of non-intrusions and possible anomalies while that of Phase 2 evaluation is the DBSCAN clustering step where possible anomalies are clustered and a cluster of false positives is recognised. Sections \ref{evaluation:sec3.1} and \ref{evaluation:sec3.2} present the Phase 1 and 2 evaluation, respectively.
+%' 
+%' 
+%' % -----------------
+%' % SUB-SECTION: 3.1
+%' % -----------------
+%' \subsection{Phase 1}
+%' \label{evaluation:sec3.1}
+%' 
+%' A range of different values for the input parameter of the LOF algorithm, $k$, is tested. Assuming there is not enough domain knowledge and the most appropriate value for $k$ is not known, we have specified the range of $k$ to be tested as percentage, relative to the size of a test dataset, at 10, 20, 30 and 40 percents of the test dataset size. We refer to the percentages of $k$ as $\%k$ (percentage $k$).
+%' 
+%' The rest of this section is divided into four, each of which presents the density plots of LOF scores at different $\%k$ and the means and standard deviations of detection and false positive rates from one hundred repeated experiments for fixed percentage of intrusions.
+%' 
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 10\% intrusions}
+%' The test dataset used in this section is composed of 10\% intrusion and 90\% non-intrusion instances. Figure \ref{fig:attack10} represents the density plots at the four different percentages of $k$ at fixed 10\% intrusions. The means of thresholds, detection rates and false positive rates are tabulated, along with thier standard deviations in brackets, in Table \ref{evaluation:tab1}.
+%' 
+%' <<attack10, cache=TRUE, echo = FALSE, fig.align='center', fig.cap="Estimated density plots of LOF scores using KDE at different $\\%k$", out.width="0.45\\linewidth", fig.show='hold', fig.pos="h">>=
+%' require(scales)
+%' ## 10% attack, 10 %k
+%' scores1 = as.matrix(read.csv("phase1_scores-10a-10k.csv", header = FALSE))
+%' plot(density(scores1[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 10 %k")
+%' invisible(lapply(2:nrow(scores1), function(i) lines(density(scores1[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 10% attack, 20 %k
+%' scores2 = as.matrix(read.csv("phase1_scores-10a-20k.csv", header = FALSE))
+%' plot(density(scores2[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 20 %k")
+%' invisible(lapply(2:nrow(scores2), function(i) lines(density(scores2[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 10% attack, 30 %k
+%' scores3 = as.matrix(read.csv("phase1_scores-10a-30k.csv", header = FALSE))
+%' plot(density(scores3[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 30 %k")
+%' invisible(lapply(2:nrow(scores3), function(i) lines(density(scores3[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 10% attack, 430 %k
+%' scores4 = as.matrix(read.csv("phase1_scores-10a-40k.csv", header = FALSE))
+%' plot(density(scores4[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 40 %k")
+%' invisible(lapply(2:nrow(scores4), function(i) lines(density(scores4[i, ]), col = alpha("black", 0.1))))
+%' @
+%' 
+%' <<phase1-data, cache=TRUE, echo = FALSE, results='asis'>>=
+%' load(file = "phase1_evaluation.RData")
+%' @
+%' 
+%' <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' options(digits = 3)
+%' library(xtable)
+%' tab = data.frame(rbind(c(paste0(round(a10_10k$threshold[1], 3), " (", round(a10_10k$threshold[2], 2), ")"),
+%'                          paste0(round(a10_20k$threshold[1], 3), " (", round(a10_20k$threshold[2], 2), ")"),
+%'                          paste0(round(a10_30k$threshold[1], 3), " (", round(a10_30k$threshold[2], 2), ")"),
+%'                          paste0(round(a10_40k$threshold[1], 3), " (", round(a10_40k$threshold[2], 2), ")")),
+%'                        c(paste0(round(a10_10k$detection.rate[1], 3), " (", round(a10_10k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a10_20k$detection.rate[1], 3), " (", round(a10_20k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a10_30k$detection.rate[1], 3), " (", round(a10_30k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a10_40k$detection.rate[1], 3), " (", round(a10_40k$detection.rate[2], 2), ")")),
+%'                        c(paste0(round(a10_10k$false.alarm[1], 3), " (", round(a10_10k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a10_20k$false.alarm[1], 3), " (", round(a10_20k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a10_30k$false.alarm[1], 3), " (", round(a10_30k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a10_40k$false.alarm[1], 3), " (", round(a10_40k$false.alarm[2], 2), ")"))))
+%' 
+%' colnames(tab) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' rownames(tab) = c("threshold", "detection rate", "false alarm rate")
+%' xtab        = xtable(tab, caption = "Threshold, detection rate and false alarm rate at 10\\% intrusions", label = "evaluation:tab1", digits = 3)
+%' align(xtab) = "r|llll"
+%' print(xtab, booktabs = TRUE, caption.placement = "top")
+%' @
+%' 
+%' 
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 20\% intrusions}
+%' The test dataset used in this section is composed of 20\% intrusion and 80\% non-intrusion instances. Figure \ref{fig:attack20} represents the density plots at the different percentages of $k$  at fixed 20\% intrusions. The means of thresholds, detection rates and false positive rates are tabulated, along with thier standard deviations in brackets, in Table \ref{evaluation:tab2}.
+%' 
+%' <<attack20, cache=TRUE, echo = FALSE, fig.align='center', fig.cap="Estimated density plots of LOF scores using KDE at different $\\%k$", out.width="0.45\\linewidth", fig.show='hold', fig.pos="h">>=
+%' require(scales)
+%' ## 20% attack, 10 %k
+%' scores1 = as.matrix(read.csv("phase1_scores-20a-10k.csv", header = FALSE))
+%' plot(density(scores1[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 10 %k")
+%' invisible(lapply(2:nrow(scores1), function(i) lines(density(scores1[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 20% attack, 20 %k
+%' scores2 = as.matrix(read.csv("phase1_scores-20a-20k.csv", header = FALSE))
+%' plot(density(scores2[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 20 %k")
+%' invisible(lapply(2:nrow(scores2), function(i) lines(density(scores2[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 20% attack, 30 %k
+%' scores3 = as.matrix(read.csv("phase1_scores-20a-30k.csv", header = FALSE))
+%' plot(density(scores3[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 30 %k")
+%' invisible(lapply(2:nrow(scores3), function(i) lines(density(scores3[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 20% attack, 430 %k
+%' scores4 = as.matrix(read.csv("phase1_scores-20a-40k.csv", header = FALSE))
+%' plot(density(scores4[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 40 %k")
+%' invisible(lapply(2:nrow(scores4), function(i) lines(density(scores4[i, ]), col = alpha("black", 0.1))))
+%' @
+%' 
+%' <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' options(digits = 3)
+%' library(xtable)
+%' tab = data.frame(rbind(c(paste0(round(a20_10k$threshold[1], 3), " (", round(a20_10k$threshold[2], 2), ")"),
+%'                          paste0(round(a20_20k$threshold[1], 3), " (", round(a20_20k$threshold[2], 2), ")"),
+%'                          paste0(round(a20_30k$threshold[1], 3), " (", round(a20_30k$threshold[2], 2), ")"),
+%'                          paste0(round(a20_40k$threshold[1], 3), " (", round(a20_40k$threshold[2], 2), ")")),
+%'                        c(paste0(round(a20_10k$detection.rate[1], 3), " (", round(a20_10k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a20_20k$detection.rate[1], 3), " (", round(a20_20k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a20_30k$detection.rate[1], 3), " (", round(a20_30k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a20_40k$detection.rate[1], 3), " (", round(a20_40k$detection.rate[2], 2), ")")),
+%'                        c(paste0(round(a20_10k$false.alarm[1], 3), " (", round(a20_10k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a20_20k$false.alarm[1], 3), " (", round(a20_20k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a20_30k$false.alarm[1], 3), " (", round(a20_30k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a20_40k$false.alarm[1], 3), " (", round(a20_40k$false.alarm[2], 2), ")"))))
+%' 
+%' colnames(tab) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' rownames(tab) = c("threshold", "detection rate", "false alarm rate")
+%' xtab        = xtable(tab, caption = "Threshold, detection rate and false alarm rate at 20\\% intrusions", label = "evaluation:tab2", digits = 3)
+%' align(xtab) = "r|llll"
+%' print(xtab, booktabs = TRUE, caption.placement = "top")
+%' @
+%' 
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 30\% intrusions}
+%' The test dataset used in this section is composed of 30\% intrusion and 70\% non-intrusion instances. Figure \ref{fig:attack30} represents the density plots at the different percentages of $k$  at fixed 30\% intrusions. The means of thresholds, detection rates and false positive rates are tabulated, along with thier standard deviations in brackets, in Table \ref{evaluation:tab3}.
+%' 
+%' <<attack30, cache=TRUE, echo = FALSE, fig.align='center', fig.cap="Estimated density plots of LOF scores using KDE at different $\\%k$", out.width="0.45\\linewidth", fig.show='hold', fig.pos="h">>=
+%' require(scales)
+%' ## 30% attack, 10 %k
+%' scores1 = as.matrix(read.csv("phase1_scores-30a-10k.csv", header = FALSE))
+%' plot(density(scores1[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 10 %k")
+%' invisible(lapply(2:nrow(scores1), function(i) lines(density(scores1[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 30% attack, 20 %k
+%' scores2 = as.matrix(read.csv("phase1_scores-30a-20k.csv", header = FALSE))
+%' plot(density(scores2[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 20 %k")
+%' invisible(lapply(2:nrow(scores2), function(i) lines(density(scores2[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 30% attack, 30 %k
+%' scores3 = as.matrix(read.csv("phase1_scores-30a-30k.csv", header = FALSE))
+%' plot(density(scores3[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 30 %k")
+%' invisible(lapply(2:nrow(scores3), function(i) lines(density(scores3[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 30% attack, 430 %k
+%' scores4 = as.matrix(read.csv("phase1_scores-30a-40k.csv", header = FALSE))
+%' plot(density(scores4[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 40 %k")
+%' invisible(lapply(2:nrow(scores4), function(i) lines(density(scores4[i, ]), col = alpha("black", 0.1))))
+%' @
+%' 
+%' <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' options(digits = 3)
+%' library(xtable)
+%' tab = data.frame(rbind(c(paste0(round(a30_10k$threshold[1], 3), " (", round(a30_10k$threshold[2], 2), ")"),
+%'                          paste0(round(a30_20k$threshold[1], 3), " (", round(a30_20k$threshold[2], 2), ")"),
+%'                          paste0(round(a30_30k$threshold[1], 3), " (", round(a30_30k$threshold[2], 2), ")"),
+%'                          paste0(round(a30_40k$threshold[1], 3), " (", round(a30_40k$threshold[2], 2), ")")),
+%'                        c(paste0(round(a30_10k$detection.rate[1], 3), " (", round(a30_10k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a30_20k$detection.rate[1], 3), " (", round(a30_20k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a30_30k$detection.rate[1], 3), " (", round(a30_30k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a30_40k$detection.rate[1], 3), " (", round(a30_40k$detection.rate[2], 2), ")")),
+%'                        c(paste0(round(a30_10k$false.alarm[1], 3), " (", round(a30_10k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a30_20k$false.alarm[1], 3), " (", round(a30_20k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a30_30k$false.alarm[1], 3), " (", round(a30_30k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a30_40k$false.alarm[1], 3), " (", round(a30_40k$false.alarm[2], 2), ")"))))
+%' 
+%' colnames(tab) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' rownames(tab) = c("threshold", "detection rate", "false alarm rate")
+%' xtab        = xtable(tab, caption = "Threshold, detection rate and false alarm rate at 30\\% intrusions", label = "evaluation:tab3", digits = 3)
+%' align(xtab) = "r|llll"
+%' print(xtab, booktabs = TRUE, caption.placement = "top")
+%' @
+%' 
+%' 
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 40\% intrusions}
+%' The test dataset used in this section is composed of 40\% intrusion and 60\% non-intrusion instances. Figure \ref{fig:attack40} represents the density plots at the different percentages of $k$ at fixed 40\% intrusions. The means of thresholds, detection rates and false positive rates are tabulated, along with thier standard deviations in brackets, in Table \ref{evaluation:tab4}.
+%' 
+%' <<attack40, cache=TRUE, echo = FALSE, fig.align='center', fig.cap="Estimated density plots of LOF scores using KDE at different $\\%k$", out.width="0.45\\linewidth", fig.show='hold', fig.pos="h">>=
+%' require(scales)
+%' ## 40% attack, 10 %k
+%' scores1 = as.matrix(read.csv("phase1_scores-40a-10k.csv", header = FALSE))
+%' plot(density(scores1[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 10 %k")
+%' invisible(lapply(2:nrow(scores1), function(i) lines(density(scores1[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 40% attack, 20 %k
+%' scores2 = as.matrix(read.csv("phase1_scores-40a-20k.csv", header = FALSE))
+%' plot(density(scores2[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 20 %k")
+%' invisible(lapply(2:nrow(scores2), function(i) lines(density(scores2[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 40% attack, 30 %k
+%' scores3 = as.matrix(read.csv("phase1_scores-40a-30k.csv", header = FALSE))
+%' plot(density(scores3[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 30 %k")
+%' invisible(lapply(2:nrow(scores3), function(i) lines(density(scores3[i, ]), col = alpha("black", 0.1))))
+%' 
+%' ## 40% attack, 430 %k
+%' scores4 = as.matrix(read.csv("phase1_scores-40a-40k.csv", header = FALSE))
+%' plot(density(scores4[1, ]), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density of LOF scores at 10% intrusion and 40 %k")
+%' invisible(lapply(2:nrow(scores4), function(i) lines(density(scores4[i, ]), col = alpha("black", 0.1))))
+%' @
+%' 
+%' <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' options(digits = 3)
+%' library(xtable)
+%' tab = data.frame(rbind(c(paste0(round(a40_10k$threshold[1], 3), " (", round(a40_10k$threshold[2], 2), ")"),
+%'                          paste0(round(a40_20k$threshold[1], 3), " (", round(a40_20k$threshold[2], 2), ")"),
+%'                          paste0(round(a40_30k$threshold[1], 3), " (", round(a40_30k$threshold[2], 2), ")"),
+%'                          paste0(round(a40_40k$threshold[1], 3), " (", round(a40_40k$threshold[2], 2), ")")),
+%'                        c(paste0(round(a40_10k$detection.rate[1], 3), " (", round(a40_10k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a40_20k$detection.rate[1], 3), " (", round(a40_20k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a40_30k$detection.rate[1], 3), " (", round(a40_30k$detection.rate[2], 2), ")"),
+%'                          paste0(round(a40_40k$detection.rate[1], 3), " (", round(a40_40k$detection.rate[2], 2), ")")),
+%'                        c(paste0(round(a40_10k$false.alarm[1], 3), " (", round(a40_10k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a40_20k$false.alarm[1], 3), " (", round(a40_20k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a40_30k$false.alarm[1], 3), " (", round(a40_30k$false.alarm[2], 2), ")"),
+%'                          paste0(round(a40_40k$false.alarm[1], 3), " (", round(a40_40k$false.alarm[2], 2), ")"))))
+%' 
+%' colnames(tab) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' rownames(tab) = c("threshold", "detection rate", "false alarm rate")
+%' xtab        = xtable(tab, caption = "Threshold, detection rate and false alarm rate at 40\\% intrusions", label = "evaluation:tab4", digits = 3)
+%' align(xtab) = "r|llll"
+%' print(xtab, booktabs = TRUE, caption.placement = "top")
+%' @
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' % %The choice of the input parameter, $k$, heavily depends on the application domain and prior knowledge about data. Without knowing the actual sizes, or the local densities, of possible clusters in the data, $k$ can only be set arbitrarily. According to the authors of the LOF algorithm, $k$ must be large enough to avoid any statistical fluctuations in the computed scores. Also $k$ must be less than the size of the entire dataset to avoid including all the instances as the neighbourhood. What can be deducted from the examples given in the literature is that the choice of $k$ is related to the size of data that the algorithm is applied to. Therefore we have decided to set $k$ to be proportional to the size of a testset such that $k$ is appropriately high for a large dataset and vice versa.
+%' % 
+%' % We have tested the performance of LOF on four different values of $k$, namely 500, 1,000, 1,500 and 2,000, that is 10\%, 20\%, 30\% and 40\% of the testset size of 5,000. The amount of intrusion instances, as denoted by \emph{p.attack}, in the testset is also varied to assess whether the adequacy of $k$ depends on the number of intrusion instances in the testset. Tables \ref{tab:phase1-detection}, \ref{tab:phase1-false} and \ref{tab:phase1-threshold} present the means of the detection and false alarm rates and thresholds from the 100 repeated experiments. The corresponding standard deviations are represented in brackets.
+%' % 
+%' % <<phase1-data, cache=TRUE, echo = FALSE, results='asis'>>=
+%' % load(file = "phase1_evaluation.RData")
+%' % @
+%' % 
+%' % <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' % library(xtable)
+%' % detection.rate = data.frame(rbind(
+%' %     c(paste0(round(a10_10k$detection.rate[1], 3), " (", round(a10_10k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a10_20k$detection.rate[1], 3), " (", round(a10_20k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a10_30k$detection.rate[1], 3), " (", round(a10_30k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a10_40k$detection.rate[1], 3), " (", round(a10_40k$detection.rate[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a20_10k$detection.rate[1], 3), " (", round(a20_10k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a20_20k$detection.rate[1], 3), " (", round(a20_20k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a20_30k$detection.rate[1], 3), " (", round(a20_30k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a20_40k$detection.rate[1], 3), " (", round(a20_40k$detection.rate[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a30_10k$detection.rate[1], 3), " (", round(a30_10k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a30_20k$detection.rate[1], 3), " (", round(a30_20k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a30_30k$detection.rate[1], 3), " (", round(a30_30k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a30_40k$detection.rate[1], 3), " (", round(a30_40k$detection.rate[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a40_10k$detection.rate[1], 3), " (", round(a40_10k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a40_20k$detection.rate[1], 3), " (", round(a40_20k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a40_30k$detection.rate[1], 3), " (", round(a40_30k$detection.rate[2], 2), ")"),
+%' %       paste0(round(a40_40k$detection.rate[1], 3), " (", round(a40_40k$detection.rate[2], 2), ")"))
+%' % ))
+%' % 
+%' % colnames(detection.rate) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' % rownames(detection.rate) = c("p.attack = 10%", "p.attack = 20%", "p.attack = 30%", "p.attack = 40%")
+%' % 
+%' % xtab        = xtable(detection.rate, caption = "Detection rate", label = "tab:phase1-detection")
+%' % align(xtab) = "r|llll"
+%' % print(xtab, booktabs = TRUE)
+%' % @
+%' % 
+%' % <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' % library(xtable)
+%' % false.alarm = data.frame(rbind(
+%' %     c(paste0(round(a10_10k$false.alarm[1], 3), " (", round(a10_10k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a10_20k$false.alarm[1], 3), " (", round(a10_20k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a10_30k$false.alarm[1], 3), " (", round(a10_30k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a10_40k$false.alarm[1], 3), " (", round(a10_40k$false.alarm[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a20_10k$false.alarm[1], 3), " (", round(a20_10k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a20_20k$false.alarm[1], 3), " (", round(a20_20k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a20_30k$false.alarm[1], 3), " (", round(a20_30k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a20_40k$false.alarm[1], 3), " (", round(a20_40k$false.alarm[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a30_10k$false.alarm[1], 3), " (", round(a30_10k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a30_20k$false.alarm[1], 3), " (", round(a30_20k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a30_30k$false.alarm[1], 3), " (", round(a30_30k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a30_40k$false.alarm[1], 3), " (", round(a30_40k$false.alarm[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a40_10k$false.alarm[1], 3), " (", round(a40_10k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a40_20k$false.alarm[1], 3), " (", round(a40_20k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a40_30k$false.alarm[1], 3), " (", round(a40_30k$false.alarm[2], 2), ")"),
+%' %       paste0(round(a40_40k$false.alarm[1], 3), " (", round(a40_40k$false.alarm[2], 2), ")"))
+%' % ))
+%' % 
+%' % colnames(false.alarm) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' % rownames(false.alarm) = c("p.attack = 10%", "p.attack = 20%", "p.attack = 30%", "p.attack = 40%")
+%' % 
+%' % xtab        = xtable(false.alarm, caption = "False alarm rate", label = "tab:phase1-false")
+%' % align(xtab) = "r|llll"
+%' % print(xtab, booktabs = TRUE)
+%' % @
+%' % 
+%' % <<cache=TRUE, dependson="phase1-data", echo = FALSE, results='asis'>>=
+%' % library(xtable)
+%' % threshold = data.frame(rbind(
+%' %     c(paste0(round(a10_10k$threshold[1], 3), " (", round(a10_10k$threshold[2], 2), ")"),
+%' %       paste0(round(a10_20k$threshold[1], 3), " (", round(a10_20k$threshold[2], 2), ")"),
+%' %       paste0(round(a10_30k$threshold[1], 3), " (", round(a10_30k$threshold[2], 2), ")"),
+%' %       paste0(round(a10_40k$threshold[1], 3), " (", round(a10_40k$threshold[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a20_10k$threshold[1], 3), " (", round(a20_10k$threshold[2], 2), ")"),
+%' %       paste0(round(a20_20k$threshold[1], 3), " (", round(a20_20k$threshold[2], 2), ")"),
+%' %       paste0(round(a20_30k$threshold[1], 3), " (", round(a20_30k$threshold[2], 2), ")"),
+%' %       paste0(round(a20_40k$threshold[1], 3), " (", round(a20_40k$threshold[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a30_10k$threshold[1], 3), " (", round(a30_10k$threshold[2], 2), ")"),
+%' %       paste0(round(a30_20k$threshold[1], 3), " (", round(a30_20k$threshold[2], 2), ")"),
+%' %       paste0(round(a30_30k$threshold[1], 3), " (", round(a30_30k$threshold[2], 2), ")"),
+%' %       paste0(round(a30_40k$threshold[1], 3), " (", round(a30_40k$threshold[2], 2), ")")),
+%' %     
+%' %     c(paste0(round(a40_10k$threshold[1], 3), " (", round(a40_10k$threshold[2], 2), ")"),
+%' %       paste0(round(a40_20k$threshold[1], 3), " (", round(a40_20k$threshold[2], 2), ")"),
+%' %       paste0(round(a40_30k$threshold[1], 3), " (", round(a40_30k$threshold[2], 2), ")"),
+%' %       paste0(round(a40_40k$threshold[1], 3), " (", round(a40_40k$threshold[2], 2), ")"))
+%' % ))
+%' % 
+%' % colnames(threshold) = c("k = 10%", "k = 20%", "k = 30%", "k = 40%")
+%' % rownames(threshold) = c("p.attack = 10%", "p.attack = 20%", "p.attack = 30%", "p.attack = 40%")
+%' % 
+%' % xtab        = xtable(threshold, caption = "Threshold", label = "tab:phase1-threshold")
+%' % align(xtab) = "r|llll"
+%' % print(xtab, booktabs = TRUE)
+%' % @
+%' % 
+%' % From the tables, a few observations can be made:
+%' % 
+%' % \begin{itemize}
+%' % 
+%' % \item As $k$ increases, the detection and false positive rates as well as the thresholds are more consistent, as shown by the decreases in their respective standard deviations. This suggests that $k$ should be adequately large to produce more stable results.
+%' % 
+%' % \item As the number of intrusion instances, denoted by \emph{p.attack}, increases in the testset, the false alarm rates at $k = 10\%$ seems to increase. This mildly suggests that the LOF algorithm for this particular instance has performed well when the ratio between the numbers of intrusion and non-intrusion instances are further apart. However, the other rates vary widely between the different values of p.attack to support this claim.
+%' % 
+%' % \item The thresholds fluctuate widely for the different testsets. This is expected as our threshold is set to be adaptive to the density curve of the computed scores.
+%' % 
+%' % \item The performance seems to be at best for the case where p.attack = 10\% and $k = 40\%$, as indicated by the highest detection rate and the lowest false alarm rate. The density curves of the 100 sets of LOF scores can be seen in Figure \ref{fig:phase1-eval-density}.
+%' % 
+%' % \end{itemize}
+%' % 
+%' % 
+%' % <<phase1-eval-density, echo=FALSE, fig.align='center', fig.cap='The density curves of the 100 sets of the LOF scores computed for the testset of 4,500 non-intrusion and 500 intrusion instances at k = 2,000.', out.width="0.6\\linewidth">>=
+%' % a10_40k_scores = read.csv("phase1_scores-10a-40k.csv")
+%' % a10_40k_scores = as.matrix(a10_40k_scores)
+%' % 
+%' % library(scales)
+%' % plot(density(a10_40k_scores[1, ]), ylim = c(0, 4), col = alpha("black", 0.1), xlab = "LOF scores", main = "Density curves for 100 sets of LOF scores")
+%' % for (i in 2:99) {
+%' %     lines(density(a10_40k_scores[i, ]), col = alpha("black", 0.1))
+%' % }
+%' % @
+%' % 
+%' % %The input parameter, $k$, is set to be proportional to the size of the testset. We have tested the performance of LOF using $k$ values at 10\%, 20\%, 30\% and 40\% of the testset size, that is 500, 1,000, 1,500 and 2,000 respectively. The initial $k$ value of 500 may seem rather large but our intention is to avoid any statistical inconsistency by setting it too low, as mentioned by the authors of the LOF algorithm. Four different types of testsets are used, where the number of intrusion instances is varied between 2,000, 1,500, 1,000 and 500.
+%' % 
+%' % % As discussed by the authors of the LOF algorithm, a set of LOF scores can fluctuate non-monotonically depending on the choice of the input parameter, $k$. What they have found was that the variation, measured by the standard deviation, in the scores computed for a random uniform sample stabilises for $k$ greater than 10. From this, they suggested a heuristic that $k$ should be greater than 10 to avoid any statistical inconsistency in the computed LOF scores. On the other hand, if $k$ is set to be too large, non-outliers can end up being detected as outliers because the size of the neighbourhood increases to potentially include non-outliers from other clusters as $k$ increases. The authors' suggestion is to compute LOF scores over a range of $k$ and take the maximum of the scores to report on the most outlying scores.
+%' % % 
+%' % % The difficulty to proceed with their heuristic is the computation time and memory resource consumption, both of which depend on the size of $k$ range. If $k$ is set to be over a wide range, the LOF algorithm is going to occur that much more compared to over a narrow range.
+%' % % 
+%' % % Hence, the size 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' 
+%' % uncomment the subsection below:
+%' % -----------------
+%' % SUB-SECTION: 3.2
+%' % -----------------
+%' \subsection{Phase 2}
+%' \label{evaluation:sec3.2}
+%' 
+%' Since the aim of the DBSCAN clustering technique used in Phase 2 is to categorise instances belonging to the same attack type into each cluster, it is of the most interest to evaluate whether the members of each cluster belong to one particular type of attacks. Hence the externel criterion of clustering quality, \emph{purity}, is measured, that is given by
+%' \[ purity = \frac{1}{N} \sum_{i=1}^{k} max_j |c_i \cap t_j |, \]
+%' where $N$ is the number of objects, $k$ is the number of clusters, $c_i$ is a cluster in $C$ and $t_j$ is the class $j$. Because purity is an average measure aggregated over all clusters, the presence of relatively large clusters can result in an increased purity. To avoid the bias, clustering purity is computed at an individual cluster level for Phase 2 by
+%' \[ purity_i = \frac{1}{n_i} max_j |c_i \cap t_j |, \]
+%' for the $i$th cluster.
+%' 
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 10\% intrusions}
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 20\% intrusions}
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 30\% intrusions}
+%' 
+%' %----------------------------------------------------------
+%' \subsubsection{At 40\% intrusions}
+
+
+
+
+
+
+
+
+
+
+
+% As an example, the most frequent class, its count, the size and the purity computed for the first iteration of the repeated experiment is presented in Table \ref{tab:phase2-first1}. The classical purity measure is $\frac{1}{1719}(349+957+261+28) = 0.9279$, which is slightly greater than our approach of $\frac{1}{4}(0.751+0.994+1+0.933) = 0.9195$. The standard deviation of our purity measure is about 0.1163, which gives us a measure of consistency between the individual purity.
+% 
+% <<phase2-data, echo=FALSE, cache=TRUE>>=
+% load(file = "phase2_evaluation.RData")
 % @
 % 
-% 
-% \subsubsection{Phase 1}
-% 
-% \begin{itemize}
-% \item Detection rate from LOF
-% \item False alarm rate from LOF
-% \item Computation time
-% \end{itemize}
-% 
-% \subsubsection{Phase 2}
-% 
-% \begin{itemize}
-% \item Average purity of clusters and s.d.
-% \item Rate of correctly identifying "normal" clusters
-% \item Six different distance metrics
-% \item Computation time
-% \end{itemize}
-% 
-% \subsubsection{Overall}
-% 
-% <<echo=FALSE, results=tex>>=
+% <<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
 % library(xtable)
-% xtable(k30.euc$table,  caption = "Euclidean")
-% xtable(k30.weuc$table, caption = "Weighted Euclidean")
-% xtable(k30.man$table,  caption = "Manhattan")
-% xtable(k30.che$table,  caption = "Chebyshev")
-% xtable(k30.min$table,  caption = "Minkoski")
-% xtable(k30.mah$table,  caption = "Mahalanobis")
+% tab = rbind(phase2_results$max_class[1, ], c(349,957,261,28), phase2_results$size[1, ], round(phase2_results$purity[1, ], 3))
+% rownames(tab) = c("$class", "$count", "$size", "$purity")
+% xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first1")
+% align(xtab) = "r|llll"
+% print(xtab, booktabs = TRUE)
 % @
+% 
+% Table \ref{tab:phase2-first2} presents the Euclidean distance to the centroid of the non-intrusion instances from the centroid of each cluster for the same iteration. Since the second cluster is the closest to the centroid of the non-intrusion instances, it is removed and the remaining three clusters will form the set of detected intrusions. The third cluster, which is purely of the non-intrusion instances, is counterintuitively distant from the non-intrusion centroid. It is more distant than the first cluster of the Smurf attacks and less distant than the fourth cluster of the Neptune attacks. It could be possible that the non-intrusion instances in this cluster are rather behaving as if they are anomalies. A simple example would be that a user who has forgotten his or her password could show similar behaviour as a dictionary attack by multiple attempts at logging into a system.
+% 
+% <<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
+% library(xtable)
+% tab = matrix(round(phase2_results$distances[1, ], 3), nrow = 1)
+% rownames(tab) = "$distance"
+% xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first2")
+% align(xtab) = "r|llll"
+% print(xtab, booktabs = TRUE)
+% @
+% 
+% Finally, the mean and the standard deviation of 100 sets of purity measures are presented in Table \ref{tab:phase2-first3}.
+% 
+% <<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
+% library(xtable)
+% tab = matrix(c(round(mean(phase2_results$purity), 4), round(sd(phase2_results$purity), 4)), nrow = 1)
+% rownames(tab) = "$overall.purity"
+% colnames(tab) = c("mean", "sd")
+% xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first3", digits = 4)
+% align(xtab) = "r|ll"
+% print(xtab, booktabs = TRUE)
+% @
+
+% 
+% 
+% %----------------------------------------------------------
+% \section{System Evaluation}
+% \label{sec:evaluation-system}
+% 
+% Table \ref{tab:phase2-first3} is the result of the overall system evaluation. There are 61 occasions where the clusters of non-intrusion instances are correctly identified by being the closest to the non-intrusion centroid to result in the detection rates that are all above 96\%. For the remaining 39 occasions, the clusters are incorrectly identified to result in the detection rates below 81\%. For these 39 cases, the clusters of intrusions are identified as being the closest to the non-intrusion centroid while the actual clusters of non-intrusion instances that we want to identify are further away. The reason is because there are multiple clusters of non-intrusion instances present in the dataset. These non-intrusion instances behave abnormally relative to the majority of the other non-intrusion instances to the extent that they are detected as possible anomalies.
+% 
+% <<cache=TRUE, dependson="phase2-data", echo=FALSE, results='asis'>>=
+% library(xtable)
+% tab = matrix(c(round(mean(phase2_results$detection.rate), 4), round(sd(phase2_results$detection.rate), 4),
+%                round(mean(phase2_results$false.alarm.rate), 4), round(sd(phase2_results$false.alarm.rate), 4)), nrow = 2, byrow = TRUE)
+% rownames(tab) = c("detection rate", "false alarm rate")
+% colnames(tab) = c("mean", "sd")
+% xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first3", digits = 4)
+% align(xtab) = "r|ll"
+% print(xtab, booktabs = TRUE)
+% @
+% 
+% The same experiment is conducted on the test dataset of KDD'99 where there are 14 unique attack types. The result is presented in Table \ref{tab:phase2-first4}. The similar situation mentioned previously is also present for the results using the test dataset.
+% 
+% <<echo=FALSE, results='asis'>>=
+% library(xtable)
+% load(file = "system_testset.RData")
+% tab = t(test_testdata$table)
+% tab[1, 1] = as.numeric(tab[1, 1])
+% tab[2, 1] = as.numeric(tab[2, 1])
+% tab[1, 2] = as.numeric(gsub("[(]|[)]", "", tab[1, 2]))
+% tab[2, 2] = as.numeric(gsub("[(]|[)]", "", tab[2, 2]))
+% xtab = xtable(tab, caption = "First iteration of the repeated experiments", label = "tab:phase2-first3", digits = 4)
+% align(xtab) = "r|ll"
+% print(xtab, booktabs = TRUE)
+% @
+% 
+% % \subsection{Experimental Results}
+% % 
+% % <<load_results, echo=FALSE>>=
+% % load(file = "evaluation.results.RData")
+% % @
+% % 
+% % 
+% % \subsubsection{Phase 1}
+% % 
+% % \begin{itemize}
+% % \item Detection rate from LOF
+% % \item False alarm rate from LOF
+% % \item Computation time
+% % \end{itemize}
+% % 
+% % \subsubsection{Phase 2}
+% % 
+% % \begin{itemize}
+% % \item Average purity of clusters and s.d.
+% % \item Rate of correctly identifying "normal" clusters
+% % \item Six different distance metrics
+% % \item Computation time
+% % \end{itemize}
+% % 
+% % \subsubsection{Overall}
+% % 
+% % <<echo=FALSE, results=tex>>=
+% % library(xtable)
+% % xtable(k30.euc$table,  caption = "Euclidean")
+% % xtable(k30.weuc$table, caption = "Weighted Euclidean")
+% % xtable(k30.man$table,  caption = "Manhattan")
+% % xtable(k30.che$table,  caption = "Chebyshev")
+% % xtable(k30.min$table,  caption = "Minkoski")
+% % xtable(k30.mah$table,  caption = "Mahalanobis")
+% % @
+
+
+
+
+
+% Comment below out when building the whole doc:
+\bibliographystyle{plain}
+\bibliography{../Main/bibliography}
+
+
+
+
+
+
+
+
+
+
+
+
 

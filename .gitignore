@@ -2,6 +2,7 @@
 *.Rhistory
 *.png
 
+Data
 Writing/**/*.concordance.tex
 Writing/**/*.log
 Writing/**/*.pdf
@@ -10,9 +11,6 @@ Writing/**/*.aux
 Writing/**/*.tex
 Writing/**/*.blg
 Writing/**/cache
-
 Writing/**/*.bbl
-
-*.csv
 
 .Rproj.user
