@@ -1,7 +1,7 @@
 # ----------
 # Read data
 # ----------
-dat1 = read.csv("../kddcup.data_10_percent_corrected",     header = FALSE)
+dat1 = read.csv("../kddcup.data_10_percent_corrected",  header = FALSE)
 # dat2 = read.csv("../kddcup.testdata_10_percent_corrected", header = FALSE)
 
 ## features
@@ -27,7 +27,7 @@ Sys.setenv(WEKA_HOME = "C:\\Users\\OEM\\wekafiles")
 
 ## Load Weka packages
 WPM("load-package", "localOutlierFactor")
-#WPM("load-package", "XMeans")
+# WPM("load-package", "XMeans")
 WPM("load-package", "optics_dbScan")
 
 ## Make Weka filters
