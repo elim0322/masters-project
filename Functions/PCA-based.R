@@ -1,44 +1,3 @@
-set.seed(3); normal = sample(which(dat1$attack_type == "normal."), size = 4500, replace = FALSE)
-set.seed(3); attack = sample(which(dat1$attack_type != "normal."), size = 500,  replace = FALSE)
-## testset excludes any categorical/binary features
-testset = dat1[c(normal, attack), -c(2,3,4,7,12,21,22)]
-
-library(FactoMineR)
-pca.res = PCA(testset[, -35], graph = FALSE, ncp = 34)
-plot(pca.res$eig$eigenvalue)
-
-## number of PCs to keep
-library(nFactors)
-nPC = nMreg(pca.res$eig$eigenvalue)$nFactors["b"]
-pc = pca.res$ind$coord[, 1:nPC]
-
-library(RWeka)
-WPM("load-package", "XMeans")
-XMeans = make_Weka_clusterer("weka/clusterers/XMeans")
-xmeans.res = XMeans(as.data.frame(pc))
-cMax = names(which.max(table(xmeans.res$class_ids)))  # largest cluster
-table(testset[xmeans.res$class_ids != cMax, "attack_type"])
-
-
-
-require(RWeka)
-require(FactoMineR)
-require(nFactors)
-
-
-
-
-
-set.seed(1); normal = sample(which(dat1$attack_type == "normal."), size = 4500, replace = FALSE)
-set.seed(1); attack = sample(which(dat1$attack_type != "normal."), size = 500,  replace = FALSE)
-## testset excludes any categorical/binary features
-testset = dat1[c(normal, attack), -c(2,3,4,7,12,21,22)]
-pca.based(testset)
-
-
-pca.results = pca.experiment(dat1, p.attack = 0.1)
-
-
 pca.experiment = function(data, n = 5000, i = 100, p.attack = 0.3) {
     
     ## normal, attack and k
@@ -82,15 +41,29 @@ pca.based = function(data) {
     nPC = suppressWarnings(nMreg(pca.res$eig$eigenvalue)$nFactors["b"])
     pc  = pca.res$ind$coord[, 1:nPC]
     
-    ## X-means
-    xmeans.res = XMeans(as.data.frame(pc))
-    cMax = names(which.max(table(xmeans.res$class_ids)))  # largest cluster
+    ## k-means
+    TP = numeric()
+    FP = numeric()
+    for (i in 2:10) {
+        a = SimpleKMeans(data[, -35], control = Weka_control(N = i, S = 20))
+        b = table(testset[a$class_ids != names(which.max(table(a$class_ids))), "attack_type"])
+        TP = c(TP, sum(b[names(b) != "normal."]))
+        FP = c(FP, sum(b[names(b) == "normal."]))
+    }
+    
+    TP.max = which.max(TP)
     
     ## number of normal and attacks classified
-    n = sum(data[xmeans.res$class_ids != cMax, "attack_type"] == "normal.")
-    a = sum(data[xmeans.res$class_ids != cMax, "attack_type"] != "normal.")
+    n = TP[TP.max]
+    a = TP[TP.max]
     
     return(list(normal = n, attack = a))
     
 }
+
+pca.results10a = pca.experiment(dat1, p.attack = 0.1)
+pca.results20a = pca.experiment(dat1, p.attack = 0.2)
+pca.results30a = pca.experiment(dat1, p.attack = 0.3)
+pca.results40a = pca.experiment(dat1, p.attack = 0.4)
+
 
