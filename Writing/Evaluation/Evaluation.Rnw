@@ -149,7 +149,42 @@ print(xtab, booktabs = TRUE, caption.placement = "top", include.rownames = FALSE
 @
 
 
+
 \subsubsection{Our method vs. others}
+
+We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches.
+
+For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into a subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination of a few hundred screen plots. Another difference is that we replace $k$-means with X-means as manual examination of reduction in the sum of squared errors (SSE), in an attempt to find optimal number of clusters, $k$, is highly inefficient for several hundred experiments. Lastly, the most sizeable cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances. This way, our comparison is fair as both approaches operate under an unsupervised manner.
+
+<<>>=
+load("~/masters-project/Data/System_results/pca.results.RData")
+load("~/masters-project/Data/System_results/xmeans.results.RData")
+load("~/masters-project/Data/System_results/results_10a.RData")
+load("~/masters-project/Data/System_results/results_20a.RData")
+load("~/masters-project/Data/System_results/results_30a.RData")
+load("~/masters-project/Data/System_results/results_40a.RData")
+
+res10a = processResults(system.results_dat1_10a30k)
+res20a = processResults(system.results_dat1_20a20k)
+res30a = processResults(system.results_dat1_30a30k)
+res40a = processResults(system.results_dat1_40a20k)
+
+
+plot(0:20, seq(0, 1, by = 0.1), type = "n")
+points(c(res10a$TPR, res20a$TPR, res30a$TPR, res40a$TPR))
+lines(c(1, 1), c(0, res10a$TPR))
+lines(c(2, 2), c(0, res20a$TPR))
+lines(c(3, 3), c(0, res30a$TPR))
+lines(c(4, 4), c(0, res40a$TPR))
+@
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,22 @@
+<<set-parent, echo=FALSE, cache=FALSE>>=
+knitr::set_parent(parent = "../Main/Main.Rnw")
+@
+
+% ---------------------------
+% CHAPTER: Literature Review
+% ---------------------------
+
+\chapter{Literature Review}
+\label{ch:review}
+
+
+Spectral-based, as Chandola et al. describes, or subspace-clustering based...
+
+The majority of the proposed schemes in the field of unsupervised network intrusion detection involves clustering, which we understand as the most reasonable approach for classification in the absence of labels.
+
+
+For the PCA-based approach, we perform: (1) a \emph{Principal Component Analysis} (PCA) on a test dataset to project it into a subspace that explains a reasonable amount of variability in the dataset, (2) use a clustering technique on the projected data and (3) eliminate the members of the most sizeable cluster under an assumption that the size of such cluster corresponds to the high frequency of normal instances in the data. 
+
+
+
+
