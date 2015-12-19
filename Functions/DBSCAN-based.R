@@ -1,4 +1,7 @@
-
+dbscan.res10a = dbscan.experiment(dat1, p.attack = 0.1)
+dbscan.res20a = dbscan.experiment(dat1, p.attack = 0.2)
+dbscan.res30a = dbscan.experiment(dat1, p.attack = 0.3)
+dbscan.res40a = dbscan.experiment(dat1, p.attack = 0.4)
 
 
 dbscan.experiment = function(data, n = 5000, i = 100, p.attack = 0.3) {

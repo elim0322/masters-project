@@ -55,8 +55,8 @@ UNIDS = function(dat) {
     
 }
 
-unids_ranking = UNIDS(dat)
-
+unids_ranking = UNIDS(testset[,-35])
+sort(unids_ranking, decreasing = TRUE)[1:10]
 
 
 
