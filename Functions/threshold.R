@@ -33,8 +33,9 @@ threshold = function(score, e = 0.1, graph = FALSE) {
         }
     }
     
-    ## first index at which the cumulative sum of prob is greater than 0.45
-    ind = which(cumsum(prob) >= 0.45)[1]
+    ## first index at which the cumulative sum of prob is greater than 0.4
+    ## (This probability depends on how many patterns of normal there are)
+    ind = which(cumsum(prob) >= 0.4)[1]
     
     ## find the local minimum, maximum and threshold
     maximum   = maxima[ind]

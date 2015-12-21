@@ -1,5 +1,7 @@
+library(FactoMineR)
+library(nFactors)
+
 pca.experiment = function(data, n = 5000, i = 100, p.attack = 0.3) {
-    
     ## normal, attack and k
     nSize = n * (1 - p.attack)
     aSize = n * p.attack
@@ -41,29 +43,21 @@ pca.based = function(data) {
     nPC = suppressWarnings(nMreg(pca.res$eig$eigenvalue)$nFactors["b"])
     pc  = pca.res$ind$coord[, 1:nPC]
     
-    ## k-means
-    TP = numeric()
-    FP = numeric()
-    for (i in 2:10) {
-        a = SimpleKMeans(data[, -35], control = Weka_control(N = i, S = 20))
-        b = table(testset[a$class_ids != names(which.max(table(a$class_ids))), "attack_type"])
-        TP = c(TP, sum(b[names(b) != "normal."]))
-        FP = c(FP, sum(b[names(b) == "normal."]))
-    }
-    
-    TP.max = which.max(TP)
+    ## x-means
+    a = XMeans(as.data.frame(pc), control = Weka_control(H = 10))
+    b = table(data[a$class_ids != names(which.max(table(a$class_ids))), "attack_type"])
     
     ## number of normal and attacks classified
-    n = TP[TP.max]
-    a = TP[TP.max]
+    n = sum(b[names(b) == "normal."])
+    a = sum(b[names(b) != "normal."])
     
     return(list(normal = n, attack = a))
     
 }
 
-pca.results10a = pca.experiment(dat1, p.attack = 0.1)
-pca.results20a = pca.experiment(dat1, p.attack = 0.2)
-pca.results30a = pca.experiment(dat1, p.attack = 0.3)
-pca.results40a = pca.experiment(dat1, p.attack = 0.4)
-
+# pca.results10a = pca.experiment(dat1, p.attack = 0.1)
+# pca.results20a = pca.experiment(dat1, p.attack = 0.2)
+# pca.results30a = pca.experiment(dat1, p.attack = 0.3)
+# pca.results40a = pca.experiment(dat1, p.attack = 0.4)
+# save(pca.results10a, pca.results20a, pca.results30a, pca.results40a, file = "Data/System_results/pca.results.RData")
 
