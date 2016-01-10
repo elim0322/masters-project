@@ -202,68 +202,149 @@ runSystem = function(data, n = 5000, i = 100, p.attack = 0.3, p.k = 0.3, score) 
     
 }
 
-## run:
-load(file = "Data/LOF_scores/scores.RData")
+# ## run:
+# load(file = "Data/LOF_scores/scores.RData")
+# ## 5% attack
+# system.results_dat1_05a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.05, score = dat1_05a_05k)
+# system.results_dat1_05a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.1,  score = dat1_05a_10k)
+# system.results_dat1_05a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.2,  score = dat1_05a_20k)
+# system.results_dat1_05a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.3,  score = dat1_05a_30k)
+# system.results_dat1_05a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.4,  score = dat1_05a_40k)
+# system.results_dat1_05a50k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.5,  score = dat1_05a_50k)
+# save(system.results_dat1_05a05k, system.results_dat1_05a10k, system.results_dat1_05a20k,
+#      system.results_dat1_05a30k, system.results_dat1_05a40k, system.results_dat1_05a50k, 
+#      file = "Data/System_results/dat1_05a.RData")
+# ## 10% attack
+# system.results_dat1_10a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.05, score = dat1_10a_05k)
+# system.results_dat1_10a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.1,  score = dat1_10a_10k)
+# system.results_dat1_10a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.2,  score = dat1_10a_20k)
+# system.results_dat1_10a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.3,  score = dat1_10a_30k)
+# system.results_dat1_10a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.4,  score = dat1_10a_40k)
+# system.results_dat1_10a50k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.5,  score = dat1_10a_50k)
+# save(system.results_dat1_10a05k, system.results_dat1_10a10k, system.results_dat1_10a20k,
+#      system.results_dat1_10a30k, system.results_dat1_10a40k, system.results_dat1_10a50k,
+#      file = "Data/System_results/dat1_10a.RData")
+# ## 20% attack
+# system.results_dat1_20a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.05, score = dat1_20a_05k)
+# system.results_dat1_20a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.1,  score = dat1_20a_10k)
+# system.results_dat1_20a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.2,  score = dat1_20a_20k)
+# system.results_dat1_20a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.3,  score = dat1_20a_30k)
+# system.results_dat1_20a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.4,  score = dat1_20a_40k)
+# system.results_dat1_20a50k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.5,  score = dat1_20a_50k)
+# save(system.results_dat1_20a05k, system.results_dat1_20a10k, system.results_dat1_20a20k,
+#      system.results_dat1_20a30k, system.results_dat1_20a40k, system.results_dat1_20a50k,
+#      file = "Data/System_results/dat1_20a.RData")
+# ## 30% attack
+# system.results_dat1_30a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.05, score = dat1_30a_05k)
+# system.results_dat1_30a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.1,  score = dat1_30a_10k)
+# system.results_dat1_30a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.2,  score = dat1_30a_20k)
+# system.results_dat1_30a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.3,  score = dat1_30a_30k)
+# system.results_dat1_30a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.4,  score = dat1_30a_40k)
+# system.results_dat1_30a50k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.5,  score = dat1_30a_50k)
+# save(system.results_dat1_30a05k, system.results_dat1_30a10k, system.results_dat1_30a20k,
+#      system.results_dat1_30a30k, system.results_dat1_30a40k, system.results_dat1_30a50k,
+#      file = "Data/System_results/dat1_30a.RData")
+# ## 40% attack
+# system.results_dat1_40a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.05, score = dat1_40a_05k)
+# system.results_dat1_40a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.1,  score = dat1_40a_10k)
+# system.results_dat1_40a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.2,  score = dat1_40a_20k)
+# system.results_dat1_40a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.3,  score = dat1_40a_30k)
+# system.results_dat1_40a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.4,  score = dat1_40a_40k)
+# system.results_dat1_40a50k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.5,  score = dat1_40a_50k)
+# save(system.results_dat1_40a05k, system.results_dat1_40a10k, system.results_dat1_40a20k,
+#      system.results_dat1_40a30k, system.results_dat1_40a40k, system.results_dat1_40a50k,
+#      file = "Data/System_results/dat1_40a.RData")
+# ## 50% attack
+# system.results_dat1_50a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.05, score = dat1_50a_05k)
+# system.results_dat1_50a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.1,  score = dat1_50a_10k)
+# system.results_dat1_50a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.2,  score = dat1_50a_20k)
+# system.results_dat1_50a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.3,  score = dat1_50a_30k)
+# system.results_dat1_50a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.4,  score = dat1_50a_40k)
+# system.results_dat1_50a50k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.5,  score = dat1_50a_50k)
+# save(system.results_dat1_50a05k, system.results_dat1_50a10k, system.results_dat1_50a20k,
+#      system.results_dat1_50a30k, system.results_dat1_50a40k, system.results_dat1_50a50k,
+#      file = "Data/System_results/dat1_50a.RData")
+
+
+
+
+
 ## 5% attack
-system.results_dat1_05a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.05, score = dat1_05a_05k)
-system.results_dat1_05a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.1,  score = dat1_05a_10k)
-system.results_dat1_05a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.2,  score = dat1_05a_20k)
-system.results_dat1_05a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.3,  score = dat1_05a_30k)
-system.results_dat1_05a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.4,  score = dat1_05a_40k)
-system.results_dat1_05a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.05, p.k = 0.5,  score = dat1_05a_50k)
-save(system.results_dat1_05a05k, system.results_dat1_05a10k, system.results_dat1_05a20k,
-     system.results_dat1_05a30k, system.results_dat1_05a40k, system.results_dat1_05a50k, 
-     file = "Data/System_results/results_05a.RData")
-## 10% attack
-system.results_dat1_10a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.05, score = dat1_10a_05k)
-system.results_dat1_10a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.1,  score = dat1_10a_10k)
-system.results_dat1_10a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.2,  score = dat1_10a_20k)
-system.results_dat1_10a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.3,  score = dat1_10a_30k)
-system.results_dat1_10a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.4,  score = dat1_10a_40k)
-system.results_dat1_10a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.1, p.k = 0.5,  score = dat1_10a_50k)
-save(system.results_dat1_10a05k, system.results_dat1_10a10k, system.results_dat1_10a20k,
-     system.results_dat1_10a30k, system.results_dat1_10a40k, system.results_dat1_10a50k,
-     file = "Data/System_results/results_10a.RData")
-## 20% attack
-system.results_dat1_20a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.05, score = dat1_20a_05k)
-system.results_dat1_20a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.1,  score = dat1_20a_10k)
-system.results_dat1_20a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.2,  score = dat1_20a_20k)
-system.results_dat1_20a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.3,  score = dat1_20a_30k)
-system.results_dat1_20a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.4,  score = dat1_20a_40k)
-system.results_dat1_20a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.2, p.k = 0.5,  score = dat1_20a_50k)
-save(system.results_dat1_20a05k, system.results_dat1_20a10k, system.results_dat1_20a20k,
-     system.results_dat1_20a30k, system.results_dat1_20a40k, system.results_dat1_20a50k,
-     file = "Data/System_results/results_20a.RData")
-## 30% attack
-system.results_dat1_30a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.05, score = dat1_30a_05k)
-system.results_dat1_30a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.1,  score = dat1_30a_10k)
-system.results_dat1_30a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.2,  score = dat1_30a_20k)
-system.results_dat1_30a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.3,  score = dat1_30a_30k)
-system.results_dat1_30a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.4,  score = dat1_30a_40k)
-system.results_dat1_30a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.3, p.k = 0.5,  score = dat1_30a_50k)
-save(system.results_dat1_30a05k, system.results_dat1_30a10k, system.results_dat1_30a20k,
-     system.results_dat1_30a30k, system.results_dat1_30a40k, system.results_dat1_30a50k,
-     file = "Data/System_results/results_30a.RData")
-## 40% attack
-system.results_dat1_40a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.05, score = dat1_40a_05k)
-system.results_dat1_40a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.1,  score = dat1_40a_10k)
-system.results_dat1_40a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.2,  score = dat1_40a_20k)
-system.results_dat1_40a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.3,  score = dat1_40a_30k)
-system.results_dat1_40a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.4,  score = dat1_40a_40k)
-system.results_dat1_40a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.5,  score = dat1_40a_50k)
-save(system.results_dat1_40a05k, system.results_dat1_40a10k, system.results_dat1_40a20k,
-     system.results_dat1_40a30k, system.results_dat1_40a40k, system.results_dat1_40a50k,
-     file = "Data/System_results/results_40a.RData")
-## 50% attack
-system.results_dat1_50a05k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.05, score = dat1_50a_05k)
-system.results_dat1_50a10k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.1,  score = dat1_50a_10k)
-system.results_dat1_50a20k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.2,  score = dat1_50a_20k)
-system.results_dat1_50a30k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.3,  score = dat1_50a_30k)
-system.results_dat1_50a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.4,  score = dat1_50a_40k)
-system.results_dat1_50a40k = runSystem(dat1, n = 5000, i = 100, p.attack = 0.5, p.k = 0.5,  score = dat1_50a_50k)
-save(system.results_dat1_50a05k, system.results_dat1_50a10k, system.results_dat1_50a20k,
-     system.results_dat1_50a30k, system.results_dat1_50a40k, system.results_dat1_50a50k,
-     file = "Data/System_results/results_50a.RData")
+# system.results_dat2_05a05k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.05, p.k = 0.05, score = dat2_05a_05k)
+# system.results_dat2_05a10k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.05, p.k = 0.1,  score = dat2_05a_10k)
+# system.results_dat2_05a20k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.05, p.k = 0.2,  score = dat2_05a_20k)
+# system.results_dat2_05a30k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.05, p.k = 0.3,  score = dat2_05a_30k)
+# system.results_dat2_05a40k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.05, p.k = 0.4,  score = dat2_05a_40k)
+# system.results_dat2_05a50k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.05, p.k = 0.5,  score = dat2_05a_50k)
+# save(system.results_dat2_05a05k, system.results_dat2_05a10k, system.results_dat2_05a20k,
+#      system.results_dat2_05a30k, system.results_dat2_05a40k, system.results_dat2_05a50k, 
+#      file = "Data/System_results/dat2_05a.RData")
+# ## 10% attack
+# system.results_dat2_10a05k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.1, p.k = 0.05, score = dat2_10a_05k)
+# system.results_dat2_10a10k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.1, p.k = 0.1,  score = dat2_10a_10k)
+# system.results_dat2_10a20k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.1, p.k = 0.2,  score = dat2_10a_20k)
+# system.results_dat2_10a30k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.1, p.k = 0.3,  score = dat2_10a_30k)
+# system.results_dat2_10a40k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.1, p.k = 0.4,  score = dat2_10a_40k)
+# system.results_dat2_10a50k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.1, p.k = 0.5,  score = dat2_10a_50k)
+# save(system.results_dat2_10a05k, system.results_dat2_10a10k, system.results_dat2_10a20k,
+#      system.results_dat2_10a30k, system.results_dat2_10a40k, system.results_dat2_10a50k,
+#      file = "Data/System_results/dat2_10a.RData")
+# ## 20% attack
+# system.results_dat2_20a05k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.2, p.k = 0.05, score = dat2_20a_05k)
+# system.results_dat2_20a10k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.2, p.k = 0.1,  score = dat2_20a_10k)
+# system.results_dat2_20a20k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.2, p.k = 0.2,  score = dat2_20a_20k)
+# system.results_dat2_20a30k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.2, p.k = 0.3,  score = dat2_20a_30k)
+# system.results_dat2_20a40k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.2, p.k = 0.4,  score = dat2_20a_40k)
+# system.results_dat2_20a50k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.2, p.k = 0.5,  score = dat2_20a_50k)
+# save(system.results_dat2_20a05k, system.results_dat2_20a10k, system.results_dat2_20a20k,
+#      system.results_dat2_20a30k, system.results_dat2_20a40k, system.results_dat2_20a50k,
+#      file = "Data/System_results/dat2_20a.RData")
+# ## 30% attack
+# system.results_dat2_30a05k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.3, p.k = 0.05, score = dat2_30a_05k)
+# system.results_dat2_30a10k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.3, p.k = 0.1,  score = dat2_30a_10k)
+# system.results_dat2_30a20k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.3, p.k = 0.2,  score = dat2_30a_20k)
+# system.results_dat2_30a30k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.3, p.k = 0.3,  score = dat2_30a_30k)
+# system.results_dat2_30a40k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.3, p.k = 0.4,  score = dat2_30a_40k)
+# system.results_dat2_30a50k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.3, p.k = 0.5,  score = dat2_30a_50k)
+# save(system.results_dat2_30a05k, system.results_dat2_30a10k, system.results_dat2_30a20k,
+#      system.results_dat2_30a30k, system.results_dat2_30a40k, system.results_dat2_30a50k,
+#      file = "Data/System_results/dat2_30a.RData")
+# ## 40% attack
+# system.results_dat2_40a05k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.4, p.k = 0.05, score = dat2_40a_05k)
+# system.results_dat2_40a10k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.4, p.k = 0.1,  score = dat2_40a_10k)
+# system.results_dat2_40a20k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.4, p.k = 0.2,  score = dat2_40a_20k)
+# system.results_dat2_40a30k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.4, p.k = 0.3,  score = dat2_40a_30k)
+# system.results_dat2_40a40k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.4, p.k = 0.4,  score = dat2_40a_40k)
+# system.results_dat2_40a50k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.4, p.k = 0.5,  score = dat2_40a_50k)
+# save(system.results_dat2_40a05k, system.results_dat2_40a10k, system.results_dat2_40a20k,
+#      system.results_dat2_40a30k, system.results_dat2_40a40k, system.results_dat2_40a50k,
+#      file = "Data/System_results/dat2_40a.RData")
+# ## 50% attack
+# system.results_dat2_50a05k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.5, p.k = 0.05, score = dat2_50a_05k)
+# system.results_dat2_50a10k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.5, p.k = 0.1,  score = dat2_50a_10k)
+# system.results_dat2_50a20k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.5, p.k = 0.2,  score = dat2_50a_20k)
+# system.results_dat2_50a30k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.5, p.k = 0.3,  score = dat2_50a_30k)
+# system.results_dat2_50a40k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.5, p.k = 0.4,  score = dat2_50a_40k)
+# system.results_dat2_50a50k = runSystem(dat2, n = 5000, i = 100, p.attack = 0.5, p.k = 0.5,  score = dat2_50a_50k)
+# save(system.results_dat2_50a05k, system.results_dat2_50a10k, system.results_dat2_50a20k,
+#      system.results_dat2_50a30k, system.results_dat2_50a40k, system.results_dat2_50a50k,
+#      file = "Data/System_results/dat2_50a.RData")
+
+
+
+system.results_dat2_40
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -289,6 +370,13 @@ save(system.results_dat1_50a05k, system.results_dat1_50a10k, system.results_dat1
 # d2 = phase1Eval(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.2, file = "Writing/Evaluation/phase1_scores-40a-20k.csv")
 # d3 = phase1Eval(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.3, file = "Writing/Evaluation/phase1_scores-40a-30k.csv")
 # d4 = phase1Eval(dat1, n = 5000, i = 100, p.attack = 0.4, p.k = 0.4, file = "Writing/Evaluation/phase1_scores-40a-40k.csv")
+
+
+
+
+
+
+
 
 ## density plot
 # scores = as.matrix(read.csv("Functions/data/dat1_20a_20k.csv", header = FALSE))

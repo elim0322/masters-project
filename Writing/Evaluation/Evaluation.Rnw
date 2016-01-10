@@ -1,118 +1,33 @@
 <<set-parent, echo=FALSE, cache=FALSE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
-
-% --------------------
-% CHAPTER: Evaluation
-% --------------------
-
-\chapter{Evaluation}
-\label{ch:evaluation}
-
-% Maybe write this in discussion/conclusion?
-%The dataset chosen for benchmarking our intrusion detection system is the KDD Cup 1999 data \cite{kdd99}. There are a few issues associated with the dataset such as the presence of redundant features and duplicated instances, mentioned by Tavallaee et al. \cite{tav09} who also proposed an improved version of the dataset called NSL-KDD. Despite the issues, our decision to proceed with KDD'99 is because it is a real world data captured at MIT Lincoln Labs which means it is more likely to be accurate at describing the characteristics of real world connections compared to those described by the processed data, NSL-KDD. Another possible limitation with KDD'99 dataset is its age. Because the dataset is dated, there is high possibility that the characteristics of modern attacks may be different to those described in the dataset. However it is the only real world dataset with complete attack labels to remain as the most popular choice as a benchmarking medium for any IDS evaluation. The lack of other public network data appears to be due to the highly sensitive nature associated with network information. Technical description of KDD'99 dataset is presented in Section \ref{sec:evaluation-data}.
-
-
-In this chapter, we evaluate the strength of our proposed NIDS in detecting intrusions in the well-known and widely used KDD Cup 1999 \cite{kdd99} data. For this, we are mainly interested in true and false positive rates, also known as TPR and FPR respectively, of the system to assess how accurately each instance of a test dataset is classified as either an intrusion (attack) or a non-intrusion (normal). These two performance measures are evaluted for other popular unsupervised NID techniques to compare our method against them.
-
-Additionally, the two-phase structure of our proposed NIDS, each with its unique objective, means that each phase must be evaluated to show the set objective is successfully accomplished. As presented in the previous chapter, the first phase of the system was intended to maximally classify all possible intrusions at the cost of higher false positive rate. Therefore, Phase 1 is evaluated with its: (1) TPR to test our hypothesis that it is capable of achieving the said maximal classification and (2) FPR to confirm our belief that a higher number of false positives, than under ordinary circumstances, is resulted as expected. The two performance measures, TPR and FPR, are reported across two parameters, $k$ for LOF and the varying proportions of intrusions in test datasets, to test for the effect of the variations in those parameters on the system. For Phase 2, our primary interest, as well as its purpose, is in the reduction of overall false positive rate thus percentage reductions in the FPR are investigated. Lastly, our claim that the system of our proposal is truly comparable to DBSCAN clustering algorithm is tested with their respective TPR and FPR across the parameter, $\epsilon$ (Eps). The other parameter of DBSCAN, minPts, is fixed at 6 as we have experimentally determined that the result is not critically affected by varying the parameter.
-
-Each experiment is conducted using a random sample of 5,000 records from the 10\% subset version of the original KDD'99 dataset and is repeated one hundred times, using a different random sample each time, to cover and incorporate as much portion of the original dataset as possible in our experiment.
-
-
-% The dataset chosen for benchmarking our NIDS is the KDD Cup 1999 data \cite{kdd99} for its public availability with complete sets of labels. There have been a couple of datasets to replace the original KDD'99 data such as the NSL-KDD data \cite{tav09} and gureKddcup data \cite{per08}. The former dataset is essentially a carefully selected set of instances, mainly to avoid redundant features and duplicated entries, from the original KDD'99 data that does not introduce any novelty for us to be interested in. The latter dataset is generated equivalently as the original data with additional information on the payload of each connection record, that is the information of the transferred data. Because the payload data is processed as a sequence of bytes, for which sequential pattern mining is more appropriate, the gureKddcup data has not been a suitable choice for us. Other alternative datasets \cite{cre13} and \cite{shi12} were unavailable for access. All things considered, the KDD'99 data seems to remain as the most widely used dataset for the purpose of evaluating and benchmarking an IDS, especially because of the sheer number of literatures based on it. More technical description of the KDD'99 dataset is presented in Section \ref{evaluation:sec1}.
-
-% The rest of this chapther includes the experimental setup for the evaluation in Section \ref{evaluation:sec2}, phase-specific evaluation results in Section \ref{evaluation:sec3} and system evaluation results  in Section \ref{evaluation:sec4}, along with our choice of performance measures.
-
-
-% Data description should be in background along with other alternatives
-% ----------------------------
-% SECTION 1: data description
-% ----------------------------
-% \section{KDD'99 data description}
-% \label{evaluation:sec1}
-% The KDD dataset is prepared by Stolfo et al. \cite{sto00} based on a much larger dataset called DARPA'98 which consists of nine weeks of raw TCP dump data captured at MIT Lincoln Labs as a part of the 1988 DARPA Intrusion Evaluation Program. There are approximately 4,900,000 connection records in KDD training dataset, each of which consists of 41 features and is labelled as either normal or an attack of 22 different types. KDD test dataset contains 15 novel attack types that are not present in the training set to allow the evaluation of detecting novel attacks.
-% 
-% All of these attack types fall in one of the four main categories:
-% 
-% \begin{enumerate}
-% \item \textbf{Denial-of-service (DoS):} an attack to temporarily or indefinitely disable services of a host to its intended users by flooding memory resources.
-% 
-% \item \textbf{Remote-to-local (R2L):} a situation where an attacker is able to send packets to a target machine over a network in order to gain access as a local user of the machine.
-% 
-% \item \textbf{User-to-root (U2R):} an attempt by the attacker with precedent access to a target machine as a normal user to further gain control of root privileges.
-% 
-% \item \textbf{Probing:} a type of surveillance attack to monitor a target network of a machine in order to gain information on possible vulnerabilities of the network. As a result, the probing attacks are usually followed up by a chain of attacks that exploit any identified network vulnerabilities.
-% \end{enumerate}
-% 
-% Each instance in KDD'99 is a connection record, that is a sequence of TCP packets for a data flow between a source IP address to a target IP address. There are 41 features in the dataset that can be categorized into three groups:
-% 
-% \begin{enumerate}
-% \item \textbf{Basic features:} 9 of the 41 features are basic features of individual TCP connections, such as the types of the protocol and network service.
-% 
-% \item \textbf{Content features:} 13 of the 41 features are content features suggested by domain knowledge, such as the numbers of shell prompts, file creation operations and "root" accesses.
-% %The DoS and probing attacks occur in bursts, i.e., these attacks involve many connections in an extremely short time period, to result in frequent sequential patterns for intrusions. On the other hand, the R2L and U2R attacks usually involve a single connection and are more difficult to detect using just the basic features. Hence the main purpose of the content features is to provide additional information that can be used to improve detection.
-% 
-% \item \textbf{Traffic features:} 18 of the 41 features are traffic features computed using a two-second time window that can be further divided into two groups:
-%     
-%     \begin{enumerate}
-%     \item \textbf{"same host" features:} statistics derived from the connections in the past two seconds that have the same destination host as the current connection
-%     
-%     \item \textbf{"same service" features:} similar statistics from the connections in the past two seconds that have the same service as the current connection
-%     \end{enumerate}
-%     
-% \end{enumerate}
-
-
-
-% ------------------------------
-% SECTION 2: Experimental setup
-% ------------------------------
-%' \section{Experimental Setup}
-%' \label{evaluation:sec2}
-%' 
-%' The proposed IDS is evaluated under the following framework:
-%' 
-%' \begin{enumerate}
-%'     \item The 10 percent subset version of the complete KDD'99 is used for the experiment. Since our system operates under an unsupervised learning manner and the labels are available for both the training and test datasets, we treat them as two separate datasets and report results from those datasets separately. We refer to those datasets as \emph{dataset-1} and \emph{dataset-2} to avoid any confusion.
-%'     \item Each experiment, or run, is conducted using a random sample of 5,000 records as a testset. The ratio of intrusion and non-intrusion instances is varied in the testset to report the performance of the IDS between the differing ratios. The variation is specified for the percentage of intrusion instances in a test dataset at 10, 20, 30 and 40 percents. The sample size of 5,000 is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
-%'     \item The parameter $k$ for the LOF algorithm is varied to assess whether the value of $k$ has an impact on the performance of LOF.
-%'     \item The experiment is repeated on a hundred different testsets to account for the relatively small sample size. The random seed for each iteration of the repeated experiments is set to be a sequence from 1 to 100.
-%' \end{enumerate}
-
-
-% -----------------------------
-% SECTION 1: System evaluation
-% -----------------------------
-\section{System evaluation}
-\label{evaluation:sec1}
-
-The performance of our NIDS is reported at the best scenario of $k$ that yields the highest detection rate under the premise that Phase 1 has performed as intended. For each of the frequencies of intrusive instances, ranging from 0.1 to 0.4, we ran one hundred repeated experiments using a different random sample each time. Their results, summarised in terms of mean and standard deviation, are presented in Table \ref{evaluation:tab1}.
-
-For the intrusion frequencies between 0.1 and 0.3, both the TPR and FPR are extremely precise as indicated by the low standard deviations. One relevant metric, as a measure of dispersion, to evaluate the standard deviations is the \emph{coefficient of variation}, $c_v$, given by
-\[ c_v = \frac{\sigma}{\mu}, \]
-all of which are well under 1 to support the preciseness of our results for those intrusion frequencies.
-
-For the intrusion frequency of 0.4, the performance decreases in magnitude quite drastically. This is largely due to the fact that the process of distinguishing between an intrusion and a non-intrusion is much more difficult as the data becomes more balanced. The table, as it is, suggests that the intrusion frequency of 0.3 may possibly be a threshold at which the assumption of higher frequencies of normal instances, necessary for unsupervised anomaly detection, is violated and the distinction between normal and anomalous starts to diminish. Howver, we cannot simply rule out the possibility that the range of $k$ for the LOF algorithm in Phase 1 has not been appropriately varied. The issue regarding parameterisation of $k$ is explored specifically in a later section.
-
-%We show in a later section that the effect of variations in the frequencies of intrusive instances in a test dataset, as well as in $k$, exists to affect the performance of Phase 1 immensely, thus altering overall system performance accordingly.  Because of this, we report the system evaluation results of the best scenario , that is 
-
-<<echo = FALSE, results='asis'>>=
-load(file = "~/masters-project/Data/System_results/results_10a.RData")
-load(file = "~/masters-project/Data/System_results/results_20a.RData")
-load(file = "~/masters-project/Data/System_results/results_30a.RData")
-load(file = "~/masters-project/Data/System_results/results_40a.RData")
+<<scores, cache=TRUE, echo=FALSE>>=
+load(file = "~/../Desktop/masters-project/Data/LOF_scores/scores.RData")
+@
+<<result, cache=TRUE, echo=FALSE>>=
+load(file = "~/../Desktop/masters-project/Data/System_results/dat1_05a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat1_10a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat1_20a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat1_30a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat1_40a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat1_50a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat2_05a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat2_10a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat2_20a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat2_30a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat2_40a.RData")
+load(file = "~/../Desktop/masters-project/Data/System_results/dat2_50a.RData")
 processResults = function(results, graph = FALSE) {
     d = numeric()
     f = numeric()
     for (i in 1:100) {
         dif     = diff(results$p2.proportion.within.cluster[i, 2:10])
         dif.neg = which(dif < 0)
-        mn      = which.min(dif[dif.neg]) + 2
+        mn      = dif.neg[which.min(dif[dif.neg])] + 1
+        # mn      = which.min(dif[dif.neg]) + 2
         d       = c(d, results$system.detection.rate[i, mn])
         f       = c(f, results$system.false.alarm.rate[i, mn])
     }
-    
     if (graph) {
         avg.TPR = colMeans(results$system.detection.rate)
         avg.FPR = colMeans(results$system.false.alarm.rate)
@@ -124,111 +39,325 @@ processResults = function(results, graph = FALSE) {
         lines(avg.pwc)
         lines(avg.pws)
     }
-    
     return(list(TPR = mean(d), FPR = mean(f), TPR.sd = sd(d), FPR.sd = sd(f)))
 }
-res10a = processResults(system.results_dat1_10a30k)
-res20a = processResults(system.results_dat1_20a20k)
-res30a = processResults(system.results_dat1_30a30k)
-res40a = processResults(system.results_dat1_40a20k)
+a = function(results) {
+    tpr = numeric()
+    fpr = numeric()
+    tpr.sd = numeric()
+    fpr.sd = numeric()
+    for (i in 1:length(results)) {
+        tpr = c(tpr, mean(results[[i]]$P1.detection.rate))
+        fpr = c(fpr, mean(results[[i]]$P1.false.alarm.rate))
+        tpr.sd = c(tpr.sd, sd(results[[i]]$P1.detection.rate))
+        fpr.sd = c(fpr.sd, sd(results[[i]]$P1.false.alarm.rate))
+    }
+    w = which.max(tpr)
+    list(tpr[w], fpr[w], tpr.sd[w], fpr.sd[w])
+}
+b = function(results) {
+    tpr = numeric()
+    fpr = numeric()
+    for (i in 1:length(results)) {
+        tpr = c(tpr, sd(results[[i]]$P1.detection.rate))
+        fpr = c(fpr, sd(results[[i]]$P1.false.alarm.rate))
+    }
+    w = which.max(tpr)
+    list(tpr[w], fpr[w])
+}
+{
+dat1.means.05k = a(list(system.results_dat1_05a05k, system.results_dat1_10a05k, system.results_dat1_20a05k, system.results_dat1_30a05k, system.results_dat1_40a05k, system.results_dat1_50a05k))
+dat1.means.10k = a(list(system.results_dat1_05a10k, system.results_dat1_10a10k, system.results_dat1_20a10k, system.results_dat1_30a10k, system.results_dat1_40a10k, system.results_dat1_50a10k))
+dat1.means.20k = a(list(system.results_dat1_05a20k, system.results_dat1_10a20k, system.results_dat1_20a20k, system.results_dat1_30a20k, system.results_dat1_40a20k, system.results_dat1_50a20k))
+dat1.means.30k = a(list(system.results_dat1_05a30k, system.results_dat1_10a30k, system.results_dat1_20a30k, system.results_dat1_30a30k, system.results_dat1_40a30k, system.results_dat1_50a30k))
+dat1.means.40k = a(list(system.results_dat1_05a40k, system.results_dat1_10a40k, system.results_dat1_20a40k, system.results_dat1_30a40k, system.results_dat1_40a40k, system.results_dat1_50a40k))
+dat1.means.50k = a(list(system.results_dat1_05a50k, system.results_dat1_10a50k, system.results_dat1_20a50k, system.results_dat1_30a50k, system.results_dat1_40a50k, system.results_dat1_50a50k))
 
-library(xtable)
-a = seq(0.1, 0.4, by = 0.1)
-tab = as.data.frame(cbind(
-    a,
-    c(res10a$TPR, res20a$TPR, res30a$TPR, res40a$TPR),
-    c(res10a$TPR.sd, res20a$TPR.sd, res30a$TPR.sd, res40a$TPR.sd),
-    c(res10a$FPR, res20a$FPR, res30a$FPR, res40a$FPR),
-    c(res10a$FPR.sd, res20a$FPR.sd, res30a$FPR.sd, res40a$FPR.sd)
-))
-colnames(tab) = c("Intrusion frequency", "TPR (avg.)", "TPR (sd)", "FPR (avg.)", "FPR (sd)")
-xtab = xtable(tab, caption = "System TPR and FPR at different frequencies of intrusions", label = "evaluation:tab1", digits = 3)
-align(xtab) = "cc|cc|cc"
-digits(xtab) = c(0,1,3,3,3,3)
-print(xtab, booktabs = TRUE, caption.placement = "top", include.rownames = FALSE)
+dat1.sd.05k = b(list(system.results_dat1_05a05k, system.results_dat1_10a05k, system.results_dat1_20a05k, system.results_dat1_30a05k, system.results_dat1_40a05k, system.results_dat1_50a05k))
+dat1.sd.10k = b(list(system.results_dat1_05a10k, system.results_dat1_10a10k, system.results_dat1_20a10k, system.results_dat1_30a10k, system.results_dat1_40a10k, system.results_dat1_50a10k))
+dat1.sd.20k = b(list(system.results_dat1_05a20k, system.results_dat1_10a20k, system.results_dat1_20a20k, system.results_dat1_30a20k, system.results_dat1_40a20k, system.results_dat1_50a20k))
+dat1.sd.30k = b(list(system.results_dat1_05a30k, system.results_dat1_10a30k, system.results_dat1_20a30k, system.results_dat1_30a30k, system.results_dat1_40a30k, system.results_dat1_50a30k))
+dat1.sd.40k = b(list(system.results_dat1_05a40k, system.results_dat1_10a40k, system.results_dat1_20a40k, system.results_dat1_30a40k, system.results_dat1_40a40k, system.results_dat1_50a40k))
+dat1.sd.50k = b(list(system.results_dat1_05a50k, system.results_dat1_10a50k, system.results_dat1_20a50k, system.results_dat1_30a50k, system.results_dat1_40a50k, system.results_dat1_50a50k))
+
+
+## dat2
+dat2.means.05k = a(list(system.results_dat2_05a05k, system.results_dat2_10a05k, system.results_dat2_20a05k, system.results_dat2_30a05k, system.results_dat2_40a05k, system.results_dat2_50a05k))
+dat2.means.10k = a(list(system.results_dat2_05a10k, system.results_dat2_10a10k, system.results_dat2_20a10k, system.results_dat2_30a10k, system.results_dat2_40a10k, system.results_dat2_50a10k))
+dat2.means.20k = a(list(system.results_dat2_05a20k, system.results_dat2_10a20k, system.results_dat2_20a20k, system.results_dat2_30a20k, system.results_dat2_40a20k, system.results_dat2_50a20k))
+dat2.means.30k = a(list(system.results_dat2_05a30k, system.results_dat2_10a30k, system.results_dat2_20a30k, system.results_dat2_30a30k, system.results_dat2_40a30k, system.results_dat2_50a30k))
+dat2.means.40k = a(list(system.results_dat2_05a40k, system.results_dat2_10a40k, system.results_dat2_20a40k, system.results_dat2_30a40k, system.results_dat2_40a40k, system.results_dat2_50a40k))
+dat2.means.50k = a(list(system.results_dat2_05a50k, system.results_dat2_10a50k, system.results_dat2_20a50k, system.results_dat2_30a50k, system.results_dat2_40a50k, system.results_dat2_50a50k))
+
+dat2.sd.05k = b(list(system.results_dat2_05a05k, system.results_dat2_10a05k, system.results_dat2_20a05k, system.results_dat2_30a05k, system.results_dat2_40a05k, system.results_dat2_50a05k))
+dat2.sd.10k = b(list(system.results_dat2_05a10k, system.results_dat2_10a10k, system.results_dat2_20a10k, system.results_dat2_30a10k, system.results_dat2_40a10k, system.results_dat2_50a10k))
+dat2.sd.20k = b(list(system.results_dat2_05a20k, system.results_dat2_10a20k, system.results_dat2_20a20k, system.results_dat2_30a20k, system.results_dat2_40a20k, system.results_dat2_50a20k))
+dat2.sd.30k = b(list(system.results_dat2_05a30k, system.results_dat2_10a30k, system.results_dat2_20a30k, system.results_dat2_30a30k, system.results_dat2_40a30k, system.results_dat2_50a30k))
+dat2.sd.40k = b(list(system.results_dat2_05a40k, system.results_dat2_10a40k, system.results_dat2_20a40k, system.results_dat2_30a40k, system.results_dat2_40a40k, system.results_dat2_50a40k))
+dat2.sd.50k = b(list(system.results_dat2_05a50k, system.results_dat2_10a50k, system.results_dat2_20a50k, system.results_dat2_30a50k, system.results_dat2_40a50k, system.results_dat2_50a50k))
+}
+
+## dat1
+dat1.means.05a = a(list(system.results_dat1_05a05k, system.results_dat1_05a10k, system.results_dat1_05a20k, system.results_dat1_05a30k, system.results_dat1_05a40k, system.results_dat1_05a50k))
+dat1.means.10a = a(list(system.results_dat1_10a05k, system.results_dat1_10a10k, system.results_dat1_10a20k, system.results_dat1_10a30k, system.results_dat1_10a40k, system.results_dat1_10a50k))
+dat1.means.20a = a(list(system.results_dat1_20a05k, system.results_dat1_20a10k, system.results_dat1_20a20k, system.results_dat1_20a30k, system.results_dat1_20a40k, system.results_dat1_20a50k))
+dat1.means.30a = a(list(system.results_dat1_30a05k, system.results_dat1_30a10k, system.results_dat1_30a20k, system.results_dat1_30a30k, system.results_dat1_30a40k, system.results_dat1_30a50k))
+dat1.means.40a = a(list(system.results_dat1_40a05k, system.results_dat1_40a10k, system.results_dat1_40a20k, system.results_dat1_40a30k, system.results_dat1_40a40k, system.results_dat1_40a50k))
+dat1.means.50a = a(list(system.results_dat1_50a05k, system.results_dat1_50a10k, system.results_dat1_50a20k, system.results_dat1_50a30k, system.results_dat1_50a40k, system.results_dat1_50a50k))
+
+## dat2
+dat2.means.05a = a(list(system.results_dat2_05a05k, system.results_dat2_05a10k, system.results_dat2_05a20k, system.results_dat2_05a30k, system.results_dat2_05a40k, system.results_dat2_05a50k))
+dat2.means.10a = a(list(system.results_dat2_10a05k, system.results_dat2_10a10k, system.results_dat2_10a20k, system.results_dat2_10a30k, system.results_dat2_10a40k, system.results_dat2_10a50k))
+dat2.means.20a = a(list(system.results_dat2_20a05k, system.results_dat2_20a10k, system.results_dat2_20a20k, system.results_dat2_20a30k, system.results_dat2_20a40k, system.results_dat2_20a50k))
+dat2.means.30a = a(list(system.results_dat2_30a05k, system.results_dat2_30a10k, system.results_dat2_30a20k, system.results_dat2_30a30k, system.results_dat2_30a40k, system.results_dat2_30a50k))
+dat2.means.40a = a(list(system.results_dat2_40a05k, system.results_dat2_40a10k, system.results_dat2_40a20k, system.results_dat2_40a30k, system.results_dat2_40a40k, system.results_dat2_40a50k))
+dat2.means.50a = a(list(system.results_dat2_50a05k, system.results_dat2_50a10k, system.results_dat2_50a20k, system.results_dat2_50a30k, system.results_dat2_50a40k, system.results_dat2_50a50k))
 @
 
+% --------------------
+% CHAPTER: Evaluation
+% --------------------
+\chapter{Evaluation}
+\label{ch:evaluation}
 
+% Maybe write this in discussion/conclusion?
+%The dataset chosen for benchmarking our intrusion detection system is the KDD Cup 1999 data \cite{kdd99}. There are a few issues associated with the dataset such as the presence of redundant features and duplicated instances, mentioned by Tavallaee et al. \cite{tav09} who also proposed an improved version of the dataset called NSL-KDD. Despite the issues, our decision to proceed with KDD'99 is because it is a real world data captured at MIT Lincoln Labs which means it is more likely to be accurate at describing the characteristics of real world connections compared to those described by the processed data, NSL-KDD. Another possible limitation with KDD'99 dataset is its age. Because the dataset is dated, there is high possibility that the characteristics of modern attacks may be different to those described in the dataset. However it is the only real world dataset with complete attack labels to remain as the most popular choice as a benchmarking medium for any IDS evaluation. The lack of other public network data appears to be due to the highly sensitive nature associated with network information. Technical description of KDD'99 dataset is presented in Section \ref{sec:evaluation-data}.
 
-\subsubsection{Our method vs. others}
+In this chapter, we validate fulfillment of the ideas described in the previous chapter as well as evaluate the strength of our proposed NIDS in detecting intrusions in the well-known and widely used KDD Cup 1999 data \cite{kdd99}. For this, we are mainly interested in True and False Positive Rates (TPR and FPR), also known as the detection and false alarm rates respectively, of the system to assess how accurately each instance is classified as either an intrusion or a non-intrusion.
 
-We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches.
+Each experiment is conducted using a random sample of 5,000 instances from the 10\% subset version of the original KDD'99 dataset and is repeated one hundred times to compensate for the rather large size of the dataset. The sample size, of 5,000 records, is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment. The results from the repeated experiments are reported on their means and standard deviations. Lastly, we treat both the original training and test datasets as two separate datasets as our system operates under the unsupervised learning paradigm, that is the labels are only used for external evaluation purposes.
 
-For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into a subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination of a few hundred screen plots. Another difference is that we replace $k$-means with X-means as manual examination of reduction in the sum of squared errors (SSE), in an attempt to find optimal number of clusters, $k$, is highly inefficient for several hundred experiments. Lastly, the most sizeable cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances. This way, our comparison is fair as both approaches operate under an unsupervised manner.
+% These two performance measures are evaluted for other popular unsupervised NID techniques to compare our method against them.
 
-<<>>=
-load("~/masters-project/Data/System_results/pca.results.RData")
-load("~/masters-project/Data/System_results/xmeans.results.RData")
-load("~/masters-project/Data/System_results/results_10a.RData")
-load("~/masters-project/Data/System_results/results_20a.RData")
-load("~/masters-project/Data/System_results/results_30a.RData")
-load("~/masters-project/Data/System_results/results_40a.RData")
+% The dataset chosen for benchmarking our NIDS is the KDD Cup 1999 data \cite{kdd99} for its public availability with complete sets of labels. There have been a couple of datasets to replace the original KDD'99 data such as the NSL-KDD data \cite{tav09} and gureKddcup data \cite{per08}. The former dataset is essentially a carefully selected set of instances, mainly to avoid redundant features and duplicated entries, from the original KDD'99 data that does not introduce any novelty for us to be interested in. The latter dataset is generated equivalently as the original data with additional information on the payload of each connection record, that is the information of the transferred data. Because the payload data is processed as a sequence of bytes, for which sequential pattern mining is more appropriate, the gureKddcup data has not been a suitable choice for us. Other alternative datasets \cite{cre13} and \cite{shi12} were unavailable for access. All things considered, the KDD'99 data seems to remain as the most widely used dataset for the purpose of evaluating and benchmarking an IDS, especially because of the sheer number of literatures based on it. More technical description of the KDD'99 dataset is presented in Section \ref{evaluation:sec1}.
 
-res10a = processResults(system.results_dat1_10a30k)
-res20a = processResults(system.results_dat1_20a20k)
-res30a = processResults(system.results_dat1_30a30k)
-res40a = processResults(system.results_dat1_40a20k)
+% The rest of this chapther includes the experimental setup for the evaluation in Section \ref{evaluation:sec2}, phase-specific evaluation results in Section \ref{evaluation:sec3} and system evaluation results  in Section \ref{evaluation:sec4}, along with our choice of performance measures.
 
+%Each experiment, or run, is conducted using a random sample of 5,000 records as a testset. The ratio of intrusion and non-intrusion instances is varied in the testset to report the performance of the IDS between the differing ratios. The variation is specified for the percentage of intrusion instances in a test dataset at 10, 20, 30 and 40 percents. The sample size of 5,000 is chosen such that the LOF algorithm runs comfortably without reaching beyond the memory limit of the machine used for this experiment.
 
-plot(0:20, seq(0, 1, by = 0.1), type = "n")
-points(c(res10a$TPR, res20a$TPR, res30a$TPR, res40a$TPR))
-lines(c(1, 1), c(0, res10a$TPR))
-lines(c(2, 2), c(0, res20a$TPR))
-lines(c(3, 3), c(0, res30a$TPR))
-lines(c(4, 4), c(0, res40a$TPR))
-@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%The parameter $k$ for the LOF algorithm is varied to assess whether the value of $k$ has an impact on the performance of LOF.
 
 % -------------------------------
 % SECTION 1: Validation of ideas
 % -------------------------------
 \section{Validation of ideas}
+\label{evaluation:sec1}
+The two-phase structure of our proposed NIDS, each with its unique objective, means that each phase must be evaluated to show the assigned objective is successfully accomplished. As presented in the previous chapter, the first phase is intended for maximum classification of all possible intrusions at the cost of higher false positive rate. Therefore Phase 1 is evaluated with its: (1) TPR to test our hypothesis that it is capable of achieving the said maximal classification and (2) FPR to confirm our belief that a higher number of false positives, than under ordinary circumstances, is resulted as expected. For Phase 2, our primary interest, as well as its purpose, is in the reduction of overall false positive rate thus percentage reductions in the FPR are investigated.
+% Lastly, our claim that the system of our proposal is truly comparable to DBSCAN clustering algorithm is tested with their respective TPR and FPR across the parameter, $\epsilon$ (Eps). The other parameter of DBSCAN, minPts, is fixed at 6 as we have experimentally determined that the result is not critically affected by varying the parameter.
+
+\subsubsection{Phase 1}
+Appendix A presents numerical and graphical results from experiments where intrusion frequency in a test set and $k$ are varied as proportions of the sample size. What we have inferred from the results is that $k$ is the most appropriate when set to be greater or equal to the actual number of intrusion instances in a test set. If $k$ is set too low, the range of resulting LOF scores increases along with noise to introduce difficulties in inferring thresholds. As $k$ is increased towards the number of intrusion instances, the resulting LOF scores tend to stabilise in a range within more manageable boundaries. For the purpose of this section, we assume that $k$ is chosen appropriately for each intrusion frequency, that is we report on the best scenario of $k$ from here on.
+
+Figure \ref{fig:lofResults} reveals that the classification process of Phase 1 is reasonably accurate for the \emph{training} dataset as shown by the very high TPRs but not as accurate for the \emph{test} dataset. Upon manual examination, we have found that, for the \emph{test} dataset, many intrusion instances share similar local densities as their non-intrusion counterparts leading to failure in finding adequate thresholds. When the kernel density esimates  were plotted, a number of intrusion instances had unusually low LOF scores than the rest to be positioned within the supposed region of non-intrusion instances, and vice versa. In other words, the LOF algorithm was not able to differentiate between the non-intrusion and the intrusion instances because their respective local densities are analogous. On the other hand, the detection is quite precise as the lengths of the error bars are extremely small.
+
+We conclude that our classification method implemented in Phase 1 performs well as long as the proportion of intrusion is not too large and the local densities are reasonably different between intrusion and non-intrusion instances. For the cases where local densities are similar, an anomaly detection algorithm that is not density-based could be a more viable alternative.
+
+<<lofResults, dependson="result", echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
+x = 1:6
+y1 = c(dat1.means.05a[[1]], dat1.means.10a[[1]], dat1.means.20a[[1]], dat1.means.30a[[1]], dat1.means.40a[[1]], dat1.means.50a[[1]])
+y2 = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
+y1.sd = c(dat1.means.05a[[3]], dat1.means.10a[[3]], dat1.means.20a[[3]], dat1.means.30a[[3]], dat1.means.40a[[3]], dat1.means.50a[[3]])
+y2.sd = c(dat1.means.05a[[4]], dat1.means.10a[[4]], dat1.means.20a[[4]], dat1.means.30a[[4]], dat1.means.40a[[4]], dat1.means.50a[[4]])
+
+# par(xpd = T, mar = par()$mar+c(0,0,0,3))
+plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
+arrows(x, y1-y1.sd, x, y1+y1.sd, length=0.05, angle=90, code=3)
+arrows(x, y2-y2.sd, x, y2+y2.sd, length=0.05, angle=90, code=3)
+
+y3 = c(dat2.means.05a[[1]], dat2.means.10a[[1]], dat2.means.20a[[1]], dat2.means.30a[[1]], dat2.means.40a[[1]], dat2.means.50a[[1]])
+y4 = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means.30a[[2]], dat2.means.40a[[2]], dat2.means.50a[[2]])
+y3.sd = c(dat2.means.05a[[3]], dat2.means.10a[[3]], dat2.means.20a[[3]], dat2.means.30a[[3]], dat2.means.40a[[3]], dat2.means.50a[[3]])
+y4.sd = c(dat2.means.05a[[4]], dat2.means.10a[[4]], dat2.means.20a[[4]], dat2.means.30a[[4]], dat2.means.40a[[4]], dat2.means.50a[[4]])
+
+plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main=expression(italic("Test dataset")))
+lines(y4, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
+arrows(x, y3-y3.sd, x, y3+y3.sd, length=0.05, angle=90, code=3)
+arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
+@
+
+\subsubsection{Phase 2}
+Figure \ref{fig:dbscanResults} presents percentage reduction in FPRs from Phase 1 to Phase 2. It seems that the FP elimination step of Phase 2 works really well, especially for the \emph{test} dataset. The unusual decline in the percentage at the intrusion frequency of 0.2 for the \emph{training} dataset is not something to worry about as the initial FPR, from Phase 1, has been quite low to begin with.
+
+Some of the FPs remain included in the result, limiting further percentage reduction in FPR, because they are incorrectly classified, or clustered, by the DBSCAN algorithm. These FPs are positioned in relatively dense regions nearby some of the intrusion instances to make them indistinguishable from one another based on density. Therefore the DBSCAN algorithm fails to cluster them with non-intrusion instances by definition.
+
+<<dbscanResults, dependson="result", echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="Percentage reduction in FPR across intrusion frequencies from the training and test sets">>=
+dat1.FPR = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
+dat2.FPR = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means.30a[[2]], dat2.means.40a[[2]], dat2.means.50a[[2]])
+y1 = 100 * (dat1.FPR - c(processResults(system.results_dat1_05a10k)$FPR,processResults(system.results_dat1_10a30k)$FPR,processResults(system.results_dat1_20a20k)$FPR,processResults(system.results_dat1_30a30k)$FPR,processResults(system.results_dat1_40a20k)$FPR,processResults(system.results_dat1_50a05k)$FPR)) / dat1.FPR
+y2 = 100 * (dat2.FPR - c(processResults(system.results_dat2_05a10k)$FPR,processResults(system.results_dat2_10a20k)$FPR,processResults(system.results_dat2_20a20k)$FPR,processResults(system.results_dat2_30a30k)$FPR,processResults(system.results_dat2_40a30k)$FPR,processResults(system.results_dat2_50a10k)$FPR)) / dat2.FPR
+plot(y1, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+plot(y2, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+@
+
+
+
+% -----------------------------
+% SECTION 2: System evaluation
+% -----------------------------
+\section{System evaluation}
 \label{evaluation:sec2}
 
-\subsubsection{LOF}
-\subsection{}
-\subsection{}
+Figure \ref{fig:sysResults} presents the system evaluation results for the \emph{training} and \emph{test} datasets. For the \emph{training} dataset between the intrusion frequencies of 0.05 and 0.4, we can infer graphically that the system is accurate, as the TPRs are very close to 1, and precise, as the lengths of the error bars are short. We suspect that the decrease in performance from the intrusion frequency of 0.5 is caused by the amount of intrusion instances in the random samples. As the data become more balanced, there is higher chance for DBSCAN to form balanced clusters. This in turn increases the likelihood that the largest clusters, which we remove, actually consist of intrusion instances to result in a decrease in overall TPR. We could consider this as a threshold at which the dinstinction between normal and anomalous starts to diminish and the assumption of test data containing high frequencies of normal instances is violated to essentially make anomaly detection impossible.
+
+For the \emph{test} dataset, both the TPRs and FPRs are generally lower compared to those from the \emph{training} dataset. We suspect the primary cause of this to be the similarities in local densities. The problem of indistinguishable local densities is difficult to address because each dataset is associated with a unique degree of similarity among local densities. For data that suffer from extremely similar densities, the best solution may be to avoid using anything distance-based, because densities are essentially computed using distances, and rather attempt to incorporate some external information able to distinctively describe different types of instances.
+
+Another possible cause may be associated with our random sampling method. We attempted to cover as much portion of the data as possible by running repeated experiments and sampling without replacement. Running repeated experiments with small samples, which may not be fitting representatives of the entire dataset, can skew the results in certain directions. In addition, samples, randomly selected without replacement, are no longer independent, which may have an effect on the overall results. We could not increase the sample size further due to the expensive nature of the LOF algorithm.
+
+% One relevant metric, as a measure of dispersion, to evaluate the standard deviations is the \emph{coefficient of variation}, $c_v$, given by
+% \[ c_v = \frac{\sigma}{\mu}, \]
+% all of which are well under 1 to support the preciseness of our results for those intrusion frequencies.
+
+<<sysResults, dependson="result", cache=TRUE, echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="System TPR and FPR across intrusion frequencies from the training and test sets">>=
+# res05a = processResults(system.results_dat1_10a30k)
+res05a = processResults(system.results_dat1_05a05k)
+res10a = processResults(system.results_dat1_10a30k)
+res20a = processResults(system.results_dat1_20a20k)
+res30a = processResults(system.results_dat1_30a40k)
+res40a = processResults(system.results_dat1_40a20k)
+res50a = processResults(system.results_dat1_50a05k)
+x = 1:6
+y1 = c(res05a$TPR, res10a$TPR, res20a$TPR, res30a$TPR, res40a$TPR, res50a$TPR)
+y2 = c(res05a$FPR, res10a$FPR, res20a$FPR, res30a$FPR, res40a$FPR, res50a$FPR)
+y1.sd = c(res05a$TPR.sd, res10a$TPR.sd, res20a$TPR.sd, res30a$TPR.sd, res40a$TPR.sd, res50a$TPR.sd)
+y2.sd = c(res05a$FPR.sd, res10a$FPR.sd, res20a$FPR.sd, res30a$FPR.sd, res40a$FPR.sd, res50a$FPR.sd)
+
+plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjust=0, xpd=TRUE)
+arrows(x, y1-y1.sd, x, y1+y1.sd, length=0.05, angle=90, code=3)
+arrows(x, y2-y2.sd, x, y2+y2.sd, length=0.05, angle=90, code=3)
+
+
+dat2.res05a = processResults(system.results_dat2_05a20k)
+dat2.res10a = processResults(system.results_dat2_10a30k)
+dat2.res20a = processResults(system.results_dat2_20a20k)
+dat2.res30a = processResults(system.results_dat2_30a30k)
+dat2.res40a = processResults(system.results_dat2_40a20k)
+dat2.res50a = processResults(system.results_dat2_50a05k)
+y3 = c(dat2.res05a$TPR, dat2.res10a$TPR, dat2.res20a$TPR, dat2.res30a$TPR, dat2.res40a$TPR, dat2.res50a$TPR)
+y4 = c(dat2.res05a$FPR, dat2.res10a$FPR, dat2.res20a$FPR, dat2.res30a$FPR, dat2.res40a$FPR, dat2.res50a$FPR)
+y3.sd = c(dat2.res05a$TPR.sd, dat2.res10a$TPR.sd, dat2.res20a$TPR.sd, dat2.res30a$TPR.sd, dat2.res40a$TPR.sd, dat2.res50a$TPR.sd)
+y4.sd = c(dat2.res05a$FPR.sd, dat2.res10a$FPR.sd, dat2.res20a$FPR.sd, dat2.res30a$FPR.sd, dat2.res40a$FPR.sd, dat2.res50a$FPR.sd)
+plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+lines(y4, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjust=0, xpd = TRUE)
+arrows(x, y3-y3.sd, x, y3+y3.sd, length=0.05, angle=90, code=3)
+arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
+@
+
+\subsubsection{Our method vs. others}
+We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches.
+
+For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into a subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination of a few hundred screen plots. Another difference is that we replace $k$-means with X-means as manual examination of reduction in the sum of squared errors (SSE), in an attempt to find optimal number of clusters, $k$, is highly inefficient for several hundred experiments. Lastly, the most sizeable cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances. This way, our comparison is fair as both approaches operate under an unsupervised manner.
+
+<<compare, dependson="sysResults", echo=FALSE, out.width="0.7\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison with other methods">>=
+load("~/../Desktop/masters-project/Data/System_results/pca.results.RData")
+load("~/../Desktop/masters-project/Data/System_results/xmeans.results.RData")
+
+## x-axis
+w = 0.1  # width
+x1.l = seq(1, 30, by = 5) + w
+x1.r = seq(2, 29, by = 5) - w
+x2.l = seq(2, 30, by = 5) + w
+x2.r = seq(3, 31, by = 5) - w
+x3.l = seq(3, 30, by = 5) + w
+x3.r = seq(4, 31, by = 5) - w
+## y-axis
+## xmeans results
+y5 = c(mean(xmeans.results.dat1.05a$TPR),mean(xmeans.results.dat1.10a$TPR),mean(xmeans.results.dat1.20a$TPR),mean(xmeans.results.dat1.30a$TPR),mean(xmeans.results.dat1.40a$TPR),mean(xmeans.results.dat1.50a$TPR))
+y6 = c(mean(xmeans.results.dat1.05a$FPR),mean(xmeans.results.dat1.10a$FPR),mean(xmeans.results.dat1.20a$FPR),mean(xmeans.results.dat1.30a$FPR),mean(xmeans.results.dat1.40a$FPR),mean(xmeans.results.dat1.50a$FPR))
+y5.sd = c(sd(xmeans.results.dat1.05a$TPR),sd(xmeans.results.dat1.10a$TPR),sd(xmeans.results.dat1.20a$TPR),sd(xmeans.results.dat1.30a$TPR),sd(xmeans.results.dat1.40a$TPR),sd(xmeans.results.dat1.50a$TPR))
+y6.sd = c(sd(xmeans.results.dat1.05a$FPR),sd(xmeans.results.dat1.10a$FPR),sd(xmeans.results.dat1.20a$FPR),sd(xmeans.results.dat1.30a$FPR),sd(xmeans.results.dat1.40a$FPR),sd(xmeans.results.dat1.50a$FPR))
+## pca results
+y7 = c(mean(pca.results.dat1.05a$TPR),mean(pca.results.dat1.10a$TPR),mean(pca.results.dat1.20a$TPR),mean(pca.results.dat1.30a$TPR),mean(pca.results.dat1.40a$TPR),mean(pca.results.dat1.50a$TPR))
+y8 = c(mean(pca.results.dat1.05a$FPR),mean(pca.results.dat1.10a$FPR),mean(pca.results.dat1.20a$FPR),mean(pca.results.dat1.30a$FPR),mean(pca.results.dat1.40a$FPR),mean(pca.results.dat1.50a$FPR))
+y7.sd = c(sd(pca.results.dat1.05a$TPR),sd(pca.results.dat1.10a$TPR),sd(pca.results.dat1.20a$TPR),sd(pca.results.dat1.30a$TPR),sd(pca.results.dat1.40a$TPR),sd(pca.results.dat1.50a$TPR))
+y8.sd = c(sd(pca.results.dat1.05a$FPR),sd(pca.results.dat1.10a$FPR),sd(pca.results.dat1.20a$FPR),sd(pca.results.dat1.30a$FPR),sd(pca.results.dat1.40a$FPR),sd(pca.results.dat1.50a$FPR))
+
+## plot setup
+x = 0:28
+arw = 0.5 * (x1.r - x1.l)
+arw.length = 0.03
+arw.lwd = 0.8
+sat = 0.3
+TPR.col = grey.colors(1, 11.5/12)
+FPR.col = grey.colors(1, 10/12)
+
+## plot
+par(mar = par()$mar+c(0,0,1,0))
+plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", type="n", main=expression(italic("Training dataset")))
+legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our method","XMeans-based","PCA-based","Respective FPR"), density=c(NA,NA,5,NA), angle=c(NA,NA,45,NA), fill=c(TPR.col,NA,"black",FPR.col))
+axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
+axis(1, at = seq(0, 30, by=5), labels = NA)
+
+rect(x1.l, 0, x1.r, y1, col = TPR.col)
+rect(x1.l, 0, x1.r, y2, col = FPR.col)
+arrows(x1.l+arw, y1-y1.sd, x1.l+arw, y1+y1.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows(x1.l+arw, y2-y2.sd, x1.l+arw, y2+y2.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+
+rect(x2.l, 0, x2.r, y5)
+rect(x2.l, 0, x2.r, y6, col = FPR.col)
+arrows(x2.l+arw, y5-y5.sd, x2.l+arw, y5+y5.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows(x2.l+arw, y6-y6.sd, x2.l+arw, y6+y6.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+
+rect(x3.l, 0, x3.r, y7, col = "black", density=5, angle=45)
+rect(x3.l, 0, x3.r, y8, col = FPR.col)
+# arrows(x3.l+arw, y7-y7.sd, x3.l+arw, y7+y7.sd, length=arw.length, angle=90, code=3)
+arrows(x3.l+arw, y7-y7.sd, x3.l+arw, 1, length=arw.length, angle=90, code=3)  ## goes over 1
+# arrows(x3.l+arw, y8-y8.sd, x3.l+arw, y8+y8.sd, length=arw.length, angle=90, code=3)
+arrows((x3.l+arw)[-c(5,6)], (y8-y8.sd)[-c(5,6)], (x3.l+arw)[-c(5,6)], (y8+y8.sd)[-c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y8+y8.sd)[c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes below 0
+
+
+## dat2
+y9 = c(mean(xmeans.results.dat2.05a$TPR),mean(xmeans.results.dat2.10a$TPR),mean(xmeans.results.dat2.20a$TPR),mean(xmeans.results.dat2.30a$TPR),mean(xmeans.results.dat2.40a$TPR),mean(xmeans.results.dat2.50a$TPR))
+y10 = c(mean(xmeans.results.dat2.05a$FPR),mean(xmeans.results.dat2.10a$FPR),mean(xmeans.results.dat2.20a$FPR),mean(xmeans.results.dat2.30a$FPR),mean(xmeans.results.dat2.40a$FPR),mean(xmeans.results.dat2.50a$FPR))
+y9.sd = c(sd(xmeans.results.dat2.05a$TPR),sd(xmeans.results.dat2.10a$TPR),sd(xmeans.results.dat2.20a$TPR),sd(xmeans.results.dat2.30a$TPR),sd(xmeans.results.dat2.40a$TPR),sd(xmeans.results.dat2.50a$TPR))
+y10.sd = c(sd(xmeans.results.dat2.05a$FPR),sd(xmeans.results.dat2.10a$FPR),sd(xmeans.results.dat2.20a$FPR),sd(xmeans.results.dat2.30a$FPR),sd(xmeans.results.dat2.40a$FPR),sd(xmeans.results.dat2.50a$FPR))
+## pca results
+y11 = c(mean(pca.results.dat2.05a$TPR),mean(pca.results.dat2.10a$TPR),mean(pca.results.dat2.20a$TPR),mean(pca.results.dat2.30a$TPR),mean(pca.results.dat2.40a$TPR),mean(pca.results.dat2.50a$TPR))
+y12 = c(mean(pca.results.dat2.05a$FPR),mean(pca.results.dat2.10a$FPR),mean(pca.results.dat2.20a$FPR),mean(pca.results.dat2.30a$FPR),mean(pca.results.dat2.40a$FPR),mean(pca.results.dat2.50a$FPR))
+y11.sd = c(sd(pca.results.dat2.05a$TPR),sd(pca.results.dat2.10a$TPR),sd(pca.results.dat2.20a$TPR),sd(pca.results.dat2.30a$TPR),sd(pca.results.dat2.40a$TPR),sd(pca.results.dat2.50a$TPR))
+y12.sd = c(sd(pca.results.dat2.05a$FPR),sd(pca.results.dat2.10a$FPR),sd(pca.results.dat2.20a$FPR),sd(pca.results.dat2.30a$FPR),sd(pca.results.dat2.40a$FPR),sd(pca.results.dat2.50a$FPR))
+
+plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", type="n", main=expression(italic("Test dataset")))
+legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our method","XMeans-based","PCA-based","Respective FPR"), density=c(NA,NA,5,NA), angle=c(NA,NA,45,NA), fill=c(TPR.col,NA,"black",FPR.col))
+axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
+axis(1, at = seq(0, 30, by=5), labels = NA)
+
+rect(x1.l, 0, x1.r, y3, col = TPR.col)
+rect(x1.l, 0, x1.r, y4, col = FPR.col)
+arrows(x1.l+arw, y3-y3.sd, x1.l+arw, y3+y3.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows(x1.l+arw, y4-y4.sd, x1.l+arw, y4+y4.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+
+rect(x2.l, 0, x2.r, y9)
+rect(x2.l, 0, x2.r, y10, col = FPR.col)
+arrows(x2.l+arw, y9-y9.sd, x2.l+arw, y9+y9.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows(x2.l+arw, y10-y10.sd, x2.l+arw, y10+y10.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+
+rect(x3.l, 0, x3.r, y11, col = "black", density=5, angle=45)
+rect(x3.l, 0, x3.r, y12, col = FPR.col)
+# arrows(x3.l+arw, y11-y11.sd, x3.l+arw, y11+y11.sd, length=arw.length, angle=90, code=3)
+arrows(x3.l+arw, y11-y11.sd, x3.l+arw, 1, length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes over 1
+# arrows(x3.l+arw, y12-y12.sd, x3.l+arw, y12+y12.sd, length=arw.length, angle=90, code=3)
+arrows((x3.l+arw)[-c(5,6)], (y12-y12.sd)[-c(5,6)], (x3.l+arw)[-c(5,6)], (y12+y12.sd)[-c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y12+y12.sd)[c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes below 0
+@
 
 
 
 
 
 
-
-
-%' % -------------------------------------
-%' % SECTION 3: Phase-specific evaluation
-%' % -------------------------------------
-%' \section{Phase-specific Evaluation}
-%' \label{evaluation:sec3}
-%' 
-%' This section reports on results from the evaluation of each Phase. The main focus of Phase 1 evaluation is the kernel function-based threshold determination step where a threshold is determined from kernel density estimates and input data is partitioned into sets of non-intrusions and possible anomalies while that of Phase 2 evaluation is the DBSCAN clustering step where possible anomalies are clustered and a cluster of false positives is recognised. Sections \ref{evaluation:sec3.1} and \ref{evaluation:sec3.2} present the Phase 1 and 2 evaluation, respectively.
-%' 
-%' 
-%' % -----------------
-%' % SUB-SECTION: 3.1
-%' % -----------------
-%' \subsection{Phase 1}
-%' \label{evaluation:sec3.1}
-%' 
 %' A range of different values for the input parameter of the LOF algorithm, $k$, is tested. Assuming there is not enough domain knowledge and the most appropriate value for $k$ is not known, we have specified the range of $k$ to be tested as percentage, relative to the size of a test dataset, at 10, 20, 30 and 40 percents of the test dataset size. We refer to the percentages of $k$ as $\%k$ (percentage $k$).
 %' 
 %' The rest of this section is divided into four, each of which presents the density plots of LOF scores at different $\%k$ and the means and standard deviations of detection and false positive rates from one hundred repeated experiments for fixed percentage of intrusions.

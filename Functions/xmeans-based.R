@@ -1,4 +1,3 @@
-
 xmeans.experiment = function(data, n = 5000, i = 100, p.attack = 0.3) {
     ## normal, attack
     nSize = n * (1 - p.attack)
@@ -33,9 +32,19 @@ xmeans.experiment = function(data, n = 5000, i = 100, p.attack = 0.3) {
     return(list(TPR = atk/aSize, FPR = nrm/nSize))
 }
 
-# xmeans.results10a = xmeans.experiment(dat1, p.attack = 0.1)
-# xmeans.results20a = xmeans.experiment(dat1, p.attack = 0.2)
-# xmeans.results30a = xmeans.experiment(dat1, p.attack = 0.3)
-# xmeans.results40a = xmeans.experiment(dat1, p.attack = 0.4)
-# save(xmeans.results10a, xmeans.results20a, xmeans.results30a, xmeans.results40a, file = "Data/System_results/xmeans.results.RData")
-
+# ## dat1
+# xmeans.results.dat1.05a = xmeans.experiment(dat1, p.attack = 0.05)
+# xmeans.results.dat1.10a = xmeans.experiment(dat1, p.attack = 0.1)
+# xmeans.results.dat1.20a = xmeans.experiment(dat1, p.attack = 0.2)
+# xmeans.results.dat1.30a = xmeans.experiment(dat1, p.attack = 0.3)
+# xmeans.results.dat1.40a = xmeans.experiment(dat1, p.attack = 0.4)
+# xmeans.results.dat1.50a = xmeans.experiment(dat1, p.attack = 0.5)
+# ## dat2
+# xmeans.results.dat2.05a = xmeans.experiment(dat2, p.attack = 0.05)
+# xmeans.results.dat2.10a = xmeans.experiment(dat2, p.attack = 0.1)
+# xmeans.results.dat2.20a = xmeans.experiment(dat2, p.attack = 0.2)
+# xmeans.results.dat2.30a = xmeans.experiment(dat2, p.attack = 0.3)
+# xmeans.results.dat2.40a = xmeans.experiment(dat2, p.attack = 0.4)
+# xmeans.results.dat2.50a = xmeans.experiment(dat2, p.attack = 0.5)
+# ## save
+# save(xmeans.results.dat1.05a,xmeans.results.dat1.10a,xmeans.results.dat1.20a,xmeans.results.dat1.30a,xmeans.results.dat1.40a,xmeans.results.dat1.50a,xmeans.results.dat2.05a,xmeans.results.dat2.10a,xmeans.results.dat2.20a,xmeans.results.dat2.30a,xmeans.results.dat2.40a,xmeans.results.dat2.50a, file = "Data/System_results/xmeans.results.RData")

@@ -17,13 +17,14 @@ threshold = function(score, e = 0.1, graph = FALSE) {
     ## find extrema, minima and maxima (less than 2)
     extrema = diff(sign(diff(d$y)))
     extrema = c(0, extrema, 0)  # to make the length equal to d
-    maxima  = which(extrema[d$x < 5] == -2)
-    minima  = which(extrema[d$x < 5] ==  2)
+    # maxima  = which(extrema[d$x < 10] == -2)
+    # minima  = which(extrema[d$x < 10] ==  2)
+    maxima  = which(extrema == -2)
+    minima  = which(extrema ==  2)
     
     ## find prob for each curvature
     prob = numeric()
     require(sfsmisc)
-    
     if (length(minima) == 1) {
         prob = integrate.xy(d$x[1:minima[1]], d$y[1:minima[1]])
     } else {
