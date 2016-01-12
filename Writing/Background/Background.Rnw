@@ -8,7 +8,10 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 Explain the various types of unsupervised anomaly detection methods mentioned by Chandola et al. (2009) and why I chose LOF
 
 
-
+• PCA can be defined as the orthogonal projection of the data
+onto a lower dimensional linear space, known as the principal
+subspace, such that the variance of the projected data is
+maximized in the subspace
 
 
 

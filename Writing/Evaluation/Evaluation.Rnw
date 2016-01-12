@@ -204,11 +204,9 @@ axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 \section{System evaluation}
 \label{evaluation:sec2}
 
-Figure \ref{fig:sysResults} presents the system evaluation results for the \emph{training} and \emph{test} datasets. For the \emph{training} dataset between the intrusion frequencies of 0.05 and 0.4, we can infer graphically that the system is accurate, as the TPRs are very close to 1, and precise, as the lengths of the error bars are short. We suspect that the decrease in performance from the intrusion frequency of 0.5 is caused by the amount of intrusion instances in the random samples. As the data become more balanced, there is higher chance for DBSCAN to form balanced clusters. This in turn increases the likelihood that the largest clusters, which we remove, actually consist of intrusion instances to result in a decrease in overall TPR. We could consider this as a threshold at which the dinstinction between normal and anomalous starts to diminish and the assumption of test data containing high frequencies of normal instances is violated to essentially make anomaly detection impossible.
+Figure \ref{fig:sysResults} presents the system evaluation results for the \emph{training} and \emph{test} datasets. For the \emph{training} dataset between the intrusion frequencies of 0.05 and 0.4, we can infer graphically that the system is accurate, as the TPRs are very close to 1, and precise, as the lengths of the error bars are short. We suspect that the decrease in performance from the intrusion frequency of 0.5 is caused by the balanced nature of the classes in the random samples. As the data become more balanced, there is higher chance for DBSCAN to form balanced clusters. This in turn increases the likelihood that the largest clusters, which we remove, actually consist of intrusion instances to result in a decrease in overall TPR. Because our method assumes of higher frequencies of non-intrusion instances in test data, a mendatory assumption for any anomaly-based intrusion detection, and removes the largest resulting clusters under that assumption, it cannot be functional if that assumption is violated. In other words, perfectly balanced data cannot be classified correctly in an unsupervised learning manner unless some external information is available. The unusually high variation in the TPR at this particular intrusion frequency means that the system was highly indecisive because there were essentially no classification criteria. In fact about half of the hundred runs produced better results than the other half to further support our reasoning.
 
-For the \emph{test} dataset, both the TPRs and FPRs are generally lower compared to those from the \emph{training} dataset. We suspect the primary cause of this to be the similarities in local densities. The problem of indistinguishable local densities is difficult to address because each dataset is associated with a unique degree of similarity among local densities. For data that suffer from extremely similar densities, the best solution may be to avoid using anything distance-based, because densities are essentially computed using distances, and rather attempt to incorporate some external information able to distinctively describe different types of instances.
-
-Another possible cause may be associated with our random sampling method. We attempted to cover as much portion of the data as possible by running repeated experiments and sampling without replacement. Running repeated experiments with small samples, which may not be fitting representatives of the entire dataset, can skew the results in certain directions. In addition, samples, randomly selected without replacement, are no longer independent, which may have an effect on the overall results. We could not increase the sample size further due to the expensive nature of the LOF algorithm.
+For the \emph{test} dataset, both the TPRs and FPRs are generally lower compared to those from the \emph{training} dataset. We suspect the primary cause of this to be the similarities in local densities introducing challenges against effective classification. Also the performance starts to decrease at the intrusion frequency of 0.4, that is lower compared to the \emph{training} set. This can also be explained by the similarities between the local densities that scale down the previously mentioned threshold at which the classification criteria cease to exist. The problem of indistinguishable local densities is difficult to address because each dataset is associated with a unique degree of similarity within its respective local densities. For data that suffer from extremely similar densities, the best solution may be to avoid using anything distance-based, because densities are essentially computed using distances, and rather attempt to incorporate some external information capable of describing different types of instances. Another possible cause may be associated with our random sampling method. We attempted to cover as much portion of the data as possible by running repeated experiments as well as by sampling without replacement. However running repeated experiments with small samples, which may not be fitting representatives of the entire dataset, can skew the results in certain directions. In addition, samples, randomly selected without replacement, are no longer independent of one another, which may have an effect on the overall results. We could not increase the sample size further due to the expensive nature of the LOF algorithm.
 
 % One relevant metric, as a measure of dispersion, to evaluate the standard deviations is the \emph{coefficient of variation}, $c_v$, given by
 % \[ c_v = \frac{\sigma}{\mu}, \]
@@ -254,10 +252,14 @@ arrows(x, y3-y3.sd, x, y3+y3.sd, length=0.05, angle=90, code=3)
 arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
 @
 
-\subsubsection{Our method vs. others}
-We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches.
 
-For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into a subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination of a few hundred screen plots. Another difference is that we replace $k$-means with X-means as manual examination of reduction in the sum of squared errors (SSE), in an attempt to find optimal number of clusters, $k$, is highly inefficient for several hundred experiments. Lastly, the most sizeable cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances. This way, our comparison is fair as both approaches operate under an unsupervised manner.
+
+
+% ----------------------
+% SECTION 3: Comparison
+% ----------------------
+\section{Our method vs. others}
+We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches. For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into the principal subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination through hundreds of scree plots. Another difference is that we replace $k$-means with $X$-means \cite{pel00} as to avoid, again, manually having to determine optimal number of clusters, $k$. Lastly the largest cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances, therefore mostly contain non-intrusion instances. For the clustering-based approach, we use simply use the $X$-means algorithm and remove the largest cluster based on the same previously mentioned assumption. As a third comparison, we hoped to reproduce a subspace clustering approach proposed in \cite{cas12, cas14} because it is the most recent work with the most promising results and involves DBSCAN. However we failed to reproduce their work and decided to leave it out of the comparison. Random samples of the same seeds as our previous experiments are used to provide fair comparision between the methods. All the methods operate under the unsupervised learning paradigm to further assure comparability. The results are presented in Figure \ref{fig:compare}.
 
 <<compare, dependson="sysResults", echo=FALSE, out.width="0.7\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison with other methods">>=
 load("~/../Desktop/masters-project/Data/System_results/pca.results.RData")
@@ -295,7 +297,7 @@ FPR.col = grey.colors(1, 10/12)
 ## plot
 par(mar = par()$mar+c(0,0,1,0))
 plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", type="n", main=expression(italic("Training dataset")))
-legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our method","XMeans-based","PCA-based","Respective FPR"), density=c(NA,NA,5,NA), angle=c(NA,NA,45,NA), fill=c(TPR.col,NA,"black",FPR.col))
+legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based","Respective FPR"), density=c(NA,NA,20,NA), angle=c(NA,NA,45,NA), fill=c(TPR.col,NA,"black",FPR.col))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
 
@@ -309,13 +311,13 @@ rect(x2.l, 0, x2.r, y6, col = FPR.col)
 arrows(x2.l+arw, y5-y5.sd, x2.l+arw, y5+y5.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
 arrows(x2.l+arw, y6-y6.sd, x2.l+arw, y6+y6.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
 
-rect(x3.l, 0, x3.r, y7, col = "black", density=5, angle=45)
+rect(x3.l, 0, x3.r, y7, col = "black", density=10, angle=45)
 rect(x3.l, 0, x3.r, y8, col = FPR.col)
 # arrows(x3.l+arw, y7-y7.sd, x3.l+arw, y7+y7.sd, length=arw.length, angle=90, code=3)
-arrows(x3.l+arw, y7-y7.sd, x3.l+arw, 1, length=arw.length, angle=90, code=3)  ## goes over 1
+arrows(x3.l+arw, y7-y7.sd, x3.l+arw, 1, length=arw.length, angle=90, code=1)  ## goes over 1
 # arrows(x3.l+arw, y8-y8.sd, x3.l+arw, y8+y8.sd, length=arw.length, angle=90, code=3)
 arrows((x3.l+arw)[-c(5,6)], (y8-y8.sd)[-c(5,6)], (x3.l+arw)[-c(5,6)], (y8+y8.sd)[-c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
-arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y8+y8.sd)[c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes below 0
+arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y8+y8.sd)[c(5,6)], length=arw.length, angle=90, code=2, lwd=arw.lwd)  ## goes below 0
 
 
 ## dat2
@@ -329,8 +331,8 @@ y12 = c(mean(pca.results.dat2.05a$FPR),mean(pca.results.dat2.10a$FPR),mean(pca.r
 y11.sd = c(sd(pca.results.dat2.05a$TPR),sd(pca.results.dat2.10a$TPR),sd(pca.results.dat2.20a$TPR),sd(pca.results.dat2.30a$TPR),sd(pca.results.dat2.40a$TPR),sd(pca.results.dat2.50a$TPR))
 y12.sd = c(sd(pca.results.dat2.05a$FPR),sd(pca.results.dat2.10a$FPR),sd(pca.results.dat2.20a$FPR),sd(pca.results.dat2.30a$FPR),sd(pca.results.dat2.40a$FPR),sd(pca.results.dat2.50a$FPR))
 
-plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", type="n", main=expression(italic("Test dataset")))
-legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our method","XMeans-based","PCA-based","Respective FPR"), density=c(NA,NA,5,NA), angle=c(NA,NA,45,NA), fill=c(TPR.col,NA,"black",FPR.col))
+plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", ylab="Rates", type="n", main=expression(italic("Test dataset")))
+legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based","Respective FPR"), density=c(NA,NA,20,NA), angle=c(NA,NA,45,NA), fill=c(TPR.col,NA,"black",FPR.col))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
 
@@ -342,19 +344,21 @@ arrows(x1.l+arw, y4-y4.sd, x1.l+arw, y4+y4.sd, length=arw.length, angle=90, code
 rect(x2.l, 0, x2.r, y9)
 rect(x2.l, 0, x2.r, y10, col = FPR.col)
 arrows(x2.l+arw, y9-y9.sd, x2.l+arw, y9+y9.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
-arrows(x2.l+arw, y10-y10.sd, x2.l+arw, y10+y10.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows((x2.l+arw)[-c(3:5)], (y10-y10.sd)[-c(3:5)], (x2.l+arw)[-c(3:5)], (y10+y10.sd)[-c(3:5)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
+arrows((x2.l+arw)[3:5], 0, (x2.l+arw)[3:5], (y10+y10.sd)[3:5], length=arw.length, angle=90, code=2, lwd=arw.lwd)
 
-rect(x3.l, 0, x3.r, y11, col = "black", density=5, angle=45)
+rect(x3.l, 0, x3.r, y11, col = "black", density=10, angle=45)
 rect(x3.l, 0, x3.r, y12, col = FPR.col)
 # arrows(x3.l+arw, y11-y11.sd, x3.l+arw, y11+y11.sd, length=arw.length, angle=90, code=3)
-arrows(x3.l+arw, y11-y11.sd, x3.l+arw, 1, length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes over 1
+arrows((x3.l+arw)[-c(5:6)], (y11-y11.sd)[-c(5:6)], (x3.l+arw)[-c(5:6)], (y11+y11.sd)[-c(5:6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes over 1
+arrows((x3.l+arw)[c(5:6)], (y11-y11.sd)[c(5:6)], (x3.l+arw)[c(5:6)], 1, length=arw.length, angle=90, code=1, lwd=arw.lwd)
 # arrows(x3.l+arw, y12-y12.sd, x3.l+arw, y12+y12.sd, length=arw.length, angle=90, code=3)
-arrows((x3.l+arw)[-c(5,6)], (y12-y12.sd)[-c(5,6)], (x3.l+arw)[-c(5,6)], (y12+y12.sd)[-c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
-arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y12+y12.sd)[c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)  ## goes below 0
+arrows(x3.l+arw, 0, x3.l+arw, y12+y12.sd, length=arw.length, angle=90, code=2, lwd=arw.lwd)  ## goes below 0
 @
 
+For the \emph{training} dataset, our method appears to be more precise than the other methods as indicated by the small variation. This is a promising piece of information to claim that our method functions exactly as designed and is very robust as the performance is reliable and independent of any discrepancies between the random samples.  The accuracy of our method is also reasonably comparable to the others, especially as it manages to retain the FPRs at a relatively low level. One exception is when the intrusion frequency reaches at 0.5, and we have already established that such frequency of intrusion instances may be too high for any anomaly detection schemes. The simple $X$-means-based method produced unexpectedly high TPRs but their respective FPRs are generally too high to be reliable. A steady decrease in the FPRs towards a higher intrusion frequency can be observed to suggest that the $X$-means-based method may be a more reliable alternative for balanced data. However one shortcoming of the $X$-means algorithm that it favours balanced data must be carefully noted here. In any case, our method outperforms the $X$-means-based method at the lower intrusion frequencies. The PCA-based approach is too imprecise to be a reliable method, even though \emph{most} of the runs produced reasonably high TPRs, on average, to bring up the overall detection rate. Because the PCA-based approach is just an extended version of the $X$-means approach that implements PCA, we can deduce that the PCA part solely explains the poor performance. The ineffectiveness of PCA means that the information contained in the data cannot be effectively summarised in lower dimensions and the dimensionality reduction using linear transformation is inefficient for the data. Our conclusion from this finding is that the shape of the data cloud is too spherical to find a suitable subspace that explains a sufficient amount of the information contained in the data as an acceptable alternative representation in lower dimensions. The \emph{test} dataset presents similar patterns in accordance with the previously examined findings.
 
-
+To conclude, our method is the most reliable out of all three approaches as long as intrusion frequencies are not overly high. The expected outcome of our method can be dependent on the type of data, in terms of densities, but the good side is that resulting FPs will be kept at a moderately low level. The promise of low false alarm rate is valuable as users will be further assured that the detected intrusion instances are that much more likely to be what they wish to catch.
 
 
 
@@ -870,16 +874,3 @@ arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y12+y12.sd)[c(5,6)], length=a
 % Comment below out when building the whole doc:
 \bibliographystyle{plain}
 \bibliography{../Main/bibliography}
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -5,15 +5,21 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 % -----------------
 % CHAPTER: Methods
 % -----------------
-
 \chapter{Methods}
 \label{ch:methods}
 
-One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed intrusion detection system (IDS) is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
+Our proposed NIDS is built upon the philosophy of \emph{reductionism} and the concept of \emph{min-maxing}. Unsupervised learning tasks are often faced with inevitable underperformance compared to their supervised and semi-supervised counterparts because they are expected to operate with much less information given, eg, missing labels. In order to come up with a robust unsupervised NID scheme capable of producing satisfactory results, our initial approach was to reduce the existing problems, of the underperforming tendency, into simpler, more basic and manageable parts. But the question arises as to how such problems must be defined so that performance is ultimately affected by solving them. To this question, we considered the concept of \emph{min-maxing} to be applicable. More specifically, one way to define the problem of underperformance is as the state of producing an underwhelming number of True Positives (TPs) while also producing an overwhelming number of False Positives (FPs). Then the problem can be reduced and be solved by appropriate methods to \emph{maximise} the incidence of TPs and to \emph{minimise} that of FPs individually. This concept forms the foundation of our NID approach.
+
+For the maximising part, we acknowledge, in general, a positive correlation between True Positive Rate (TPR) and False Positive Rate (FPR), which can be typically observed from a \emph{receiver operating characteristic} (ROC) curve. Using the relationship, our solution is to run the anomaly detection algorithm of our choice in a more permissible, optimistic way which will increase the likelihood of \emph{both} normal and anomalous instances with relatively subtle characteristics to be classified. In this way, we can expect a higher TPR than under ordinary circumstances and the maximisation problem can be easily solved. However, also expected is a higher FPR than usual as more instances, whether they are actually TPs or not, will be classified. We address this problem separately in a separate step which follows the intial classification step. For the \emph{new} problem of the high FPR, we focus solely on identifying which instances correspond to the FPs using a clustering method and remove those instances so that they are not retained in the final result. In other words, those FPs, which we know are surely of normal instances, will no longer be present in the final result in the hope that the remaining instances are only of the anomalous, or intrusion, instances. Then the minimisation problem is essentially solved.
+
+For the rest of this chapter, more technical aspect of our method is presented with a demonstration at the end.
+
+<<echo=FALSE,eval=FALSE>>=
+% One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed intrusion detection system (IDS) is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
 
 % The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a demonstration of the system in Section \ref{methods:sec5}.
 
-The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3} and a demonstration of the system in Section \ref{methods:sec5}.
+% The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3} and a demonstration of the system in Section \ref{methods:sec5}.
 
 
 %The main problem of unsupervised anomaly detection methods is the incidence of a high false positive (or alarm) rate, that is the proportion of normal instances erroneously classified as anomalous (also known as false positives or false alarms). The issue is usually the result of violating one of the most fundamental assumptions in anomaly detection that normal instances are much more frequent than anomalies in a test dataset as it then becomes more difficult for a given method to distinguish between the normal and abnormal instances. A method's adequacy for a given test dataset also has an impact on the prevalence of false positives.
@@ -25,36 +31,31 @@ The rest of this chapter is divided into sections that provide a high-level over
 
 %Lastly, the system is compared with an intial hypothetical design that was intuitively drafted in the final section of the chapter.
 
-
 % --------------------------
 % SECTION 1: General scheme
 % --------------------------
-\section{General scheme}
-\label{methods:sec1}
-
-This section describes the core concept, including underlying supplementary ideas, and a schematic overview of the general scheme in Sections \ref{methods:sec1.1} and \ref{methods:sec1.2}, respectively.
-
-
-% ----------------
-% SUB-SECTION 1.1
-% ----------------
-\subsection{Core concept}
-\label{methods:sec1.1}
-
-The core concept of the general scheme comes from a variation of the \emph{minimax} principle originally proposed by von Neumann \cite{von1928}, that is a decision rule for minimising one's maximum loss in a zero-sum game. Our variation is defined as an attempt to grant an entity a notion of being ``best" by maximising highly desirable traits while minimising undesirable ones. The traits of an intrusion detection system to be \emph{maximised} is the sensitivity, or strength, of detection ---because it is directly related to the intention and purpose of the system, and provides an estimate of its usefulness--- and to be \emph{minimised} is the incidence of false positives ---because a low false positive rate is required for the system to be precise. There are two ideas that contribute towards this core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are always expected. These ideas are used in conceptualising the ways in which the two traits of an unsupervised anomaly detection method can be respectively maximised and minimised. The in-depth discussions of the ideas is followed by the rest of the section.
-
-%Other measures such as time and space complexities, which are useful in evaluating the applicability of a system, are ignored at this stage and are possible candidates for future work.
-
-
-
-%----------------------------------------------------------
-\subsubsection{Positive correlation between detection and false positive rates}
-Without going into the algorithmic level of a method and modifying it, the most simplistic approach in achieving a higher detection rate is to set a more permissive, insensitive threshold such that potential anomalies, whose similarity measures have been less distinctive otherwise, could be classified. More false positives will also be included in the result to suggest that the detection and false positive rates are positively correlated when adjusted in this manner. Using this idea, it is possible to set a threshold as liberal as possible to allow every anomaly in a test dataset to be classified, that is essentially equivalent to maximising the sensitivity of the given anomaly detection method.
-
-
-%----------------------------------------------------------
-\subsubsection{Expected prevalence of false positives}
-For an unsupervised anomaly detection method, the root cause of the problem associated with relatively high incidence of false positives can be a few such as the violation of the fundamental assumption that normal instances are much more frequent than anomalies in a test dataset. In a truly unsupervised fashion, one cannot discover the number of normal, or abnormal, instances in a test dataset, due to the absence of response labels, and must therefore expect a few false positives in the result. In addition to the problem, the previously described maximisation of sensitivity, through the setting of a liberal threshold, is strongly expected to generate a high frequency of false positives in the result. So in any case, the false positives are inevitably expected. If the prevalence of the false positives is imminent, it may be advisable to let it happen and find a solution to eliminate them, that is to focus more on resolution than prevention. In other words, rather than trying to prevent the type I errors, minimising false positives (or maximising the precision of a method, from a different perspective) can be achieved by identifying them and removing those instances from a set of possible anomalies.
+% \section{General scheme}
+% \label{methods:sec1}
+% 
+% This section describes the core concept, including underlying supplementary ideas, and a schematic overview of the general scheme in Sections \ref{methods:sec1.1} and \ref{methods:sec1.2}, respectively.
+% 
+% 
+% % ----------------
+% % SUB-SECTION 1.1
+% % ----------------
+% \subsection{Core concept}
+% \label{methods:sec1.1}
+% The core concept of the general scheme comes from a variation of the \emph{minimax} principle originally proposed by von Neumann \cite{von1928}, that is a decision rule for minimising one's maximum loss in a zero-sum game. Our variation is defined as an attempt to grant an entity a notion of being ``best" by maximising highly desirable traits while minimising undesirable ones. The traits of an intrusion detection system to be \emph{maximised} is the sensitivity, or strength, of detection ---because it is directly related to the intention and purpose of the system, and provides an estimate of its usefulness--- and to be \emph{minimised} is the incidence of false positives ---because a low false positive rate is required for the system to be precise. There are two ideas that contribute towards this core concept of the scheme: (1) the detection and false positive rates, of an unsupervised anomaly detection task, are positively correlated and (2) false positives are always expected. These ideas are used in conceptualising the ways in which the two traits of an unsupervised anomaly detection method can be respectively maximised and minimised. The in-depth discussions of the ideas is followed by the rest of the section.
+% 
+% %Other measures such as time and space complexities, which are useful in evaluating the applicability of a system, are ignored at this stage and are possible candidates for future work.
+% 
+% %----------------------------------------------------------
+% \subsubsection{Positive correlation between detection and false positive rates}
+% Without going into the algorithmic level of a method and modifying it, the most simplistic approach in achieving a higher detection rate is to set a more permissive, insensitive threshold such that potential anomalies, whose similarity measures have been less distinctive otherwise, could be classified. More false positives will also be included in the result to suggest that the detection and false positive rates are positively correlated when adjusted in this manner. Using this idea, it is possible to set a threshold as liberal as possible to allow every anomaly in a test dataset to be classified, that is essentially equivalent to maximising the sensitivity of the given anomaly detection method.
+% 
+% %----------------------------------------------------------
+% \subsubsection{Expected prevalence of false positives}
+% For an unsupervised anomaly detection method, the root cause of the problem associated with relatively high incidence of false positives can be a few such as the violation of the fundamental assumption that normal instances are much more frequent than anomalies in a test dataset. In a truly unsupervised fashion, one cannot discover the number of normal, or abnormal, instances in a test dataset, due to the absence of response labels, and must therefore expect a few false positives in the result. In addition to the problem, the previously described maximisation of sensitivity, through the setting of a liberal threshold, is strongly expected to generate a high frequency of false positives in the result. So in any case, the false positives are inevitably expected. If the prevalence of the false positives is imminent, it may be advisable to let it happen and find a solution to eliminate them, that is to focus more on resolution than prevention. In other words, rather than trying to prevent the type I errors, minimising false positives (or maximising the precision of a method, from a different perspective) can be achieved by identifying them and removing those instances from a set of possible anomalies.
 
 
 %Our initial concern has been the inferior performance associated with unsupervised learning. It is a generally well-established idea that a supervised or semi-supervised learning task outperforms its unsupervised counterpart due to its nature of utilising response labels in a data for building more accurate models. For the case of anomaly detection, it is of no exception to observe a similar circumstance which would be best avoided if possible. An interesting question is then whether the performance of an unsupervised anomaly detection method can ever be improved.
@@ -66,38 +67,36 @@ For an unsupervised anomaly detection method, the root cause of the problem asso
 % ----------------
 % SUB-SECTION 1.2
 % ----------------
-\subsection{Schematic overview}
-\label{methods:sec1.2}
-
-Figure \ref{fig:methods-scheme} represents the general scheme which forms the foundation of our proposed system. The word, \emph{general}, is used as the scheme is closely followed in building the prototypes of the proposed system and is theoretically possible to be generalised for different application domains of unsupervised anomaly detection. An experiment to assess the generalisability of the system is a potential future work.
-
-\begin{figure}[!h]
-\centering
-  \begin{tikzpicture}[node distance=2cm]
-    \node(in)  [simple] {test data};
-    \node(p1)  [procs,  below of=in, minimum width=6.2cm] {Phase 1: \\ unsupervised anomaly detection \\ with extra permissive thresholds \\ (maximise sensitivity of detection)};
-    \node(pa)  [simple, below of=p1] {all possible anomalies};
-    \node(p2)  [procs,  below of=pa, minimum width=6.2cm] {Phase 2: \\ false positive recognition and \\ elimination using clustering \\ (minimise false positives)};
-    \node(out) [simple, below of=p2] {all anomalies};
-    \draw [arrow] (in) to (p1);
-    \draw [arrow] (p1) to (pa);
-    \draw [arrow] (pa) to (p2);
-    \draw [arrow] (p2) to (out);
-  \end{tikzpicture}
-  \caption{General scheme}
-  \label{fig:methods-scheme}
-\end{figure}
-
-
-%----------------------------------------------------------
-\subsubsection{Phase 1}
-The aim of Phase 1 is to maximise the sensitivity of detection by using a liberal threshold in order to allow anomalies, that are otherwise less distinguishable from normal instances, to be classified. This approach can effectively classify anomalies that are embedded in clusters of normal instances and less distinctive. Another possible advantage is that the phase can be general to any threshold-based anomaly detection methods because the algorithmic structure of the method is untouched. An example would be to apply a lower threshold on a set of distances to $k^{th}$ nearest neighbour so that less distant instances, classified as normal otherwise, may be classified as potential anomalies.
-
-
-%----------------------------------------------------------
-\subsubsection{Phase 2}
-The aim of Phase 2 is to minimise the number of false positives by firstly identifying which instances are the false positives and secondly eliminating them from the set of possible anomalies output from Phase 1. The approach we have found relevant in classifying false positives is through clustering because it provides (1) unsupervised classification of instances and (2) grouping of false positives for painless elimination. One underlying assumption must be made for the clustering approach to be effective, that is the instances for each label, including false positives, are more similar to one another than to those for the other labels. If the assumption is violated, e.g., false positives are indistinguishable from normal instances, classifying anomalies and false positives in unsupervised manner becomes impossible for any methods.
-
+% \subsection{Schematic overview}
+% \label{methods:sec1.2}
+% 
+% Figure \ref{fig:methods-scheme} represents the general scheme which forms the foundation of our proposed system. The word, \emph{general}, is used as the scheme is closely followed in building the prototypes of the proposed system and is theoretically possible to be generalised for different application domains of unsupervised anomaly detection. An experiment to assess the generalisability of the system is a potential future work.
+% 
+% \begin{figure}[!h]
+% \centering
+%   \begin{tikzpicture}[node distance=2cm]
+%     \node(in)  [simple] {test data};
+%     \node(p1)  [procs,  below of=in, minimum width=6.2cm] {Phase 1: \\ unsupervised anomaly detection \\ with extra permissive thresholds \\ (maximise sensitivity of detection)};
+%     \node(pa)  [simple, below of=p1] {all possible anomalies};
+%     \node(p2)  [procs,  below of=pa, minimum width=6.2cm] {Phase 2: \\ false positive recognition and \\ elimination using clustering \\ (minimise false positives)};
+%     \node(out) [simple, below of=p2] {all anomalies};
+%     \draw [arrow] (in) to (p1);
+%     \draw [arrow] (p1) to (pa);
+%     \draw [arrow] (pa) to (p2);
+%     \draw [arrow] (p2) to (out);
+%   \end{tikzpicture}
+%   \caption{General scheme}
+%   \label{fig:methods-scheme}
+% \end{figure}
+% 
+% 
+% %----------------------------------------------------------
+% \subsubsection{Phase 1}
+% The aim of Phase 1 is to maximise the sensitivity of detection by using a liberal threshold in order to allow anomalies, that are otherwise less distinguishable from normal instances, to be classified. This approach can effectively classify anomalies that are embedded in clusters of normal instances and less distinctive. Another possible advantage is that the phase can be general to any threshold-based anomaly detection methods because the algorithmic structure of the method is untouched. An example would be to apply a lower threshold on a set of distances to $k^{th}$ nearest neighbour so that less distant instances, classified as normal otherwise, may be classified as potential anomalies.
+% 
+% %----------------------------------------------------------
+% \subsubsection{Phase 2}
+% The aim of Phase 2 is to minimise the number of false positives by firstly identifying which instances are the false positives and secondly eliminating them from the set of possible anomalies output from Phase 1. The approach we have found relevant in classifying false positives is through clustering because it provides (1) unsupervised classification of instances and (2) grouping of false positives for painless elimination. One underlying assumption must be made for the clustering approach to be effective, that is the instances for each label, including false positives, are more similar to one another than to those for the other labels. If the assumption is violated, e.g., false positives are indistinguishable from normal instances, classifying anomalies and false positives in unsupervised manner becomes impossible for any methods.
 
 %The inferior performance associated with unsupervised anomaly detection methods is due to their nature of completely disregarding the labels of responses in data. This type of machine learning methods relies on the analysis of one or more uniquely defined similarity measures under two major assumptions: (1) the majority of the instances in a test data consists of non-anomalous, ``normal", instances and (2) they are more similar to one another than to anomalous instances.
 
@@ -112,16 +111,16 @@ The aim of Phase 2 is to minimise the number of false positives by firstly ident
 % (1) general as any choice of anomaly detection methods is applicable.. Without changing the core algorithm of the detection method of our choice,
 
 %As mentioned earlier in Chapter [REF intro], the caveats of a typical anomaly-based network intrusion detection system (NIDS), in terms of the relatively low detection and high false alarm rates, are minimised in such a manner that each of those problems is addressed individually: (1) the anomaly detection technique in our method is executed in a generous way to maximise detection rate, and (2) a clustering scheme is applied to identify the cluster of false positives which will be eliminated to reduce overall false alarm rates. The result of such disintegration of the problems is a two-phase NIDS whose schematic overview is represented in figure \ref{fig:overview}. A high-level system overview is as follows:
-
+@
 
 
 % -------------------------------
-% SECTION 2: High-level overview
+% SECTION 1: System overview
 % -------------------------------
-\section{High-level system overview}
-\label{methods:sec2}
+\section{System overview}
+\label{methods:sec1}
 
-This section describes and summarises the high-level overview of our proposed system.
+The system is divided into two phases whose objectives are to achieve the highest possible TPR and the lowest possible FPR, respectively, using the previously mentioned ideas. Over the course of the research, the final version of our NIDS has seen a few changes from the initial design we had in mind. For example, our intial design for the first phase was to simply achieve a high TPR by setting a more admissible threshold, strictly following the previously mentioned concept. However the final version now involves more steps, which may seem contradictory to and deviating from the concepts and ideas discussed. But the extra steps were implemented as the result of a natural process of adjusting and improving the system, not as an attempt to raise any confusion. Keeping this in mind, the high level system overview is presented in Figure \ref{fig:methods-sys}.
 
 \begin{figure}[h]
 \centering
@@ -129,9 +128,9 @@ This section describes and summarises the high-level overview of our proposed sy
     \node(start) [start] {\textsc{Start}};
     \node(in)    [io, below of=start]  {Data \\ (numeric)};
     \node(p1)    [procs, below of=in, minimum width=8cm]  {Phase 1: \\ Density-based anomaly detection};
-    \node(pa)    [io, below of=p1]     {Possible \\ anomalies};
-    \node(p2)    [procs, below of=pa, minimum width=8cm]  {Phase 2: \\ Clustering-based false positive elimination};
-    \node(out)   [io, below of=p2]     {Anomalies \\ (intrusions)};
+    \node(pa)    [io, below of=p1]     {Possible \\ intrusions};
+    \node(p2)    [procs, below of=pa, minimum width=8cm]  {Phase 2: \\ Clustering-based FP elimination};
+    \node(out)   [io, below of=p2]     {Intrusions};
     \node(end)   [start, below of=out] {\textsc{End}};
     \draw [arrow] (start) to (in);
     \draw [arrow] (in) to (p1);
@@ -144,272 +143,278 @@ This section describes and summarises the high-level overview of our proposed sy
   \label{fig:methods-sys}
 \end{figure}
 
-Using the general scheme described in the previous section, our proposed two-phase intrusion detection system is built as represented in Figure \ref{fig:methods-sys}. The overall high-level structure of the system is identical to that of the previous schematic with two phases tasked with the same objectives: (1) maximise sensitivity and (2) minimise false positives. A major difference is that the phases of the system consist of sub-processes that collectively accomplish the set objectives. The overall high-level system overview is summarised as follows:
+Phase 1 accepts only numerical data as it initially runs the LOF algorithm to score each instance with a degree of being anomalous. Once every instance is scored, the probability distribution of the LOF scores is estimated using the kernel density estimation (KDE), which is then used to plot the estimated probability density function (PDF) to help determine appropriate thresholds. Because we assume that every test dataset contains a higher proportion of normal instances, we expect to observe a very dense curvature whose area under the graph, ie, corresponding probability, is greater than for any other curves and the instances whose scores fall under this region are normal. Then we can extrapolate from the PDF the point at which this major curve ends on the greater side. We lower that point by 10\% to use it as a threshold that is permissible enough to achieve a high TPR. Then those instances whose scores are less than the threshold are labelled as normal while the others are labelled as possible anomalies. Once all the instances are labelled as either normal or possible anomaly, a random sample of reasonably large size, that being a value just under the number of the possible anomalies is taken from the group of the normal instances. The random sample is then merged with the group of the possible anomalies to produce a merged set of instances. This merged set has a property that it contains enough normal instances that will be clustered with the FPs from the possible anomalies using the DBSCAN algorithm in Phase 2. Because we are absolutely sure that more FPs are produced than usual, from the way we set the threshold, we can expect that the merged set consists of higher proportion of normal instances that collectively correspond to the random sample and the FPs.
 
-\begin{itemize}
-  \item The system commences with the numeric portion of a test dataset as the input for Phase 1 process.
-  
-  \item The primary objective of Phase 1 is to execute anomaly detection on the input through five sub-processes which are tasked with:
-    \begin{itemize}
-      \item density-based anomaly scoring using the Local Outlier Factor algorithm, 
-      \item kernel function-based threshold determination, 
-      \item threshold-based input data partitioning, 
-      \item random sampling of partitioned instances and 
-      \item merging of residual partitioned datasets.
-    \end{itemize}
-  
-  \item The output of Phase 1 is a set of outliers (anomalous instances), false positives and randomly sampled inliers (non-intrusions), and becomes the input for Phase 2 process.
-  
-  \item The primary objective of Phase 2 is to group non-intrusions, i.e., false positives, and intrusions, i.e., anomalies, into clusters through three sub-processes which are tasked with:
-    \begin{itemize}
-      \item density-based clustering, 
-      \item identification of the cluster of the non-intrusions and 
-      \item removal of the members associated with the cluster from the rest of the Phase 2 input instances.
-    \end{itemize}
-  
-  \item The output of Phase 2 is a set of intrusion instances, classified as anomalies, and the residual non-intrusion instances, that are the remaining false positives.
-  
-\end{itemize}
+Phase 2 accepts the merged set as its input and performs the DBSCAN algorithm on it. If one does not have necessary domain knowledge to help decide optimal input parameters for the DBSCAN, the \emph{labels} of the random sample can be used to track down which input parameter should produce the most desirable results. The paramter, $MinPts$, has not much impact on the result so it can be fixed while the other parameter, $Eps$, is varied. For each $Eps$, we can measure the proportion of the largest cluster that corresponds to the random sample, denoted by $p_c$. Ideally, we want to observe an increase in this proportion as $Eps$ increases because it will then indicate that the largest clusters are correctly adding FPs incrementally. Another pattern we wish to observe is the $Eps$ value at which the proportion very rapidly drops as this suggests that the parameter is increased over a threshold at which the DBSCAN algorithm starts to include anomalies, which we do not want, in those clusters decreasing their purity. Our heuristic is to select the $Eps$ just before this rapid drop for the most desirable result. Another measure that can provide some extra information is the proportion of the raondom sample included in the largest cluster, denoted by $p_r$. Ideally, this proportion should be very close to 1 as this will then indicate that most of the random sample is clustered in the largest cluster. Then the instances included in the largest cluster are all removed so that the remaining instances in the result correspond to anomalies only, and thus intrusions.
 
+<<echo=FALSE,eval=FALSE>>=
+# % Using the general scheme described in the previous section, our proposed two-phase intrusion detection system is built as represented in Figure \ref{fig:methods-sys}. The overall high-level structure of the system is identical to that of the previous schematic with two phases tasked with the same objectives: (1) maximise sensitivity and (2) minimise false positives. A major difference is that the phases of the system consist of sub-processes that collectively accomplish the set objectives. The overall high-level system overview is summarised as follows:
+# % 
+# % \begin{itemize}
+# %   \item The system commences with the numeric portion of a test dataset as the input for Phase 1 process.
+# %   
+# %   \item The primary objective of Phase 1 is to execute anomaly detection on the input through five sub-processes which are tasked with:
+# %     \begin{itemize}
+# %       \item density-based anomaly scoring using the Local Outlier Factor algorithm, 
+# %       \item kernel function-based threshold determination, 
+# %       \item threshold-based input data partitioning, 
+# %       \item random sampling of partitioned instances and 
+# %       \item merging of residual partitioned datasets.
+# %     \end{itemize}
+# %   
+# %   \item The output of Phase 1 is a set of outliers (anomalous instances), false positives and randomly sampled inliers (non-intrusions), and becomes the input for Phase 2 process.
+# %   
+# %   \item The primary objective of Phase 2 is to group non-intrusions, i.e., false positives, and intrusions, i.e., anomalies, into clusters through three sub-processes which are tasked with:
+# %     \begin{itemize}
+# %       \item density-based clustering, 
+# %       \item identification of the cluster of the non-intrusions and 
+# %       \item removal of the members associated with the cluster from the rest of the Phase 2 input instances.
+# %     \end{itemize}
+# %   
+# %   \item The output of Phase 2 is a set of intrusion instances, classified as anomalies, and the residual non-intrusion instances, that are the remaining false positives.
+# %   
+# % \end{itemize}
+# 
+# % -----------------------------------
+# % SECTION 3: Phase-specific overview
+# % -----------------------------------
+# % \section{Phase-specific overview}
+# % \label{methods:sec3}
+# % 
+# % This section presents the low-level discussion and flowchart of each phase in Sections \ref{methods:sec3.1} and \ref{methods:sec3.2}. 
+# % 
+# % 
+# % % ----------------
+# % % SUB-SECTION 3.1
+# % % ----------------
+# % \subsection{Phase 1: density-based anomaly detection}
+# % \label{methods:sec3.1}
+# % 
+# % The input for Phase 1 process is the numeric portion of a test dataset, and the output is a set of possible anomalies that include actual anomalies (true positives) and incorrectly classified anomalies (false positives). There are five sub-processes, each of which is numbered in the order of execution and described in the rest of this section. The schematic overview of Phase 1 in low-level is represented in Figure \ref{fig:methods-p1}.
+# % 
+# % \begin{figure}[!h]
+# % \centering
+# %   \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
+# %     \node(0) [start] {\textsc{Phase 1 start}};
+# %     \node(1) [io,    below=1cm of 0]   {Data \\ (numeric)};
+# %     \node(2) [procs, below=1cm of 1]   {(1) LOF};
+# %     \node(3) [io,    below=1cm of 2]   {Scores};
+# %     \node(4) [procs, below=1cm of 3]   {(2) Kernel function-based \\ threshold \\ determination};
+# %     \node(5) [decis, below=1cm of 4]   {(3) Partition};
+# %     \node(6) [io,     left=3cm of 5]   {Non-intrusions \\ (NI set)};
+# %     \node(7) [procs, below=1cm of 6]   {(4) Random sampling \\ with sample size of $n$};
+# %     \node(8) [io,    below=1cm of 7]   {Sampled \\ non-intrusions};
+# %     \node(9) [io,    right=3cm of 5]   {Possible anomalies \\ (PA set)};
+# %     \node(10) [merge] at (8-|5)        {(5) Merge};
+# %     \node(11) [io,    below=1cm of 10] {Final \\ output};
+# %     \node(12) [start, below=1cm of 11] {\textsc{Phase 1 end}};
+# %     \draw [arrow] (0) to (1);
+# %     \draw [arrow] (1) to (2);
+# %     \draw [arrow] (2) to (3);
+# %     \draw [arrow] (3) to (4);
+# %     \draw [arrow] (4) to (5);
+# %     \draw [arrow] (5) --node[anchor=south] {$<$ threshold} (6);
+# %     \draw [arrow] (6) to (7);
+# %     \draw [arrow] (7) to (8);
+# %     \draw [arrow] (8) to (10);
+# %     \draw [arrow] (10) to (11);
+# %     \draw [arrow] (5) --node[anchor=south] {$\geq$ threshold} (9);
+# %     \draw [arrow] (9) |- (10);
+# %     \draw [arrow] (11) to (12);
+# %   \end{tikzpicture}
+# %   \caption{Low-level Phase 1 overview.}
+# %   \label{fig:methods-p1}
+# % \end{figure}
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(1) LOF}
+# % The density-based anomaly scoring algorithm, Local Outlier Factor (LOF), is run on the input data to score each instance a degree of being an anomaly. The input test dataset must be pre-processed to be completely numeric, that is any existing categorical and binary features in the dataset are dropped and only discrete and continous numeric features are retained. The input parameter, $k$ (also referred to as $MinPts$), of the LOF algorithm is the most appropriate when it is set to be a value greater than the number of anomalies in a given input data. We have not considered computing multiple LOF scores for each instance over a range of $k$ values, as suggested by the original authors, because $k$ in our case is always greater than 10 to produce statistically stable scores. Lastly, it should be reminded that a normal instance will have a score of one, or similar, while an anomaly will have a score much greater than one, as mentioned previously in Chapter [background].
+# % %As mentioned in Chapter [background], a normal instance will have a score close to one while an anomalous instance will have a score much greater than one.
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(2) Kernel function-based threshold determination}
+# % Provided that the input dataset satisfies two assumptions which are: (1) the majority of the instances are normal and (2) anomalies are statistically distinct from the normal instances, a set of LOF scores produced from the previous step is expected to include a range of highly frequent values. In other words, if 70\% of the dataset corresponds to normal then approximately 70\% of the computed LOF scores is expected to be close to one. We use this fact to determine the cut-off value for the LOF scores where the majority of them are valued at. In order to assess the range of scores that the majority of the instances fall into, kernel density estimation (KDE) is used to estimate the probability density of the scores and its estimated function is graphed. Then a threshold for the scores is set around the value where the curvature, whose area under the graph corresponds to the largest probability around the score of one, ends. A graphical demonstration of KDE is presented in Section \ref{methods:sec5}.
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(3) Partitioning}
+# % Instances, whose LOF scores are below the threshold, are partitioned as non-intrusions and those, whose scores are greater or equal to the threshold, are partitioned as possible anomalies. For future reference, the former set of non-intrusion instances is denoted as an \emph{NI set} and the latter set of possible anomalies is denoted as a \emph{PA set}. It should be noted that the NI set is purely made up of non-intrusion instances while the PA set contains both true and false positives. In addition, every anomaly existent in the input dataset is classified correctly in the PA set.
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(4) Random sampling}
+# % A random sample of the non-intrusion instances is taken to avoid any sampling bias, that is a bias against, or toward, certain instances being more likely to be selected. The equation to determine the random sample size is,
+# % \begin{equation}
+# % \label{methods:eq1}
+# % n_r = \frac{n_{PA}}{n_c},
+# % \end{equation}
+# % where $n_r$ denotes the random sample size, $n_{PA}$ denotes the number of possible anomalies and $n_c$ denotes the number of attack types (class labels). The equation \ref{methods:eq1} is intended to even out the number of instances belonging to each class to facilitate a clustering task to be used in Phase 2. When there is not enough domain knowledge about the number of attack types in a test dataset, $n_c$ is defaulted to be one. This means that at least half of the merged set, to be produced in the next step, will correspond to normal.
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(5) Merging}
+# % The random sample of non-intrusion instances is merged with the set of possible anomalies. The purpose of this step is to provide the PA set with the information of the non-intrusion instances from the NI set by the merge to facilitate a clustering task to be performed in Phase 2. Using this information, the non-intrusion instances including the false positives in the PA set can be clustered together.
+# % 
+# % 
+# % % ----------------
+# % % SUB-SECTION 3.2
+# % % ----------------
+# % \subsection{Phase 2: clustering-based false positive elimination}
+# % \label{methods:sec3.2}
+# % 
+# % The input for Phase 2 process is the merged dataset output from Phase 1, and the output is the intrusion instances defined as anomalies. There are two sub-processes, each of which is numbered in the order of execution and described in the rest of this section. The schematic overview of Phase 2 in low-level is represented in Figure \ref{fig:methods-p2}.
+# % 
+# % \begin{figure}[!h]
+# % \centering
+# %   \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
+# %     \node(0) [start] {\textsc{Phase 2 start}};
+# %     \node(1) [io,    below=1cm of 0] {Merged dataset \\ output from Phase 1};
+# %     \node(2) [procs, below=1cm of 1] {(1) DBSCAN};
+# %     \node(3) [io,    below=1cm of 2] {Clusters of instances};
+# %     \node(4) [decis, below=1cm of 3] {(2) Cluster size};
+# %     \node(5) [io,     left=2cm of 4] {Intrusions};
+# %     \node(6) [io,    below=1cm of 5] {Final \\ output};
+# %     \node(7) [start, below=1cm of 6] {\textsc{Phase 2 end}};
+# %     \node(8) [io,    right=2cm of 4] {Non-intrusions};
+# %     \draw [arrow] (0) to (1);
+# %     \draw [arrow] (1) to (2);
+# %     \draw [arrow] (2) to (3);
+# %     \draw [arrow] (3) to (4);
+# %     \draw [arrow] (4) --node[anchor=south] {$<n$} (5);
+# %     \draw [arrow] (5) to (6);
+# %     \draw [arrow] (6) to (7);
+# %     \draw [arrow] (4) --node[anchor=south] {$\geq n$} (8);
+# %   \end{tikzpicture}
+# %   \caption{Low-level Phase 2 overview}
+# %   \label{fig:methods-p2}
+# % \end{figure}
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(1) DBSCAN}
+# % The clustering algorithm, Density-Based Spatial Clustering of Applications with Noise, is based on the idea of local, or relative, density similar to LOF. Because of the local approach, the advantage of DBSCAN lies in its ability to effectively cluster data of an arbitrary shape. The two input parameters, $Eps$ and $MinPts$, can be adjusted accordingly to domain knowledge for more accurate and precise clustering.
+# % 
+# % 
+# % %----------------------------------------------------------
+# % \subsubsection{(2) Cluster selection}
+# % It is established in the previous phase that (1) the number of instances for each label is roughly balanced and (2) false positives, i.e., non-intrusions, will correspond to the most frequent label. Based on this establishment, a cluster of size greater than the random sample size, $n_r$, will be that of false positives and a cluster of size smaller than $n$ will be intrusions. The final stage is to simply disregard the cluster of false positives, as they are non-intrusive, and report the members in the cluster of intrusions.
+# 
+# 
+# % include below in background chapter as preliminary
+# % ----------------------
+# % SECTION 4: Comparison
+# % ----------------------
+# % \newpage
+# % \section{Comparison to initial prototype design}
+# % \label{methods:sec4}
+# % 
+# % This section provides a comparison of our proposed intrusion detection system to an initial prototype system. Our intuitions and logic behind the initial design of the system is discussed for each phase in Sections \ref{methods:sec4.1} and \ref{methods:sec4.2}, respectively. The schematic overview of the intial prototype is represented in Figure \ref{fig:methods-prototype}.
+# % 
+# % \begin{figure}[h]
+# % \centering
+# %   \begin{tikzpicture}[node distance = 2cm]
+# %     \node(input)  [simple] {1. Input data (numeric)};
+# %     \node(phase1) [procs, below of=input] {2. Phase 1: \\ Anomaly Detection};
+# % %     \node(PA) [simple, below of=phase1] {3. Possible anomalies with false positives};
+# % %     \node(phase2) [procs, below of=PA] {4. Phase 2: \\ False positive elimination};
+# % %     \node(output) [simple, below of=phase2] {5. Anomalies};
+# %     \node(NI) [simple,  below left of=phase1, node distance=5cm] {3(a). Non-Intrusion instances \\ (NI set)};
+# %     \node(PA) [simple,  below right of=phase1, node distance=5cm] {3(b). Possibly Anomalous instances \\ (PA set)};
+# %     \node(phase2) [procs, below of=PA, node distance=3cm] {4. Phase 2: \\ False Positive Elimination};
+# %     \node(output) [simple,  below of=phase2, node distance=3cm] {5. Possible anomalies with \\ false positive eliminated \\ (ePA set)};
+# %     \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
+# %     
+# %     \draw [arrow] (input)   to (phase1);
+# % %     \draw [arrow] (phase1) to (PA);
+# % %     \draw [arrow] (PA) to (phase2);
+# % %     \draw [arrow] (phase2) to (output);
+# %     \draw [arrow] (phase1)  to (NI);
+# %     \draw [arrow] (phase1)  to (PA);
+# %     \draw [arrow] (PA) to (phase2);
+# %     \draw [arrow, dotted] (NI.300) |- (phase2);
+# %     \draw [arrow] (phase2)  to (output);
+# %     \draw [arrow] (NI.240) |- (final);
+# %     \draw [arrow] (output) |- (final);
+# %   \end{tikzpicture}
+# %   \caption{High-level intial prototype overview}
+# %   \label{fig:methods-prototype}
+# % \end{figure}
+# % 
+# % 
+# % % ----------------
+# % % SUB-SECTION 4.1
+# % % ----------------
+# % \subsection{Phase 1: Partition via anomaly detection}
+# % \label{methods:sec4.1}
+# % The initial design of Phase 1 is to partition a given input dataset into a set of non-intrusion instances, which we have termed a NI set, and a set of possible anomalies, which we have termed a PA set. Our intuitive approach is to use the NI set as a ``training" set of normal instances so that its pattern or behaviour can be compared with clusters of the PA set in Phase 2. Then the cluster that matches the profile of the NI set most closely, i.e., a cluster most similar to the members of the NI set, will be associated with non-intrusion (or normal) instances, that is the false positives. From one perspective, the mode of this approach resembles that of a semi-supervised learning task as the training labels are essentially available for use. And the availability of the label is an invaluable piece of information that could facilitate the classification of false positives. However there is a limitation in the way the NI and PA sets are generated that ultimately hinders the performance of the system.
+# % 
+# % The limitation exists as the potential anomalies in a PA set is generated as the product of the relative density-based algorithm LOF. Hence these instances lie in a relatively sparse region compared to their neighbours, i.e., they are isolated from the rest of the entire dataset. On the other hand, the instances associated with a NI set lie in a dense region. This means that the profile of the NI set cannot be compared with that of the PA set as the sparse instances could lie in arbitrary positions relative to the dense instances. The hypothesis of this limitation is supported by the result that there is only 50\% chance, on average, that the cluster of false positives is correctly identified for this approach.
+# % 
+# % 
+# % 
+# % % ----------------
+# % % SUB-SECTION 4.2
+# % % ----------------
+# % \subsection{Phase 2: False positive elimination via clustering}
+# % \label{methods:sec4.2}
+# % 
+# % \subsubsection{X-means}
+# % The initial choice of the clustering method was X-means. Despite its limitations, the algorithm was suitable for quickly testing out our hypothesis for its simplicity yet accetable performance. We have used the clustering purity metric at an individual cluster level to evaluate the effectiveness of the clustering method. We have found that the cluster purity measures per run are usually averaged to a range between 0.7 and 0.8, which indicate that the chosen clustering method is subjectively adequate but not perfect. From this finding, a hypothesis on this behaviour is established to be caused by an arbitrary shape of the data, which the X-means algorithm cannot cope with.
+# % 
+# % \subsubsection{Similarity measures}
+# % 
+# % FIX THIS:
+# % \\
+# % There have been numerous similarity measures: (1)
+# % The similarty measure to be used as a comparison
 
-
-
-
-% -----------------------------------
-% SECTION 3: Phase-specific overview
-% -----------------------------------
-\section{Phase-specific overview}
-\label{methods:sec3}
-
-This section presents the low-level discussion and flowchart of each phase in Sections \ref{methods:sec3.1} and \ref{methods:sec3.2}. 
-
-
-% ----------------
-% SUB-SECTION 3.1
-% ----------------
-\subsection{Phase 1: density-based anomaly detection}
-\label{methods:sec3.1}
-
-The input for Phase 1 process is the numeric portion of a test dataset, and the output is a set of possible anomalies that include actual anomalies (true positives) and incorrectly classified anomalies (false positives). There are five sub-processes, each of which is numbered in the order of execution and described in the rest of this section. The schematic overview of Phase 1 in low-level is represented in Figure \ref{fig:methods-p1}.
-
-\begin{figure}[!h]
-\centering
-  \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
-    \node(0) [start] {\textsc{Phase 1 start}};
-    \node(1) [io,    below=1cm of 0]   {Data \\ (numeric)};
-    \node(2) [procs, below=1cm of 1]   {(1) LOF};
-    \node(3) [io,    below=1cm of 2]   {Scores};
-    \node(4) [procs, below=1cm of 3]   {(2) Kernel function-based \\ threshold \\ determination};
-    \node(5) [decis, below=1cm of 4]   {(3) Partition};
-    \node(6) [io,     left=3cm of 5]   {Non-intrusions \\ (NI set)};
-    \node(7) [procs, below=1cm of 6]   {(4) Random sampling \\ with sample size of $n$};
-    \node(8) [io,    below=1cm of 7]   {Sampled \\ non-intrusions};
-    \node(9) [io,    right=3cm of 5]   {Possible anomalies \\ (PA set)};
-    \node(10) [merge] at (8-|5)        {(5) Merge};
-    \node(11) [io,    below=1cm of 10] {Final \\ output};
-    \node(12) [start, below=1cm of 11] {\textsc{Phase 1 end}};
-    \draw [arrow] (0) to (1);
-    \draw [arrow] (1) to (2);
-    \draw [arrow] (2) to (3);
-    \draw [arrow] (3) to (4);
-    \draw [arrow] (4) to (5);
-    \draw [arrow] (5) --node[anchor=south] {$<$ threshold} (6);
-    \draw [arrow] (6) to (7);
-    \draw [arrow] (7) to (8);
-    \draw [arrow] (8) to (10);
-    \draw [arrow] (10) to (11);
-    \draw [arrow] (5) --node[anchor=south] {$\geq$ threshold} (9);
-    \draw [arrow] (9) |- (10);
-    \draw [arrow] (11) to (12);
-  \end{tikzpicture}
-  \caption{Low-level Phase 1 overview.}
-  \label{fig:methods-p1}
-\end{figure}
-
-
-%----------------------------------------------------------
-\subsubsection{(1) LOF}
-The density-based anomaly scoring algorithm, Local Outlier Factor (LOF), is run on the input data to score each instance a degree of being an anomaly. The input test dataset must be pre-processed to be completely numeric, that is any existing categorical and binary features in the dataset are dropped and only discrete and continous numeric features are retained. The input parameter, $k$ (also referred to as $MinPts$), of the LOF algorithm is the most appropriate when it is set to be a value greater than the number of anomalies in a given input data. We have not considered computing multiple LOF scores for each instance over a range of $k$ values, as suggested by the original authors, because $k$ in our case is always greater than 10 to produce statistically stable scores. Lastly, it should be reminded that a normal instance will have a score of one, or similar, while an anomaly will have a score much greater than one, as mentioned previously in Chapter [background].
-%As mentioned in Chapter [background], a normal instance will have a score close to one while an anomalous instance will have a score much greater than one.
-
-
-%----------------------------------------------------------
-\subsubsection{(2) Kernel function-based threshold determination}
-Provided that the input dataset satisfies two assumptions which are: (1) the majority of the instances are normal and (2) anomalies are statistically distinct from the normal instances, a set of LOF scores produced from the previous step is expected to include a range of highly frequent values. In other words, if 70\% of the dataset corresponds to normal then approximately 70\% of the computed LOF scores is expected to be close to one. We use this fact to determine the cut-off value for the LOF scores where the majority of them are valued at. In order to assess the range of scores that the majority of the instances fall into, kernel density estimation (KDE) is used to estimate the probability density of the scores and its estimated function is graphed. Then a threshold for the scores is set around the value where the curvature, whose area under the graph corresponds to the largest probability around the score of one, ends. A graphical demonstration of KDE is presented in Section \ref{methods:sec5}.
-
-
-%----------------------------------------------------------
-\subsubsection{(3) Partitioning}
-Instances, whose LOF scores are below the threshold, are partitioned as non-intrusions and those, whose scores are greater or equal to the threshold, are partitioned as possible anomalies. For future reference, the former set of non-intrusion instances is denoted as an \emph{NI set} and the latter set of possible anomalies is denoted as a \emph{PA set}. It should be noted that the NI set is purely made up of non-intrusion instances while the PA set contains both true and false positives. In addition, every anomaly existent in the input dataset is classified correctly in the PA set.
-
-
-%----------------------------------------------------------
-\subsubsection{(4) Random sampling}
-A random sample of the non-intrusion instances is taken to avoid any sampling bias, that is a bias against, or toward, certain instances being more likely to be selected. The equation to determine the random sample size is,
-\begin{equation}
-\label{methods:eq1}
-n_r = \frac{n_{PA}}{n_c},
-\end{equation}
-where $n_r$ denotes the random sample size, $n_{PA}$ denotes the number of possible anomalies and $n_c$ denotes the number of attack types (class labels). The equation \ref{methods:eq1} is intended to even out the number of instances belonging to each class to facilitate a clustering task to be used in Phase 2. When there is not enough domain knowledge about the number of attack types in a test dataset, $n_c$ is defaulted to be one. This means that at least half of the merged set, to be produced in the next step, will correspond to normal.
-
-
-%----------------------------------------------------------
-\subsubsection{(5) Merging}
-The random sample of non-intrusion instances is merged with the set of possible anomalies. The purpose of this step is to provide the PA set with the information of the non-intrusion instances from the NI set by the merge to facilitate a clustering task to be performed in Phase 2. Using this information, the non-intrusion instances including the false positives in the PA set can be clustered together.
-
-
-% ----------------
-% SUB-SECTION 3.2
-% ----------------
-\subsection{Phase 2: clustering-based false positive elimination}
-\label{methods:sec3.2}
-
-The input for Phase 2 process is the merged dataset output from Phase 1, and the output is the intrusion instances defined as anomalies. There are two sub-processes, each of which is numbered in the order of execution and described in the rest of this section. The schematic overview of Phase 2 in low-level is represented in Figure \ref{fig:methods-p2}.
-
-\begin{figure}[!h]
-\centering
-  \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
-    \node(0) [start] {\textsc{Phase 2 start}};
-    \node(1) [io,    below=1cm of 0] {Merged dataset \\ output from Phase 1};
-    \node(2) [procs, below=1cm of 1] {(1) DBSCAN};
-    \node(3) [io,    below=1cm of 2] {Clusters of instances};
-    \node(4) [decis, below=1cm of 3] {(2) Cluster size};
-    \node(5) [io,     left=2cm of 4] {Intrusions};
-    \node(6) [io,    below=1cm of 5] {Final \\ output};
-    \node(7) [start, below=1cm of 6] {\textsc{Phase 2 end}};
-    \node(8) [io,    right=2cm of 4] {Non-intrusions};
-    \draw [arrow] (0) to (1);
-    \draw [arrow] (1) to (2);
-    \draw [arrow] (2) to (3);
-    \draw [arrow] (3) to (4);
-    \draw [arrow] (4) --node[anchor=south] {$<n$} (5);
-    \draw [arrow] (5) to (6);
-    \draw [arrow] (6) to (7);
-    \draw [arrow] (4) --node[anchor=south] {$\geq n$} (8);
-  \end{tikzpicture}
-  \caption{Low-level Phase 2 overview}
-  \label{fig:methods-p2}
-\end{figure}
-
-
-%----------------------------------------------------------
-\subsubsection{(1) DBSCAN}
-The clustering algorithm, Density-Based Spatial Clustering of Applications with Noise, is based on the idea of local, or relative, density similar to LOF. Because of the local approach, the advantage of DBSCAN lies in its ability to effectively cluster data of an arbitrary shape. The two input parameters, $Eps$ and $MinPts$, can be adjusted accordingly to domain knowledge for more accurate and precise clustering.
-
-
-%----------------------------------------------------------
-\subsubsection{(2) Cluster selection}
-It is established in the previous phase that (1) the number of instances for each label is roughly balanced and (2) false positives, i.e., non-intrusions, will correspond to the most frequent label. Based on this establishment, a cluster of size greater than the random sample size, $n_r$, will be that of false positives and a cluster of size smaller than $n$ will be intrusions. The final stage is to simply disregard the cluster of false positives, as they are non-intrusive, and report the members in the cluster of intrusions.
-
-
-% include below in background chapter as preliminary
-% ----------------------
-% SECTION 4: Comparison
-% ----------------------
-% \newpage
-% \section{Comparison to initial prototype design}
-% \label{methods:sec4}
-% 
-% This section provides a comparison of our proposed intrusion detection system to an initial prototype system. Our intuitions and logic behind the initial design of the system is discussed for each phase in Sections \ref{methods:sec4.1} and \ref{methods:sec4.2}, respectively. The schematic overview of the intial prototype is represented in Figure \ref{fig:methods-prototype}.
-% 
-% \begin{figure}[h]
-% \centering
-%   \begin{tikzpicture}[node distance = 2cm]
-%     \node(input)  [simple] {1. Input data (numeric)};
-%     \node(phase1) [procs, below of=input] {2. Phase 1: \\ Anomaly Detection};
-% %     \node(PA) [simple, below of=phase1] {3. Possible anomalies with false positives};
-% %     \node(phase2) [procs, below of=PA] {4. Phase 2: \\ False positive elimination};
-% %     \node(output) [simple, below of=phase2] {5. Anomalies};
-%     \node(NI) [simple,  below left of=phase1, node distance=5cm] {3(a). Non-Intrusion instances \\ (NI set)};
-%     \node(PA) [simple,  below right of=phase1, node distance=5cm] {3(b). Possibly Anomalous instances \\ (PA set)};
-%     \node(phase2) [procs, below of=PA, node distance=3cm] {4. Phase 2: \\ False Positive Elimination};
-%     \node(output) [simple,  below of=phase2, node distance=3cm] {5. Possible anomalies with \\ false positive eliminated \\ (ePA set)};
-%     \node(final) [simple, below of=phase1, yshift=-10cm, node distance=3cm]{6. Processed dataset};
-%     
-%     \draw [arrow] (input)   to (phase1);
-% %     \draw [arrow] (phase1) to (PA);
-% %     \draw [arrow] (PA) to (phase2);
-% %     \draw [arrow] (phase2) to (output);
-%     \draw [arrow] (phase1)  to (NI);
-%     \draw [arrow] (phase1)  to (PA);
-%     \draw [arrow] (PA) to (phase2);
-%     \draw [arrow, dotted] (NI.300) |- (phase2);
-%     \draw [arrow] (phase2)  to (output);
-%     \draw [arrow] (NI.240) |- (final);
-%     \draw [arrow] (output) |- (final);
-%   \end{tikzpicture}
-%   \caption{High-level intial prototype overview}
-%   \label{fig:methods-prototype}
-% \end{figure}
-% 
-% 
-% % ----------------
-% % SUB-SECTION 4.1
-% % ----------------
-% \subsection{Phase 1: Partition via anomaly detection}
-% \label{methods:sec4.1}
-% The initial design of Phase 1 is to partition a given input dataset into a set of non-intrusion instances, which we have termed a NI set, and a set of possible anomalies, which we have termed a PA set. Our intuitive approach is to use the NI set as a ``training" set of normal instances so that its pattern or behaviour can be compared with clusters of the PA set in Phase 2. Then the cluster that matches the profile of the NI set most closely, i.e., a cluster most similar to the members of the NI set, will be associated with non-intrusion (or normal) instances, that is the false positives. From one perspective, the mode of this approach resembles that of a semi-supervised learning task as the training labels are essentially available for use. And the availability of the label is an invaluable piece of information that could facilitate the classification of false positives. However there is a limitation in the way the NI and PA sets are generated that ultimately hinders the performance of the system.
-% 
-% The limitation exists as the potential anomalies in a PA set is generated as the product of the relative density-based algorithm LOF. Hence these instances lie in a relatively sparse region compared to their neighbours, i.e., they are isolated from the rest of the entire dataset. On the other hand, the instances associated with a NI set lie in a dense region. This means that the profile of the NI set cannot be compared with that of the PA set as the sparse instances could lie in arbitrary positions relative to the dense instances. The hypothesis of this limitation is supported by the result that there is only 50\% chance, on average, that the cluster of false positives is correctly identified for this approach.
-% 
-% 
-% 
-% % ----------------
-% % SUB-SECTION 4.2
-% % ----------------
-% \subsection{Phase 2: False positive elimination via clustering}
-% \label{methods:sec4.2}
-% 
-% \subsubsection{X-means}
-% The initial choice of the clustering method was X-means. Despite its limitations, the algorithm was suitable for quickly testing out our hypothesis for its simplicity yet accetable performance. We have used the clustering purity metric at an individual cluster level to evaluate the effectiveness of the clustering method. We have found that the cluster purity measures per run are usually averaged to a range between 0.7 and 0.8, which indicate that the chosen clustering method is subjectively adequate but not perfect. From this finding, a hypothesis on this behaviour is established to be caused by an arbitrary shape of the data, which the X-means algorithm cannot cope with.
-% 
-% \subsubsection{Similarity measures}
-% 
-% FIX THIS:
-% \\
-% There have been numerous similarity measures: (1)
-% The similarty measure to be used as a comparison
-
-
-
-
-
-
+@
 
 
 % -------------------------
-% SECTION 5: Demonstration
+% SECTION 2: Demonstration
 % -------------------------
 \section{Demonstration}
-\label{methods:sec5}
+\label{methods:sec2}
 
-This section illustrates a demonstration for the intracacy and details of our IDS that are not mentioned in the previous sections. Both Phase 1 and 2 require domain knowledge on input data for optimal performance due to the input parameters used. This means the system is not fully autonomous and it is our intention to leave it so. A way to automate the system is one of the future works that will be discussed in a later chapter. A demonstration for each phase is provided in Sections \ref{methods:sec5.1} and \ref{methods:sec5.2}, respectively.
+The demonstration is presented using a particular set of instances that seems to accurately portray the sort of results one can expect to obtain. Assuming the LOF algorithm is successfully performed on the data and their respective LOF scores are produced as a result, the kernel density estimates are presented as shown in Figure \ref{fig:kde-example}. The plot shows a major curvature whose probability, of approximately 0.73, is greater than any other curves and therefore must correspond to normal. We draw the threshold, as the dashed line, at a point about 10\% to the left of the first local minimum to maximise classification. A random sample of 1,000 instances, whose scores are less than the threshold, is merged with the set of possible anomalies and DBSCAN is performed on the merged set. Figure \ref{fig:kde-example2} presents a plot of the two previously discussed proportions as a heuristic as well as the system TPR and FPR. There is a relatively large decrease in $p_c$ between the $Eps$ of 0.6 and 0.7, which can also be observed for the TPR. As our heuristic suggestion to select the $Eps$ just before a major decrease in the $p_c$ appears to be the best choice to obtain the most promising TPR and FPR. The line representing $p_r$ can be used to assure that at $Eps=0.6$ \emph{every} instance from the random sample is included in this cluster to further confirm our belief that the cluster indeed consists of non-intrusion instances.
 
 
-\subsection{Phase 1}
-\label{methods:sec5.1}
-For the purpose of this demonstration, we assume that a vector of LOF scores is computed for an arbitrary dataset and its kernel density estimates are graphed as seen in Figure \ref{fig:kde-example}. We can observe from this graph that the curvature located around the score of one corresponds to a large probability (approximately 0.73) and the instances that reside within this boundary should be normal, or non-intrusions. Hence instances belonging to the left of the threshold become an NI set while those to the right become a PA set. Also observable from the graph are the four small curves which could suggest that there might four different types of attacks in the PA set. This means we could set $n_c$, from the equation \ref{methods:eq1}, to be 4 and compute the random sample size needed.
 
-<<kde-example, echo=FALSE, fig.align='center', fig.cap="Density of an arbitrary set of LOF scores", out.width="0.6\\linewidth", fig.pos="h">>=
+% \subsection{Phase 1}
+% \label{methods:sec5.1}
+% For the purpose of this demonstration, we assume that a vector of LOF scores is computed for an arbitrary dataset and its kernel density estimates are graphed as seen in Figure \ref{fig:kde-example}. We can observe from this graph that the curvature located around the score of one corresponds to a large probability (approximately 0.73) and the instances that reside within this boundary should be normal, or non-intrusions. Hence instances belonging to the left of the threshold become an NI set while those to the right become a PA set. Also observable from the graph are the four small curves which could suggest that there might four different types of attacks in the PA set. This means we could set $n_c$, from the equation \ref{methods:eq1}, to be 4 and compute the random sample size needed.
+
+<<kde-example, echo=FALSE, fig.align='center', fig.cap="Density of an arbitrary set of LOF scores", out.width="0.68\\linewidth">>=
 load(file = "lof_scores.RData")
 d = density(lof_30p, bw = "nrd", kernel = "gaussian")
 plot(d, xlab = "LOF scores", main = "Probability distribution of LOF scores")
 local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)
 local_max = min(which(diff(sign(diff(d$y))) ==  -2) + 1)
 abline(v = d$x[local_min]-diff(c(d$x[local_max], d$x[local_min]))*0.1, lty = 5, col = "grey20")
-legend("topright", "threshold", lty = 5, col = "grey20")
-
+# legend("topright", "threshold", lty = 5, col = "grey20")
+text(c(2.2, 1.2), "threshold", pos = 4, cex = 1.2)
 ## probability
 # ind = which.min(abs(threshold - d$x))
 # sfsmisc::integrate.xy(d$x[1:ind], d$y[1:ind])
 @
 
+<<kde-example2, echo=FALSE, fig.align='center', fig.cap="Result of DBSCAN", out.width="0.68\\linewidth">>=
+load("~/../Desktop/masters-project/Data/System_results/dat1_30a.RData")
+plot(seq(0,1,by=.1), seq(0,1,by=.1), type="n", xlab = "Eps", ylab = "Rate", main = "Various rates across Eps")
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$p2.proportion.within.cluster[4,])
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$p2.proportion.within.sample[4,], lty = 4)
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$system.detection.rate[4,], col = "blue")
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$system.false.alarm.rate[4, ], col = "red")
+legend("right", legend = c(expression('p'[c]), expression("p"[r]), "TPR", "FPR"), col = c("black","black","blue","red"), lty=c(1,4,1,1))
+@
 
-\subsection{Phase 2}
-\label{methods:sec5.2}
-Once we have a merged set output from Phase 1, one way to approximate a suitable value for $Eps$ is to compute the $k$-nearest neighbours for each instance, plot the distances and look for a `knee' in the plot. Figure \ref{fig:knn-example} represents an example of this plot where a knee seems to be around 0.7. It should be noted that the merged set is relatively sparse compared to the original set, therefore $Eps$ should be set to be slightly greater than the knee such as 0.8 or 0.9. After running DBSCAN, any false positives are classified together as the random sample of non-intrusion instances and they can be removed altogether to result in a residual set of intrusion instances.
 
-<<knn-example, echo=FALSE, fig.align='center', fig.cap="kNN distance plot for k=5", out.width="0.6\\linewidth", fig.pos="h">>=
+
+
+<<knn-example, echo=FALSE, eval=FALSE, fig.align='center', fig.cap="kNN distance plot for k=5", out.width="0.6\\linewidth", fig.pos="h">>=
 load(file = "knn.RData")
 dbscan::kNNdistplot(normalized[,-35], k = 5)
 @
@@ -417,8 +422,8 @@ dbscan::kNNdistplot(normalized[,-35], k = 5)
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{plain}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{plain}
+% \bibliography{../Main/bibliography}
 
 
 
