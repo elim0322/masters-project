@@ -4,53 +4,139 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 \chapter{Background}
 \label{ch:background}
+All the schemes described in this chapter are categorised as unsupervised learning algorithms as our primary interest lies in the implementation of unsupervised anomaly-based network intrusion detection system (NIDS).
 
-Explain the various types of unsupervised anomaly detection methods mentioned by Chandola et al. (2009) and why I chose LOF
+%--------------------------------------
+% SECTION 1: Anomaly detection schemes
+%--------------------------------------
+\section{Anomaly detection schemes}
+%----------------------
+% Local outlier factor
+%----------------------
+\subsection{Local outlier factor}
+Local outlier factor (LOF) is a density-based anomaly scoring algorithm proposed by Breunig et al. in \cite{bre00}. As the name suggests LOF assigns a score, also referred to as a \emph{local outlier factor} by the authors, to every given data instance under the premise that an anomaly is an object positioned in a relatively sparse region compared to its neighbouring objects. To find the local density of the data instance, $p$, (1) first the radius of the smallest hypersphere, centred at $p$, that accomodates $k$ nearest neighbours, with respect to $p$, is computed, which the authors refer to as the \emph{k-distance}, (2) compute the $k$-distances for the $k$ nearest neighbours and their sum, which gives the \emph{reachability distance} of $o$ and (3) lastly divide the volume of the hypersphere, i.e., the number of all the instances residing in the hypersphere, by the reachability distance. Then the LOF score of a given data instance is the average of the ratio of the local density of its $k$ nearest neighbours and that of the instance itself, more formally given by
+\begin{equation}
+\label{eq1}
+LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
+\end{equation}
+where $lrd$ denotes the local density of a corresponding data instance. Hence a low LOF score represents an \emph{inlier}, as its local density is relatively greater than that of its neighbours, while a high score represents an \emph{outlier} in the similar manner. To derive a heuristic, the equation \ref{eq1} can be rearranged to
+\begin{equation}
+\label{eq2}
+LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)},
+\end{equation}
+which indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another.
+
+Our decision to include the LOF algorithm into consideration is because of its local-based approach, which allows it to be very robust in finding anomalies embedded deep within clusters. Because of this, LOF is very attractive as an initiative exploratory tool as it is not easily affected by the shapes of data. We regard the expensive nature of LOF as a trade-off for the high capacity of handling different types and shapes of data in this particular case. In addition, the scoring aspect of LOF is beneficial as it allows us to set our own threshold for a highly flexible and customisable system.
+
+%---------------------------
+% Kernel density estimation
+%---------------------------
+\subsection{Kernel density estimation}
+Kernel density estimation (KDE) is a non-parametric method of approximating the probability density function (PDF), or the density, of a random variable. For a given set of independent and identically distributed sample, $(x_1, x_2, \dots, x_n)$, from an unknown density, $f$, the kernel density estimator of $f$ is formally
+\begin{equation}
+\hat{f}_n(x) = \int_{-\infty}^{\infty} \frac{1}{h} K \left( \frac{x-y}{h} \right) dF_n(y) = \frac{1}{nh} \sum_{j=1}^n K\left( \frac{x-X_j}{h} \right),
+\end{equation}
+as given by the equation 1.7 in \cite{par62}, where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. One simple way to implement KDE in anomaly detection is to estimate the PDFs of a feature from training and test data and compare them for any signs of inconsistency.
+
+The most valuable aspect of KDE is that it allows one to explore the overall distribution of a given feature. If plotted, kernel density estimates provide immediate visual awareness of where the most frequent values lie and their respective frequencies. Since our interest lies in the domain of unsupervised anomaly detection, which assumes that anomalous instances are much less frequent than their normal counterparts, KDE is appropriately relevant in our case. One major caveat of KDE lies in the fact that it is only useful for univariate data. However we can use this limitation for our benefit in conjunction with the LOF algorithm as it essentially transforms a given multivariate data into a single univariate vector of scores that KDE much prefers. Thus we have decided to include KDE as a threshold generating tool that allows us to (1) preliminarily explore the distribution of given LOF scores and infer the regions of normal and anomalous groups to find a suitable threshold that separates those groups out accordingly.
 
 
-• PCA can be defined as the orthogonal projection of the data
-onto a lower dimensional linear space, known as the principal
-subspace, such that the variance of the projected data is
-maximized in the subspace
+%-------------------------------
+% SECTION 2: Clustering schemes
+%-------------------------------
+\section{Clustering schemes}
+%-------------------------------------------------------------
+% Density-based spatial clustering of applications with noise
+%-------------------------------------------------------------
+\subsection{DBSCAN}
+DBSCAN is a density-based clustering algorithm proposed by Ester el al. \cite{est96} that offers its own version of anomaly detection. A \emph{core point}, as it defines, is a data instance surrounded by at least $k$ neighbouring instances within the radius of $\epsilon$, and those neighbours are said to be \emph{directly reachable} from the core point. Then all these neighbouring points form a cluster around the core point while non-reachable points form the border of the cluster. All points that are not reachable from any point are labelled as outliers.
+
+The fact that DBSCAN shares similarity with LOF in terms of the local density-based approach is what has appealed to us the most. Like LOF, the DBSCAN algorithm is not affected by the shapes of data and is extremely robust against any shapes and types of data. We initially considered DBSCAN as an alternative option to LOF due to their similarity. However we settled with the idea of using DBSCAN as a way to reinforce our implementation of LOF because of the very nature of the high compatibility between the two.
+
+%---------
+% X-means
+%---------
+\subsection{X-means}
+The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00}, is an extension of K-means that finds an optimal value for $k$ under the Bayesian Information Criterion (BIC). It performs ordinary K-means on given data and then, for each resulting cluster, incrementally run additional K-means using $k$ increased by a factor of two until the BIC cannot be minimised further.
+
+The main advantage of X-means is the absence of the parameter, $k$, as it computes it for users. The manual, inefficient process of having to perform multiple runs of K-means on the same data just to find an optimal $k$ can be completely avoided using X-means. Also X-means scales well computationally, that is it is capable of handling larger data more efficiently than its K-means counterpart.
+
+
+%-------------------------------------
+% SECTION 3: Dimensionality reduction
+%-------------------------------------
+\section{Dimensionality reduction}
+%------------------------------
+% Principal component analysis
+%------------------------------
+\subsection{Principal component analysis}
+Principal component analysis (PCA) is initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to vertically for the case of linear regression models. In essence, PCA is an orthogonal transformation technique that projects a given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
+
+We considered PCA as a preliminary step to reduce the dimensionality of data in an attempt to increase the efficiency of the expensive algorithms such as LOF and DBSCAN. While it allowed us to visualise the data in two-dimensions, the projected data was not an effective representation of the original data as it lost too much information along the way. Hence we used PCA only as an exploratory visualisation tool to help us develop ideas.
 
 
 
-% Data description should be in background along with other alternatives
-----------------------------
-SECTION 1: data description
-----------------------------
-\section{KDD'99 data description}
-\label{evaluation:sec1}
-The KDD dataset is prepared by Stolfo et al. \cite{sto00} based on a much larger dataset called DARPA'98 which consists of nine weeks of raw TCP dump data captured at MIT Lincoln Labs as a part of the 1988 DARPA Intrusion Evaluation Program. There are approximately 4,900,000 connection records in KDD training dataset, each of which consists of 41 features and is labelled as either normal or an attack of 22 different types. KDD test dataset contains 15 novel attack types that are not present in the training set to allow the evaluation of detecting novel attacks.
+% Comment below out when building the whole doc:
+\bibliographystyle{plain}
+\bibliography{../Main/bibliography}
 
-All of these attack types fall in one of the four main categories:
 
-\begin{enumerate}
-\item \textbf{Denial-of-service (DoS):} an attack to temporarily or indefinitely disable services of a host to its intended users by flooding memory resources.
 
-\item \textbf{Remote-to-local (R2L):} a situation where an attacker is able to send packets to a target machine over a network in order to gain access as a local user of the machine.
+%----------------------------------
+% Choice of the parameters for KDE
+%----------------------------------
+%Because the result of KDE can vary according to the choice of $h$ and $K(\cdot)$ we have chosen consistent measures for those parameters. For the smoothing parameter, $h$, we have chosen the one suggested by Scott (1992) over the one by Silverman (1986). The suggestion by Silverman, as given by the equation \ref{eq:methods3}, tends to produce an under-smoothed density where as that by Scott, as given by the equation \ref{eq:methods4}, seems to provide more appropriate smoothing. For the kernel, the Gaussian kernel is chosen as it is considered adequate for univariate data. Figure \ref{fig:hist-example} is two identical histograms of an example set of LOF scores with different density curves superimposed upon.
+%Figure \ref{fig:kde-example} shows the histogram of an example set of LOF scores along with the two different density curves superimposed upon. For the kernel, $K$, the Gaussian kernel is chosen.
+% \begin{align}
+% h = 0.9 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods3}
+% \\
+% h = 1.06 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods4}
+% \end{align}
+<<hist-example, eval=FALSE, echo=FALSE, fig.align='center', fig.cap='Histograms of an example set of LOF scores, superimposed with two different density curves produced using the suggestions of Silverman and Scott respectively.', out.width="0.45\\linewidth", fig.show='hold'>>=
+load(file = "lof_scores.RData")
+hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Silverman's density curve")
+lines(density(lof_30p, bw = "nrd0")) # silverman
+hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Scott's density curve")
+lines(density(lof_30p, bw = "nrd")) # scott
+@
 
-\item \textbf{User-to-root (U2R):} an attempt by the attacker with precedent access to a target machine as a normal user to further gain control of root privileges.
 
-\item \textbf{Probing:} a type of surveillance attack to monitor a target network of a machine in order to gain information on possible vulnerabilities of the network. As a result, the probing attacks are usually followed up by a chain of attacks that exploit any identified network vulnerabilities.
-\end{enumerate}
-
-Each instance in KDD'99 is a connection record, that is a sequence of TCP packets for a data flow between a source IP address to a target IP address. There are 41 features in the dataset that can be categorized into three groups:
-
-\begin{enumerate}
-\item \textbf{Basic features:} 9 of the 41 features are basic features of individual TCP connections, such as the types of the protocol and network service.
-
-\item \textbf{Content features:} 13 of the 41 features are content features suggested by domain knowledge, such as the numbers of shell prompts, file creation operations and "root" accesses.
-%The DoS and probing attacks occur in bursts, i.e., these attacks involve many connections in an extremely short time period, to result in frequent sequential patterns for intrusions. On the other hand, the R2L and U2R attacks usually involve a single connection and are more difficult to detect using just the basic features. Hence the main purpose of the content features is to provide additional information that can be used to improve detection.
-
-\item \textbf{Traffic features:} 18 of the 41 features are traffic features computed using a two-second time window that can be further divided into two groups:
-    
-    \begin{enumerate}
-    \item \textbf{"same host" features:} statistics derived from the connections in the past two seconds that have the same destination host as the current connection
-    
-    \item \textbf{"same service" features:} similar statistics from the connections in the past two seconds that have the same service as the current connection
-    \end{enumerate}
-    
-\end{enumerate}
+% % Data description should be in background along with other alternatives
+% % ----------------------------
+% % SECTION 1: data description
+% % ----------------------------
+% \section{KDD'99 data description}
+% \label{evaluation:sec1}
+% The KDD dataset is prepared by Stolfo et al. \cite{sto00} based on a much larger dataset called DARPA'98 which consists of nine weeks of raw TCP dump data captured at MIT Lincoln Labs as a part of the 1988 DARPA Intrusion Evaluation Program. There are approximately 4,900,000 connection records in KDD training dataset, each of which consists of 41 features and is labelled as either normal or an attack of 22 different types. KDD test dataset contains 15 novel attack types that are not present in the training set to allow the evaluation of detecting novel attacks.
+% 
+% All of these attack types fall in one of the four main categories:
+% 
+% \begin{enumerate}
+% \item \textbf{Denial-of-service (DoS):} an attack to temporarily or indefinitely disable services of a host to its intended users by flooding memory resources.
+% 
+% \item \textbf{Remote-to-local (R2L):} a situation where an attacker is able to send packets to a target machine over a network in order to gain access as a local user of the machine.
+% 
+% \item \textbf{User-to-root (U2R):} an attempt by the attacker with precedent access to a target machine as a normal user to further gain control of root privileges.
+% 
+% \item \textbf{Probing:} a type of surveillance attack to monitor a target network of a machine in order to gain information on possible vulnerabilities of the network. As a result, the probing attacks are usually followed up by a chain of attacks that exploit any identified network vulnerabilities.
+% \end{enumerate}
+% 
+% Each instance in KDD'99 is a connection record, that is a sequence of TCP packets for a data flow between a source IP address to a target IP address. There are 41 features in the dataset that can be categorized into three groups:
+% 
+% \begin{enumerate}
+% \item \textbf{Basic features:} 9 of the 41 features are basic features of individual TCP connections, such as the types of the protocol and network service.
+% 
+% \item \textbf{Content features:} 13 of the 41 features are content features suggested by domain knowledge, such as the numbers of shell prompts, file creation operations and "root" accesses.
+% %The DoS and probing attacks occur in bursts, i.e., these attacks involve many connections in an extremely short time period, to result in frequent sequential patterns for intrusions. On the other hand, the R2L and U2R attacks usually involve a single connection and are more difficult to detect using just the basic features. Hence the main purpose of the content features is to provide additional information that can be used to improve detection.
+% 
+% \item \textbf{Traffic features:} 18 of the 41 features are traffic features computed using a two-second time window that can be further divided into two groups:
+%     
+%     \begin{enumerate}
+%     \item \textbf{"same host" features:} statistics derived from the connections in the past two seconds that have the same destination host as the current connection
+%     
+%     \item \textbf{"same service" features:} similar statistics from the connections in the past two seconds that have the same service as the current connection
+%     \end{enumerate}
+%     
+% \end{enumerate}
 
 

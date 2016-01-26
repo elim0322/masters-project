@@ -1,6 +1,5 @@
 
 UNIDS = function(dat) {
-    
     ## for generalised inverse/pseudoinverse of covariance matrix
     require(MASS)
     
@@ -17,9 +16,7 @@ UNIDS = function(dat) {
     ## dissimilarity vector
     D = numeric(n)
     
-    
     for (i in 1:N) {
-        
         cat(i)
         cat("\n")
         
@@ -48,15 +45,18 @@ UNIDS = function(dat) {
                 next
             }
         }
-        
     }
-    
     return(D)
-    
 }
+
+# set.seed(1); normal = sample(which(dat1$attack_type == "normal."), size = 4500, replace = FALSE)
+# set.seed(1); attack = sample(which(dat1$attack_type == "portsweep."), size = 500,  replace = FALSE)
+# testset = dat1[c(normal, attack), -c(2,3,4,7,12,21,22)]
 
 unids_ranking = UNIDS(testset[,-35])
 sort(unids_ranking, decreasing = TRUE)[1:10]
+
+plot(density(unids_ranking))
 
 
 

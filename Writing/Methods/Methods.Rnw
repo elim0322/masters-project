@@ -519,23 +519,6 @@ dbscan::kNNdistplot(normalized[,-35], k = 5)
 % % lines(den)
 % % box()
 % % @
-% 
-% \subsubsection{1. Outlier score computation using LOF}
-% 
-% The algorithm, LOF, is a density-based anomaly detection technique which defines an anomaly to be an object that is relatively sparse compared to the densities of its neighbouring objects. The result of LOF is a score that describes the degree of an object being an outlier and this measure, termed the \emph{local outlier factor} by the authors, is given by
-% \begin{equation}
-% \label{eq:methods1}
-% LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
-% \end{equation}
-% where $LOF_{k}(p)$ is the \emph{local outlier factor} of object $p$, $k$ is the number of neighbours around $p$, $N_{k}(p)$ is the set of $k$ closest neighbours of $p$, and $lrd_{k}(p)$ and $lrd_{k}(o)$ are the local reachability densities of objects $o$ and $p$, respectively. Since the summation is over the objects in the set of $k$ closest neighbours of $p$, the equation \ref{eq:methods1} can be simplified further into
-% \begin{equation}
-% \label{eq:methods2}
-% LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)},
-% \end{equation}
-% where the numerator is the average of the local reachability densities of the neighbours. Therefore the local outlier factor of an object is the ratio of the mean of the local densities of the object's $k$ closest neighbours and the local density of the object. It is clear from the equation \ref{eq:methods2} that a score less than or equal to one indicates that the local density of $p$, given by the denominator, is more dense or equal to those of its neighbours, given by the numerator, and therefore $p$ is not an outlier. Similarly, a score greater than one indicates an outlier as the local density of $p$ is relatively smaller than that of its neighbours.
-% 
-% It may be intuitive to set up a threshold to be one so that the instances whose scores are above it are detected as possible anomalies. However such threshold can only suffice in an ideal situation, where all local densities are constant. In reality, they are more likely to fluctuate to affect the average density of the neighbours, which brings to the second step of Phase 1.
-% 
 % \subsubsection{2. Threshold determination using KDE}
 % 
 % The mean, or the average, is one of the most popular measures to estimate the central location of a set of continous values. A notable limitation of the mean is its sensitivity to extreme values. The presence of an extreme value can shift the mean considerably to result in a bias. With reference to LOF, the average local density of an object's $k$ closest neighbours can also be affected by the presence of an extreme local density. More specifically, the presence of a single extremely dense neighbour of an object can increase the average local density of the neighbourhood, which in turn increases the local outlier factor for the object to end up being detected as an anomaly. Likewise an extremely sparse neighbour can result in a small local outlier factor. Hence it is possible to observe a non-anomalous instance to have an LOF score greater than one. What this means is that an optimal threshold can vary between samples and there must be a flexible way to find an adaptive threshold.
@@ -556,29 +539,8 @@ dbscan::kNNdistplot(normalized[,-35], k = 5)
 % 
 % 
 % \newpage
-% (To be included in Background)
-% A kernel density estimate of a set of independent and identically distributed sample, $(x_1, x_2, \dots, x_n)$, is
-% \[
-% f_n(x) = \int_{-\infty}^{\infty} \frac{1}{h} K \left( \frac{x-y}{h} \right) dF_n(y) = \frac{1}{nh} \sum_{j=1}^n K\left( \frac{x-X_j}{h} \right),
-% \]
-% as given by the equation 1.7 in Emanuel Parzen 1962 [REF], where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. Because the result of KDE can vary according to the choice of $h$ and $K(\cdot)$ we have chosen consistent measures for those parameters. For the smoothing parameter, $h$, we have chosen the one suggested by Scott (1992) over the one by Silverman (1986). The suggestion by Silverman, as given by the equation \ref{eq:methods3}, tends to produce an under-smoothed density where as that by Scott, as given by the equation \ref{eq:methods4}, seems to provide more appropriate smoothing. For the kernel, the Gaussian kernel is chosen as it is considered adequate for univariate data. Figure \ref{fig:hist-example} is two identical histograms of an example set of LOF scores with different density curves superimposed upon.
-% 
-% %Figure \ref{fig:kde-example} shows the histogram of an example set of LOF scores along with the two different density curves superimposed upon. For the kernel, $K$, the Gaussian kernel is chosen.
-% 
-% \begin{align}
-% h = 0.9 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods3}
-% \\
-% h = 1.06 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods4}
-% \end{align}
-% 
-% <<hist-example, echo=FALSE, fig.align='center', fig.cap='Histograms of an example set of LOF scores, superimposed with two different density curves produced using the suggestions of Silverman and Scott respectively.', out.width="0.45\\linewidth", fig.show='hold'>>=
-% load(file = "lof_scores.RData")
-% hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Silverman's density curve")
-% lines(density(lof_30p, bw = "nrd0")) # silverman
-% 
-% hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Scott's density curve")
-% lines(density(lof_30p, bw = "nrd")) # scott
-% @
+
+
 % 
 % 
 % % The rest of this section is divided into subsections that discuss other notable anomaly detection techniques and whether they can be plausible alternatives to the LOF algorithm.
