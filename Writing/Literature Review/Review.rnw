@@ -5,18 +5,41 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 % ---------------------------
 % CHAPTER: Literature Review
 % ---------------------------
-
 \chapter{Literature Review}
 \label{ch:review}
 
 
-Spectral-based, as Chandola et al. describes, or subspace-clustering based...
 
-The majority of the proposed schemes in the field of unsupervised network intrusion detection involves clustering, which we understand as the most reasonable approach for classification in the absence of labels.
+\section{Clustering-based}
+From a historical point of view, Portnoy, Eskin and Stolfo pioneered the field of unsupervised anomaly-based intrusion detection \cite{por01}. In their work, problems associated with signature-based detection methods, in terms of difficulties in detecting novel threats and accessing labelled data, are addressed with an approach using a single-linkage hierarchical clustering method. Initially, input data are \emph{standardised}, that is each feature is normalised in terms of standard deviation units away from its mean. Then clusters of normal and anomalous instances are formed using training data with an overwhelmingly high frequency of normal instances ($> 98\%$) and each instance in test data is assigned to the closest cluster based on the standard Euclidean distance. The major shortcoming of the proposed approach is the use of the single-linkage clustering which is generally not as effective as other clustering algorithms. 
 
-
-For the PCA-based approach, we perform: (1) a \emph{Principal Component Analysis} (PCA) on a test dataset to project it into a subspace that explains a reasonable amount of variability in the dataset, (2) use a clustering technique on the projected data and (3) eliminate the members of the most sizeable cluster under an assumption that the size of such cluster corresponds to the high frequency of normal instances in the data. 
-
+Eskin et al. presented an improved result using the same data as in the previous work \cite{esk02}. The same data pre-processing occurs on the numeric features however fuzzy coding is used for the discrete features to assign each corresponding instance a degree of membership between 0 and 1. Then three different algorithms are applied with a common goal of finding which points are in sparse regions, which are (1) fixed-width clustering, (2) k-nearest neighbour (k-NN) and (3) one class Support Vector Machine (SVM). For the fixed-width clustering approach, the starting point is the centre of its cluster and subsequent points within the width, $w$, from the centre are added to the cluster while those whose distance is further than $w$ form new centres. Then the smaller clusters are examined. For the K-NN approach, each point is scored with the sum of the distances to its corresponding k-nearest neighbours and the smaller scores are examined. Lastly, the one class SVM approach involves projecting the data to a space with a higher dimension that maximally separates the data as two classes. The three algorithms provide slightly improved results than the single-linkage based algorithm. Howver increasingly high false positive rates are expected in order to achieve true positive rate above 0.9.
 
 
+
+
+
+% map data into a Hilbert space where for each pair of points their dot product is defined which allows a norm and distance to be defined.
+
+
+% \section{}
+% \section{Spectral}
+
+
+
+
+
+
+% Spectral-based, as Chandola et al. describes, or subspace-clustering based...
+
+% The majority of the proposed schemes in the field of unsupervised network intrusion detection involves clustering, which we understand as the most reasonable approach for classification in the absence of labels.
+
+% For the PCA-based approach, we perform: (1) a \emph{Principal Component Analysis} (PCA) on a test dataset to project it into a subspace that explains a reasonable amount of variability in the dataset, (2) use a clustering technique on the projected data and (3) eliminate the members of the most sizeable cluster under an assumption that the size of such cluster corresponds to the high frequency of normal instances in the data.
+
+
+
+
+% Comment below out when building the whole doc:
+\bibliographystyle{unsrt}
+\bibliography{../Main/bibliography}
 
