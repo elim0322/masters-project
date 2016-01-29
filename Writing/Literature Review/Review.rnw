@@ -31,23 +31,20 @@ A more recent work by Casas, Mazel and Owezarski \cite{cas11, cas12, cas14} is a
 % ------------------
 \section{Others}
 \label{review:sec2}
+A noteworthy contribution to the one class SVM approach discussed in the previous section is a quarter-sphere SVM approach proposed by Laskov et al.\ \cite{las04}. Instead of using the planar approach in the ordinary one class SVM, a sphere variant known as the Support Vector Data Description 
+(SVDD) is discussed. The concept of SVDD is further studied and, relying on the property of intrusion data that most of the features are non-negatively defined, the quarter-sphere approach is proposed with moderate success.
 
-%A noteworthy contribution to the one class SVM approach in \cite{esk02} is a quarter-sphere SVM approach proposed by Laskov et al.\ \cite{las04} which outperformed the existing one class SVM algorithm.
+Zanero and Savaresi addressed difficulties associated with the large size of network data and proposed a two-tier intrusion detection system (IDS) \cite{zan04}. The first tier is an unsupervised clustering algorithm whose purpose is to compress the size of data into more manageable structure so that a subsequent traditional anomaly detection algorithm for the second tier works at improved efficiency. This novel system shares a similarity with our approach in that both methods are executed in a two-phase, or a two-tier, manner. A critical difference between the two lies in the objective set for each phase, that is, in our case, the attempt to (1) improve the accuracy at the expense of allowing more False Positives to arise in the process and (2) eliminate the allowed False Positives along with the naturally occured False Positives altogether from the result.
 
-% Other noteworthy contributions include a hybrid approach combining density- and grid-based clustering algorithms proposed by Leung and Leckie \cite{leu05} and a two-tier IDS proposed by Zanero and Savaresi \cite{zan04}. Both approaches reduced computational complexity and improved efficiency while producing comparable results to the exisitng techniques.
+Lastly, there are a couple of notable spectral anomaly detection methods in the literature \cite{tho03,lak05}. The former used Principal Component Analysis (PCA) on time series to detect high eigenvalues as they indicate abrupt changes that translate to anomalous activities and the latter used PCA to find a subspace that explains about 85\% of the variability in given data and a clustering algorithm to classify data instances as either an anomaly or normal.
 
-
-
-
-
-
+There are other contributions in the field that are not mentioned in this chapter, simply because it is impossible to mention them all. A more extensive list of anomaly detection techniques in various domains is presented in \cite{cha09} and a list of anomaly-based NIDS in deployment, both commercial and freeware, is presented in \cite{gar09}.
 
 
 
 
 % Spectral-based, as Chandola et al. describes, or subspace-clustering based...
 
-% The majority of the proposed schemes in the field of unsupervised network intrusion detection involves clustering, which we understand as the most reasonable approach for classification in the absence of labels.
 
 % For the PCA-based approach, we perform: (1) a \emph{Principal Component Analysis} (PCA) on a test dataset to project it into a subspace that explains a reasonable amount of variability in the dataset, (2) use a clustering technique on the projected data and (3) eliminate the members of the most sizeable cluster under an assumption that the size of such cluster corresponds to the high frequency of normal instances in the data.
 
