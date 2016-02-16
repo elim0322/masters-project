@@ -4,51 +4,89 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 \chapter{Background}
 \label{ch:background}
-All the schemes described in this chapter are categorised as unsupervised learning algorithms as our primary interest lies in the implementation of unsupervised anomaly-based network intrusion detection system (NIDS).
+Discussions in this chapter highlight the schemes implemented in our approach to unsupervised anomaly-based network intrusion detection. All the schemes are unsupervised learning tasks as our primary interest lies in the detection of novel threats without the use of labels.
 
-%--------------------------------------
-% SECTION 1: Anomaly detection schemes
-%--------------------------------------
-\section{Anomaly detection schemes}
 %----------------------
 % Local outlier factor
 %----------------------
-\subsection{Local outlier factor}
-Local outlier factor (LOF) is a density-based anomaly scoring algorithm proposed by Breunig et al. in \cite{bre00}. As the name suggests LOF assigns a score, also referred to as a \emph{local outlier factor} by the authors, to every given data instance under the premise that an anomaly is an object positioned in a relatively sparse region compared to its neighbouring objects. To find the local density of the data instance, $p$, (1) first the radius of the smallest hypersphere, centred at $p$, that accomodates $k$ nearest neighbours, with respect to $p$, is computed, which the authors refer to as the \emph{k-distance}, (2) compute the $k$-distances for the $k$ nearest neighbours and their sum, which gives the \emph{reachability distance} of $o$ and (3) lastly divide the volume of the hypersphere, i.e., the number of all the instances residing in the hypersphere, by the reachability distance. Then the LOF score of a given data instance is the average of the ratio of the local density of its $k$ nearest neighbours and that of the instance itself, more formally given by
+\section{Local outlier factor}
+Local outlier factor (LOF) is a density-based anomaly scoring algorithm proposed by Breunig et al. \cite{bre00} which assigns each instance in a given data with a score of being an anomaly. The LOF algorithm is based on the notion of local density of an object, that is its $k$-nearest neighbours, and comparisons between the local density of the object and those of its neighbours. Then objects with relatively low densities comapred to their neighbours are considered to be anomalies under the assumption that these objects in the sparse regions are more isolated from the rest of the data than those in the dense regions.
+
+To find the local density of an object, $p$, first its reachability-distance with respect to an object, $o$, is computed as follows
+\newcommand\rdist{\mathop{\mbox{$reach$-$\mathit{dist}_k$}}}
+\newcommand\kdist{\mathop{\mbox{$k$-$\mathit{dist}$}}}
 \begin{equation}
 \label{eq1}
-LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
+\rdist(p, o) = max\{\kdist(o), d(p, o)\},
 \end{equation}
-where $lrd$ denotes the local density of a corresponding data instance. Hence a low LOF score represents an \emph{inlier}, as its local density is relatively greater than that of its neighbours, while a high score represents an \emph{outlier} in the similar manner. To derive a heuristic, the equation \ref{eq1} can be rearranged to
+where $\kdist(o)$ is the distance between the object, $o$, and its $k$-th nearest neighbour, and $d(p,o)$ is the true distance between the objects, $p$ and $o$. Then the local reachability density of $p$ is given by
 \begin{equation}
 \label{eq2}
-LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)},
+lrd(p) = 1/\left( \frac{\sum_{B \in N_k(p)} \rdist(p, o)}{|N_k(p)|} \right),
 \end{equation}
-which indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another.
+where $N_k(p)$ is the set of the $k$-nearest neighbours of $p$. In words, (1) the radius of the smallest hypersphere, that accomodates $k$ nearest neighbours, is computed for an object and for all its $k$ neighbours ($\kdist$), (2) the sum of the radii is computed and (3) the volume of the hypersphere is divided by the sum. Lastly, the LOF score of $p$ is given by
+\begin{equation}
+\label{eq3}
+LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
+\end{equation}
+which can be further simplified to
+\begin{equation}
+\label{eq4}
+LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)}.
+\end{equation}
+Equation \ref{eq:4} indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another. This provides a heuristic to suggest that an object whose LOF score is less than 1 is an inlier while the opposite is an outlier.
 
-Our decision to include the LOF algorithm into consideration is because of its local-based approach, which allows it to be very robust in finding anomalies embedded deep within clusters. Because of this, LOF is very attractive as an initiative exploratory tool as it is not easily affected by the shapes of data. We regard the expensive nature of LOF as a trade-off for the high capacity of handling different types and shapes of data in this particular case. In addition, the scoring aspect of LOF is beneficial as it allows us to set our own threshold for a highly flexible and customisable system.
+The LOF algorithm is used in Phase 1 of our method. Our decision to implement LOF is largely due to its local density-based approach, which allows it to be very robust in finding anomalies embedded deep within clusters. To illustrate this, consider a set of two-dimensional objects plotted as presented in Figure \ref{fig:back1}. Using a simple global nearest neighbour approach, the object, $p1$, cannot be identified as an outlier because distance between any pair of points in the sparse region is always greater than that between $p1$ and its nearest neighbours. However, using the local density-based approach, LOF can recognise both $p1$ and $p2$ as outliers. This means the performance of LOF is not easily affected by the shapes of data and is robust towards data of arbitrary shapes. A downside of LOF is its expensive nature, which we regard as a trade-off for the high capacity of handling different types and shapes of data.
 
+In addition to the previously mentioned advantage, the scoring aspect of LOF is beneficial in our study. What it produces as output is a single numeric vector, of scores, that is simple to work with. One way to understand the process of LOF is that it transforms high-dimensional data into a much simpler vector of one dimension whose element, each, provides a degree of being an outlier. The luxuary to work with a numeric vector allows for setting up a highly flexible threshold, which has been suitable for running multiple experiments in our study.
+
+<<back1, echo=FALSE, out.width="0.6\\linewidth", fig.align='center', fig.cap="Advantages of the local approach in LOF">>=
+set.seed(1)
+r1 = runif(50, 0, 1)
+set.seed(2)
+a1 = runif(50, 0, 2*pi)
+plot(r1 * cos(a1), r1 * sin(a1), asp=1, xlim=c(-1,10), ylim=c(-1,10), xlab="", ylab="", axes=FALSE)
+set.seed(1)
+r2 = runif(200, 0, 10)
+set.seed(2)
+a2 = runif(200, 0, 2*pi)
+points(12 + r2 * cos(a2), 12 + r2 * sin(a2))
+points(1.3, 1.3, pch = 4, cex=1.3)
+text(1.3, 1.3, "p1", pos=4, cex=1.3)
+points(8, 0.2, pch = 4, cex=1.3)
+text(8, 0.2, "p2", pos=4, cex=1.3)
+box()
+@
+
+
+\newpage
 %---------------------------
 % Kernel density estimation
 %---------------------------
-\subsection{Kernel density estimation}
-Kernel density estimation (KDE) is a non-parametric method of approximating the probability density function (PDF), or the density, of a random variable. For a given set of independent and identically distributed sample, $(x_1, x_2, \dots, x_n)$, from an unknown density, $f$, the kernel density estimator of $f$ is formally
+\section{Kernel density estimation}
+Kernel density estimation (KDE) is a non-parametric method of approximating the probability density function (PDF), or the density, of a random variable. For a given set of independent and identically distributed sample, $(x_1, x_2, \dots, x_n)$, from an unknown density, $f$, the kernel density estimator of $f$ is:
 \begin{equation}
 \hat{f}_n(x) = \int_{-\infty}^{\infty} \frac{1}{h} K \left( \frac{x-y}{h} \right) dF_n(y) = \frac{1}{nh} \sum_{j=1}^n K\left( \frac{x-X_j}{h} \right),
 \end{equation}
-as given by the equation 1.7 in \cite{par62}, where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. One simple way to implement KDE in anomaly detection is to estimate the PDFs of a feature from training and test data and compare them for any signs of inconsistency.
+as given by Equation 1.7 in reference \cite{par62}, where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. The problem of KDE is implemented in anomaly detection by: (1) estimating the PDFs of a feature from training and test data and (2) comparing them for any signs of inconsistency, with an example in network intrusion detection being reference \cite{yeu02}.
 
-The most valuable aspect of KDE is that it allows one to explore the overall distribution of a given feature. If plotted, kernel density estimates provide immediate visual awareness of where the most frequent values lie and their respective frequencies. Since our interest lies in the domain of unsupervised anomaly detection, which assumes that anomalous instances are much less frequent than their normal counterparts, KDE is appropriately relevant in our case. One major caveat of KDE lies in the fact that it is only useful for univariate data. However we can use this limitation for our benefit in conjunction with the LOF algorithm as it essentially transforms a given multivariate data into a single univariate vector of scores that KDE much prefers. Thus we have decided to include KDE as a threshold generating tool that allows us to (1) preliminarily explore the distribution of given LOF scores and infer the regions of normal and anomalous groups to find a suitable threshold that separates those groups out accordingly.
+The most valuable aspect of KDE is that it allows one to explore the overall distribution of a given feature. If plotted, kernel density estimates provide immediate visual awareness of where the most frequent values lie and their respective frequencies. Since our interest lies in the domain of unsupervised anomaly detection, which assumes that anomalous instances are much less frequent than their normal counterparts, KDE is appropriately relevant in our case. Another advantage of KDE is that it is highly efficient. Figure \ref{fig:back2} presents a plot of kernel density estimates for an arbitrary set of LOF scores. We have established previously that a score less than or equal to 1 indicates an inlier, which is synonymous with the major peak around the score of 1 allowing for some fluctuations. Examining this plot, we can set a threshold somewhere around 1.4 so that instances whose scores are greater than 1.4 can be labelled as possible anomalies while the rest are normal. A major caveat of KDE lies in the fact that it is useful only for univariate data, which is immediately negated once it is used on the univarate data of LOF scores.
+
+<<back2, echo=FALSE, cache=TRUE, out.width="0.6\\linewidth", fig.align='center', fig.cap="An example of KDE using an arbitrary set of LOF scores">>=
+scores = as.vector(read.csv("../../Data/LOF_scores/dat1_05a_30k.csv", header = FALSE)[1,])
+plot(density(as.numeric(scores)), xlab="Scores", main="Density of LOF scores")
+abline(v=1.4, lty=4, col="blue")
+legend("topright", "threshold", lty=4, col="blue")
+@
+
+Thus we have decided to include KDE as a threshold generating tool that allows us to preliminarily explore the distribution of LOF scores and infer the regions of normal and anomalous groups to find a suitable threshold that separates those groups out accordingly.
 
 
-%-------------------------------
-% SECTION 2: Clustering schemes
-%-------------------------------
-\section{Clustering schemes}
+%% WORK FROM HERE
 %-------------------------------------------------------------
 % Density-based spatial clustering of applications with noise
 %-------------------------------------------------------------
-\subsection{DBSCAN}
+\section{DBSCAN}
 DBSCAN is a density-based clustering algorithm proposed by Ester el al. \cite{est96} that offers its own version of anomaly detection. A \emph{core point}, as it defines, is a data instance surrounded by at least $k$ neighbouring instances within the radius of $\epsilon$, and those neighbours are said to be \emph{directly reachable} from the core point. Then all these neighbouring points form a cluster around the core point while non-reachable points form the border of the cluster. All points that are not reachable from any point are labelled as outliers.
 
 The fact that DBSCAN shares similarity with LOF in terms of the local density-based approach is what has appealed to us the most. Like LOF, the DBSCAN algorithm is not affected by the shapes of data and is extremely robust against any shapes and types of data. We initially considered DBSCAN as an alternative option to LOF due to their similarity. However we settled with the idea of using DBSCAN as a way to reinforce our implementation of LOF because of the very nature of the high compatibility between the two.
@@ -56,8 +94,9 @@ The fact that DBSCAN shares similarity with LOF in terms of the local density-ba
 %---------
 % X-means
 %---------
+\section{Other schemes}
 \subsection{X-means}
-The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00}, is an extension of K-means that finds an optimal value for $k$ under the Bayesian Information Criterion (BIC). It performs ordinary K-means on given data and then, for each resulting cluster, incrementally run additional K-means using $k$ increased by a factor of two until the BIC cannot be minimised further.
+The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00x}, is an extension of K-means that finds an optimal value for $k$ under the Bayesian Information Criterion (BIC). It performs ordinary K-means on given data and then, for each resulting cluster, incrementally run additional K-means using $k$ increased by a factor of two until the BIC cannot be minimised further.
 
 The main advantage of X-means is the absence of the parameter, $k$, as it computes it for users. The manual, inefficient process of having to perform multiple runs of K-means on the same data just to find an optimal $k$ can be completely avoided using X-means. Also X-means scales well computationally, that is it is capable of handling larger data more efficiently than its K-means counterpart.
 
@@ -77,7 +116,7 @@ We considered PCA as a preliminary step to reduce the dimensionality of data in 
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{plain}
+\bibliographystyle{ieeetr}
 \bibliography{../Main/bibliography}
 
 
@@ -92,13 +131,14 @@ We considered PCA as a preliminary step to reduce the dimensionality of data in 
 % \\
 % h = 1.06 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods4}
 % \end{align}
-<<hist-example, eval=FALSE, echo=FALSE, fig.align='center', fig.cap='Histograms of an example set of LOF scores, superimposed with two different density curves produced using the suggestions of Silverman and Scott respectively.', out.width="0.45\\linewidth", fig.show='hold'>>=
-load(file = "lof_scores.RData")
-hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Silverman's density curve")
-lines(density(lof_30p, bw = "nrd0")) # silverman
-hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Scott's density curve")
-lines(density(lof_30p, bw = "nrd")) # scott
-@
+
+%' <<hist-example, eval=FALSE, echo=FALSE, fig.align='center', fig.cap='Histograms of an example set of LOF scores, superimposed with two different density curves produced using the suggestions of Silverman and Scott respectively.', out.width="0.45\\linewidth", fig.show='hold'>>=
+%' load(file = "lof_scores.RData")
+%' hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Silverman's density curve")
+%' lines(density(lof_30p, bw = "nrd0")) # silverman
+%' hist(lof_30p, probability = TRUE, ylim = c(0, 1.5), xlab = "LOF scores", main = "Histogram of LOF scores, with Scott's density curve")
+%' lines(density(lof_30p, bw = "nrd")) # scott
+%' @
 
 
 % % Data description should be in background along with other alternatives

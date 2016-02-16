@@ -104,9 +104,6 @@ If more and more aspects of the society are to lean towards digitalisation and h
 
 
 
-
-
-
 % Comment below out when building the whole doc:
 \bibliographystyle{ieeetr}
 \bibliography{../Main/bibliography}
