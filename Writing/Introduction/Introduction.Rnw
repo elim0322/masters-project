@@ -4,55 +4,61 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 \chapter{Introduction}
 \label{ch:intro}
-One of the greatest benefits today's society has access to is the ease of collection and dissemination of information. In particular with vast technological advancement in personal electronic devices, such as cell phones and tablets, one can \emph{remotely} and \emph{wirelessly} share informaion from any major parts of the world. Search engine tools provide answers for most of our curiosities, online banking presents streamlined ways of business transactions and social media services connect geographically distant people together, to name a few examples, all of which are partly available through the seamless share of information. Because of the ease of sharing information, many aspects of our lives have become digital. Sensitive personal information, such as personal identification numbers or geographical locations, is now mostly digitised and ``securely" stored in databases, which attracts exploiters that seek to intrusively gain access to the valuable information.
+One of the greatest benefits today's society has access to is the ease of collection and dissemination of information. In particular with vast technological advancement in personal electronic devices, such as cell phones and tablets, one can \emph{remotely} and \emph{wirelessly} share information from any major parts of the world. Search engine tools provide answers for most of our curiosities, online banking presents streamlined ways of business transactions and social media services connect geographically distant people together, to name a few examples, all of which are partly available through the seamless share of information. Because of the ease of sharing information, many aspects of our lives have become digital. Sensitive personal information, such as personal identification numbers or geographical locations, is now mostly digitised and ``securely" stored in databases, which attracts exploiters that seek to intrusively gain access to the valuable information.
 
 Intrusion detection in network is a problem of identifying potential exploitors who sought to gain unauthorised access to information. The traditional type of intrusion detection is signature-based where network packets are compared against a database of signatures, or attributes, of known threats recorded by domain experts. A major drawback of the signature-based intrusion detection is the inability to detect new threats as the core process of detection depends on the availability of signatures. A threat whose signature is not yet recorded in the database cannot be detected as an intrusion but will rather be incorrectly labelled as a non-threat by definition. This introduces a problem in the field of network intrusion detection where labelled network data are expensive to obtain and seldom available due to their sensitive nature. A solution would be to consider anomaly-based intrusion detection which, depending on situations, does not require labels in data.
 
-The essence of anomaly-based intrusion detection is an application of anomaly detection in network intrusion detection. The idea of anomaly detection is to identify objects that do not conform to other objects in a given data. Given a baseline or an expected pattern of normal behaviour, an anomaly is identified if the patterns of the object deviates too much from the baseline as to raise a suspicion that it may have been generated differently than the others. In anomaly-based intrusion detection, these non-conforming objects, or anomalies, are assumed to translate to intrusions and therefore the concept of anomaly detection works well in this domain. Assuming that there are more legitimate users than their intrusive counterparts in a network and the legitimate users behave in a similar way to one another, finding the expected behaviour of the legitimate users is straightforward: simply summarise the major pattern.
+The essence of anomaly-based intrusion detection is an application of anomaly detection in network intrusion detection. The idea of anomaly detection is to identify objects that do not conform to other objects in a given data. Given a baseline or an expected pattern of normal behaviour, an anomaly is identified if the patterns of the object deviates too much from the baseline as to raise a suspicion that it may come from a different distribution than the others. In anomaly-based intrusion detection, these non-conforming objects, or anomalies, are assumed to translate to intrusions and therefore the concept of anomaly detection works well in this domain. Assuming that there are more legitimate users than their intrusive counterparts in a network and the legitimate users behave in a similar way to one another, finding the expected behaviour of the legitimate users is straightforward: simply summarise the major pattern.
 
 There are three types for an anomaly detection task: supervised, semi-supervised and unsupervised. The first two require either fully labelled or partially labelled training data, respectively, in order to build classifiers for unlabelled test data. The third does not require training data therefore there is not a training stage. It runs on unlabelled test data directly. The absence of the training stage and requirement for labelled data means that the unsupervised anomaly detection is an extremely useful tool as an intrusion detector. It is suitable for the usual situation in the domain where labelling each collection of packets as either good or bad is simply unimaginable considering how large network traffic volumes usually are. It can potentially provide benefits such as (1) saving on resources through reducing, if not preventing, the cost of obtaining labelled data, (2) ability to detect novel threats, which can help further understand any exploitable weaknesses in network, uncover trends and patterns in attacks and their frequencies and build better forecast models and (3) help generate labels for unlabelled data, to list only a few.
 
-However the unsupervised techniques generally suffer from higher incidence of incorrectly classifying normal objects as anomalies, that is False Positives, as they solely rely on comparing the attributes of the objects rather than their actual labels. Although a giant leap has been made in recent years in the field of unsupervised intrusion detection through various means, there remains an open question as to why focus has not been directed at elimination of False Positives.
+However the unsupervised techniques generally suffer from higher incidence of incorrectly classifying normal objects as anomalies, that is False Positives, as they solely rely on comparing the attributes of the objects rather than their actual labels. Because of the same reason, they can suffer from lower incidence of correctly classifying anomalies, True Positives. The unsupervised anomaly detection techniques are, in a way, double-edged swords capable of detecting novel threats at the cost of the relative underperformance compared to their supervised or semi-supervised counterparts.
 
-Our goal in this paper is to present a novel unsupervised anomaly-based network intrusion detection framework. The novelty in our method comes from the way it addresses the previously mentioned problem faced by most unsupervised learning tasks. Our method is divided into two phases where test data is robustly labelled in the first phase using a density-based anomaly scoring algorithm, and any resulting False Positives are clustered using the labels generated in the previous phase and eliminated from the result to reduce the overall number of False Positives. The method we propose does not rely on signatures, training or labelled data but rather robust through the use of local density-based approaches that can achieve highly accurate and precise detection. The main advantage of our method is in the relatively low rate of False Positives in the result, making it a tool that can be used to label potential threats in a network to help further analysis. In addition, our method performs well in the presence of multiple types of attacks.
+What must also be noted is the relationship between True Positive and False Positive Rates: the two rates are positively correlated. Oftentimes the unsupervised anomaly detection techniques are threshold-based, which means an increase in the threshold, to obtain more True Positives in the result, will induce a respectively increased number of False Positives (Figure \ref{fig:intro1} presents a simple analogy). Many studies in the literature focused on discovering novel approaches to maximise the True Positive Rate while maintaining low False Positive Rate and presented ROC (receiver operating characteristic) curves to denote the relationship between the rates (Figure \ref{fig:intro2}), but rarely focused are the rather large numbers of False Positives in the result. Although a giant leap has been made in recent years in the field of unsupervised intrusion detection through various means, there remains an open question as to why focus has not been directed at False Positives themselves and possibly eliminating them to improve results.
 
-If more and more aspects of the society are to lean towards digitalisation and highly facilitated exchange of digitised information between individuals, we must direct our attention to protect valuable information from unauthorised access. And the first step to greet such future is being able to identify these threats, to which we present the work described in the following chapters.
+<<intro1, echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="A simple analogy where objects outside the threshold are to be recognised as possible anomalies, that is including both anomalies (True Positives) and normal (False Positives). For the case of using the flexible threshold, that is to increase the number of True Positives in the result, increased numbers of both the anomalies and normal instances are recognised.">>=
+plot(0, 0, xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), type="n", asp=1, xlab="", ylab="", axes=FALSE, main = "An ordinary threshold")
+box(asp=1)
+set.seed(1); x1 = rnorm(80, sd = 0.5); y1 = rnorm(80, sd=  0.5)
+set.seed(1); x2 = rnorm(20, sd = 0.5); y2 = rnorm(20, sd=  0.5)
+points(x1, y1, pch = 1)
+points(x2, y2, pch = 2)
+xx1 = 1.18*cos( seq(0,2*pi, length.out=360) )
+yy1 = 1.18*sin( seq(0,2*pi, length.out=360) )
+lines(xx1,yy1, col='blue')
+legend("topright", legend=c("normal","anomaly","threshold"), col = c(rep("black",2),"blue"), pch=c(1,2,NA), lty=c(NA,NA,1))
+
+plot(0, 0, xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), type="n", asp=1, xlab="", ylab="", axes=FALSE, main = "A flexible threshold")
+box(asp=1)
+points(x1, y1, pch = 1)
+points(x2, y2, pch = 2)
+xx2 = 0.76*cos( seq(0,2*pi, length.out=360) )
+yx2 = 0.76*sin( seq(0,2*pi, length.out=360) )
+lines(xx2,yx2, col='blue')
+legend("topright", legend=c("normal","anomaly","threshold"), col = c(rep("black",2),"blue"), pch=c(1,2,NA), lty=c(NA,NA,1))
+@
+
+<<intro2, message=FALSE, echo=FALSE, out.width="0.6\\linewidth", fig.align='center', fig.cap="An example ROC curve of an arbitrary data">>=
+library(pROC)
+data(aSAH)
+invisible(roc(aSAH$outcome, aSAH$s100b,plot = TRUE, main = "ROC curve", xlab = "False Positive Rate (1 - specificity)", ylab = "True Positive Rate (sensitivity)", legacy.axes = TRUE))
+@
+
+
+Our goal in this paper is to present a novel unsupervised anomaly-based network intrusion detection framework. The novelty in our method comes from the way it addresses the previously mentioned problem faced by most unsupervised learning tasks. Our method is divided into two phases. In Phase 1, each instance in a given test data is robustly scored using the density-based anomaly scoring algorithm, LOF, and is identified as either a possible anomaly (True Positive) or normal (True Negative) using a relaxed threshold based on the distribution of the scores, and a random sample of the normal instances is merged with the possible anomalies as output. The use of the relaxed, or liberal, threshold permits more potential anomalies to be identified as the objects can more easily surpass the required threshold. In Phase 2, the density-based clustering algorithm, DBSCAN, is run on the previously mentioned merged data and the clusters of False Positives are produced with the help of the normal instances, which are then removed from the result. We carry out experiments on our method to evaluate (1) whether Phase 1 is capable of achieving a high True Positive Rate and the extent of False Positives produced along with its accuracy and precision, (2) the degree of False Positives eliminated by Phase 2 in percentage reduction and (3) overall detection power, accuracy and precision. We compare our result with other approaches to highlight advantages as well as disadvantages using respective methods. The method we propose does not rely on signatures, training or labelled data but rather robust through the use of local density-based approaches that can achieve highly accurate and precise detection. The main advantage of our method is in the relatively low rate of False Positives in the result, making it a tool that can be used to label potential threats in a network to help further analysis. In addition, our method performs well in the presence of multiple types of attacks.
+
+If more and more aspects of the society are to lean towards digitalisation and highly facilitated exchange and circulation of digitised information between individuals, we must direct our attention to protect valuable information from unauthorised access. And the first step to greet such future is being able to identify these threats, to which we present the work described in the following chapters.
 
 
 
 % The core mechanism of anomaly detection does not depend on data labels but rather appropriate attributes of individual objects. Usually a similarity metric, such as Euclidean distance, is computed and compared for each object to assess relative similarity between one another. This allows for the task of anomaly detection to be executed under the three types of machine learning: supervised, semi-supervised and unsupervised.
 
-
-
-% All of these have drastically changed our lives 
-% 
 % However, as with many revolutionary inventions, the other side of the coin exists in the forms of social, physical and developmental problems which every user should be aware of, or at least consider.
-% 
-% While the ease of sharing information 
 
 
 
 
 
-
-
-% beneficial utility
-% 
-% Services including search engines, online encyclopedia, social media and many others 
-% 
-% An extremely wide variety of information can be digitised and circulated between various different sources,
-% 
-% such as the personal information of an employee
-
-
-
-
-
-% An intrusion attack in network 
-% 
-% Anomaly detection, or outlier detection, is a problem of 
-% 
-% 
 % An anomaly, also known as an \emph{outlier} in the field of statistics, is defined by Hawkins \cite{haw80} to be
 % \begin{quote}
 % an observation which deviates so much from other observations as to arouse suspicions that it was generated by a different mechanism.
