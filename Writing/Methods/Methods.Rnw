@@ -8,28 +8,21 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 \chapter{Methods}
 \label{ch:methods}
 
-Our proposed NIDS is built upon the philosophy of \emph{reductionism} and the concept of \emph{min-maxing}. Unsupervised learning tasks are often faced with inevitable underperformance compared to their supervised and semi-supervised counterparts because they are expected to operate with much less information given, eg, missing labels. In order to come up with a robust unsupervised NID scheme capable of producing satisfactory results, our initial approach was to reduce the existing problems, of the underperforming tendency, into simpler, more basic and manageable parts. But the question arises as to how such problems must be defined so that performance is ultimately affected by solving them. To this question, we considered the concept of \emph{min-maxing} to be applicable. More specifically, one way to define the problem of underperformance is as the state of producing an underwhelming number of True Positives (TPs) while also producing an overwhelming number of False Positives (FPs). Then the problem can be reduced and be solved by appropriate methods to \emph{maximise} the incidence of TPs and to \emph{minimise} that of FPs individually. This concept forms the foundation of our NID approach.
+Our proposed NIDS is built upon the philosophy of \emph{reductionism} and the concept of \emph{min-maxing}. Unsupervised learning tasks are often faced with inevitable underperformance compared to their supervised and semi-supervised counterparts because they are expected to operate with much less information given, e.g., missing labels. In order to come up with a robust unsupervised anomaly-based intrusion detection scheme capable of producing satisfactory results, our initial approach was to reduce the existing problems, of the underperforming tendency, into simpler, more basic and manageable parts. But the question arises as to how such problems must be defined so that performance is ultimately affected by solving them. To this question, we considered the concept of \emph{min-maxing} to be applicable. More specifically, one way to define the problem of underperformance is to produce an underwhelming number of True Positives while also producing an overwhelming number of False Positives. Then the problem can be reduced and be approached by appropriate methods to \emph{maximise} the incidence of True Positives and to \emph{minimise} that of False Positives individually. This concept forms the foundation of our intrusion detection approach.
 
-For the maximising part, we acknowledge, in general, a positive correlation between True Positive Rate (TPR) and False Positive Rate (FPR), which can be typically observed from a \emph{receiver operating characteristic} (ROC) curve. Using the relationship, our solution is to run the anomaly detection algorithm of our choice in a more permissible, optimistic way which will increase the likelihood of \emph{both} normal and anomalous instances with relatively subtle characteristics to be classified. In this way, we can expect a higher TPR than under ordinary circumstances and the maximisation problem can be easily solved. However, also expected is a higher FPR than usual as more instances, whether they are actually TPs or not, will be classified. We address this problem separately in a separate step which follows the intial classification step. For the \emph{new} problem of the high FPR, we focus solely on identifying which instances correspond to the FPs using a clustering method and remove those instances so that they are not retained in the final result. In other words, those FPs, which we know are surely of normal instances, will no longer be present in the final result in the hope that the remaining instances are only of the anomalous, or intrusion, instances. Then the minimisation problem is essentially solved.
+For the maximising part, we acknowledge, in general, a positive correlation between True Positive Rate (TPR) and False Positive Rate (FPR), which can be typically observed from a receiver operating characteristic (ROC) curve. Using the relationship, our solution is to run the anomaly detection algorithm of our choice in a more permissible and optimistic way, which will increase the likelihood of \emph{both} normal and anomalous instances to be captured in the result. In this way, we can expect a higher TPR than under ordinary circumstances, that is our approach to the maximisation problem. However, also expected is a higher FPR than usual as more instances, whether they are actually True Positives or not, will be classified. We address this problem separately in a separate step following the initial optimistic execution of the anomaly detection scheme.
 
-For the rest of this chapter, more technical aspect of our method is presented with a demonstration at the end.
+For the new problem of the high FPR, we focus on identifying which instances correspond to the False Positives using a clustering algorithm. We assume that the majority of the FPs have the homogenous underlying pattern with only few of them to behave differently to the expected pattern. Under the assumption, the False Positives of the expected behaviour are likely to be grouped together using the clustering algorithm of our choice, which can then be removed so that they are not retained in the final result. What must be noted is that the possible anomalies, output from the intial anomaly detection, are instances not conforming to the overall expected behaviour of the given data by definition, which can introduce difficulties in successfully clustering the False Positives. To this problem, we take a sample of normal instances that are not captured by the initial anomaly detection, i.e., True Negatives, and merged them into the set of the possible anomalies to provide further information of the normal pattern. Then the clustering scheme becomes more capable of including the False Positives into the cluster of the True Negatives to effectively produce a ``super" cluster of normal instances that we wish to get rid of. 
+
+The technical aspects of our method is described in Section \ref{methods:sec1} and a demonstration is presented in Section \ref{methods:sec2}.
 
 <<echo=FALSE,eval=FALSE>>=
-% One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed intrusion detection system (IDS) is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
+One of the problems associated with unsupervised anomaly detection methods is that a reasonably high detection rate, given by the proportion of anomalies correctly classified, is usually followed by a correspondingly high false positive rate, given by the proportion of normal instances erroneously classified as anomalies. Such problem limits reliable use of the methods and must be addressed in order for them to be applicable with confidence. Solving this problem as our commencing point has led us to conceptualise a general two-phase scheme that our proposed intrusion detection system (IDS) is closely based on. Discussions on concepts and ideas used for the scheme are in Section \ref{methods:sec1}.
 
-% The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3}, a comparison to an initial prototype system in Section \ref{methods:sec4} and finally a demonstration of the system in Section \ref{methods:sec5}.
+The main problem of unsupervised anomaly detection methods is the incidence of a high false positive (or alarm) rate, that is the proportion of normal instances erroneously classified as anomalous (also known as false positives or false alarms). The issue is usually the result of violating one of the most fundamental assumptions in anomaly detection that normal instances are much more frequent than anomalies in a test dataset as it then becomes more difficult for a given method to distinguish between the normal and abnormal instances. A method's adequacy for a given test dataset also has an impact on the prevalence of false positives.
 
-% The rest of this chapter is divided into sections that provide a high-level overview of our proposed IDS in Section \ref{methods:sec2}, low-level and phase-specific discussions in Section \ref{methods:sec3} and a demonstration of the system in Section \ref{methods:sec5}.
+Our decision to pursue the implementation of an unsupervised anomaly detection task into an intrusion detection system (IDS) has led us to face two major caveats associated with the unsupervised learning: (1) inferior detection capability and (2) high prevalence of false positives, in comparison to its supervised counterpart. As a countermeasure to those obstacles, we have conceptualised a simple two-phase schematic which we have followed closely in developing the system. More detailed discussion of the abstract scheme can be found in Section \ref{methods:sec1}.
 
-
-%The main problem of unsupervised anomaly detection methods is the incidence of a high false positive (or alarm) rate, that is the proportion of normal instances erroneously classified as anomalous (also known as false positives or false alarms). The issue is usually the result of violating one of the most fundamental assumptions in anomaly detection that normal instances are much more frequent than anomalies in a test dataset as it then becomes more difficult for a given method to distinguish between the normal and abnormal instances. A method's adequacy for a given test dataset also has an impact on the prevalence of false positives.
-
-%Our decision to pursue the implementation of an unsupervised anomaly detection task into an intrusion detection system (IDS) has led us to face two major caveats associated with the unsupervised learning: (1) inferior detection capability and (2) high prevalence of false positives, in comparison to its supervised counterpart. As a countermeasure to those obstacles, we have conceptualised a simple two-phase schematic which we have followed closely in developing the system. More detailed discussion of the abstract scheme can be found in Section \ref{methods:sec1}.
-
-% Use better expression for below paragraphs:
-%As the core concept of our IDS closely resembles that of the previously mentioned two-phase scheme, the internal structure of the overall system adopts two top-level phases of sub-processes. The system overview along with phase-specific discussion can be found in Sections \ref{methods:sec2} and \ref{methods:sec3}, respectively.
-
-%Lastly, the system is compared with an intial hypothetical design that was intuitively drafted in the final section of the chapter.
 
 % --------------------------
 % SECTION 1: General scheme
@@ -120,16 +113,16 @@ For the rest of this chapter, more technical aspect of our method is presented w
 \section{System overview}
 \label{methods:sec1}
 
-The system is divided into two phases whose objectives are to achieve the highest possible TPR and the lowest possible FPR, respectively, using the previously mentioned ideas. Over the course of the research, the final version of our NIDS has seen a few changes from the initial design we had in mind. For example, our intial design for the first phase was to simply achieve a high TPR by setting a more admissible threshold, strictly following the previously mentioned concept. However the final version now involves more steps, which may seem contradictory to and deviating from the concepts and ideas discussed. But the extra steps were implemented as the result of a natural process of adjusting and improving the system, not as an attempt to raise any confusion. Keeping this in mind, the high level system overview is presented in Figure \ref{fig:methods-sys}.
+Our proposed method is divided into two phases whose objectives are to achieve the highest possible TPR and the lowest possible FPR, respectively, using the previously mentioned ideas. Over the course of the research, the final version of the method has seen a few changes from the initial design we had in mind. For example, our intial design for the first phase was to simply achieve a high TPR by setting a more admissible threshold, strictly following the previously mentioned concept. However the final version now involves more steps, which may seem contradictory to and deviating from the concepts and ideas discussed. But the extra steps were implemented as the result of a natural process of adjusting and improving the system. Keeping this in mind, the high level system overview is presented in Figure \ref{fig:methods-sys}.
 
 \begin{figure}[h]
 \centering
   \begin{tikzpicture}[node distance = 2.3cm, scale=0.8]
     \node(start) [start] {\textsc{Start}};
     \node(in)    [io, below of=start]  {Data \\ (numeric)};
-    \node(p1)    [procs, below of=in, minimum width=8cm]  {Phase 1: \\ Density-based anomaly detection};
+    \node(p1)    [procs, below of=in, minimum width=6.5cm]  {Phase 1: \\ Density-based anomaly detection};
     \node(pa)    [io, below of=p1]     {Possible \\ intrusions};
-    \node(p2)    [procs, below of=pa, minimum width=8cm]  {Phase 2: \\ Clustering-based FP elimination};
+    \node(p2)    [procs, below of=pa, minimum width=6.5cm]  {Phase 2: \\ Clustering-based FP removal};
     \node(out)   [io, below of=p2]     {Intrusions};
     \node(end)   [start, below of=out] {\textsc{End}};
     \draw [arrow] (start) to (in);
@@ -139,13 +132,140 @@ The system is divided into two phases whose objectives are to achieve the highes
     \draw [arrow] (p2) to (out);
     \draw [arrow] (out) to (end);
   \end{tikzpicture}
-  \caption{High-level system overview}
+  \caption{High-level system overview.}
   \label{fig:methods-sys}
 \end{figure}
 
 Phase 1 accepts only numerical data as it initially runs the LOF algorithm to score each instance with a degree of being anomalous. Once every instance is scored, the probability distribution of the LOF scores is estimated using the kernel density estimation (KDE), which is then used to plot the estimated probability density function (PDF) to help determine appropriate thresholds. Because we assume that every test dataset contains a higher proportion of normal instances, we expect to observe a very dense curvature whose area under the graph, ie, corresponding probability, is greater than for any other curves and the instances whose scores fall under this region are normal. Then we can extrapolate from the PDF the point at which this major curve ends on the greater side. We lower that point by 10\% to use it as a threshold that is permissible enough to achieve a high TPR. Then those instances whose scores are less than the threshold are labelled as normal while the others are labelled as possible anomalies. Once all the instances are labelled as either normal or possible anomaly, a random sample of reasonably large size, that being a value just under the number of the possible anomalies is taken from the group of the normal instances. The random sample is then merged with the group of the possible anomalies to produce a merged set of instances. This merged set has a property that it contains enough normal instances that will be clustered with the FPs from the possible anomalies using the DBSCAN algorithm in Phase 2. Because we are absolutely sure that more FPs are produced than usual, from the way we set the threshold, we can expect that the merged set consists of higher proportion of normal instances that collectively correspond to the random sample and the FPs.
 
-Phase 2 accepts the merged set as its input and performs the DBSCAN algorithm on it. If one does not have necessary domain knowledge to help decide optimal input parameters for the DBSCAN, the \emph{labels} of the random sample can be used to track down which input parameter should produce the most desirable results. The paramter, $MinPts$, has not much impact on the result so it can be fixed while the other parameter, $Eps$, is varied. For each $Eps$, we can measure the proportion of the largest cluster that corresponds to the random sample, denoted by $p_c$. Ideally, we want to observe an increase in this proportion as $Eps$ increases because it will then indicate that the largest clusters are correctly adding FPs incrementally. Another pattern we wish to observe is the $Eps$ value at which the proportion very rapidly drops as this suggests that the parameter is increased over a threshold at which the DBSCAN algorithm starts to include anomalies, which we do not want, in those clusters decreasing their purity. Our heuristic is to select the $Eps$ just before this rapid drop for the most desirable result. Another measure that can provide some extra information is the proportion of the raondom sample included in the largest cluster, denoted by $p_r$. Ideally, this proportion should be very close to 1 as this will then indicate that most of the random sample is clustered in the largest cluster. Then the instances included in the largest cluster are all removed so that the remaining instances in the result correspond to anomalies only, and thus intrusions.
+Phase 2 accepts the merged set as its input and performs the DBSCAN algorithm on it. If one does not have necessary domain knowledge to help decide optimal input parameters for the DBSCAN, the \emph{labels} of the random sample can be used to track down which input parameter should produce the most desirable results. The parameter, $MinPts$, do not have much impact on the result so it can be fixed values while the other parameter, $Eps$, is varied. For each $Eps$, we can measure the proportion of the largest cluster that corresponds to the random sample, denoted by $p_c$. Ideally, we want to observe an increase in this proportion as $Eps$ increases because it will then indicate that the largest clusters are correctly adding FPs incrementally. Another pattern we wish to observe is the $Eps$ value at which the proportion very rapidly drops as this suggests that the parameter is increased over a threshold at which the DBSCAN algorithm starts to include anomalies, which we do not want, in those clusters decreasing their purity. Our heuristic is to select the $Eps$ just before this rapid drop for the most desirable result. Another measure that can provide some extra information is the proportion of the raondom sample included in the largest cluster, denoted by $p_r$. Ideally, this proportion should be very close to 1 as this will then indicate that most of the random sample is clustered in the largest cluster. Then the instances included in the largest cluster are all removed so that the remaining instances in the result correspond to anomalies only, and thus intrusions.
+
+%%% PHASE 1
+\subsection{Phase 1}
+Algorithm~\ref{alg1} presents a pseudocode for Phase 1. Let $\mathbf{x}_i \in \mathbb{R}^m$ be the vector of traffic attributes, or connection features, for the $i$th connection and $\mathbf{X} = \{ x_1, x_2, \dotsc, x_n \} \in \mathbb{R}^{n \times m}$ be the complete matrix of connections.
+
+First the LOF algorithm is run on $\mathbf{X}$ with the input parameter $k$ (line 1). The value of $k$ must be greater than the actual number of intrusion instances in $\mathbf{X}$, for example if about $30\%$ of $\mathbf{X}$ is considered to be intrusions then $k = 0.3 \times m$. Once a vector of LOF scores is computed, KDE is run on the scores to find their kernel density estimates (line 2). The kernel, $K(u)$, we use is the Gaussian kernel given by
+\begin{equation}
+K(u) = \frac{1}{\sqrt{2\pi}}e^{-\frac{1}{2}u^2},
+\end{equation}
+where $u =(X_i-x)/h$, as it provides a smooth density curve optimal for graphical extrapolation. For the bandwidth, $h$, we use Silverman's rule of thumb \cite{sil86} given by
+\begin{equation}
+h = \left( \frac{4\hat{\sigma}^5}{3n} \right)^{\frac{1}{5}} \approx 1.06 \hat{\sigma}n^{-1/5},
+\end{equation}
+as it is the most optimal bandwidth when the Gaussian kernel is used. Then the computed kernel density estimates are plotted and the threshold, $t$, is extrapolated from the graph (line 3). To extrapolate, we look for the area of the highest density, check that it is near the score of 1, and extrapolate where the curve ends on the positive side. This will become much more clear in Section \ref{methods:sec2}. Then instances whose LOF scores are greater than or equal to $t$ are subsetted, or labelled, as TFP (True and False Positives) that represent possible anomalies while the remaining instances as TN (True Negatives) that is the normal instances (lines 4--10). Lastly, a random sample is taken from the TN and is appended to the TFP to produce M as the output of Phase 1. Sample size depends on domain knowledge but about $30\%$ of the size of the TFP has been experimentally determined to be appropriate in our case.
+
+\begin{algorithm}
+\caption{Phase 1}
+\label{alg1}
+
+\begin{algorithmic}[1]
+\Require $\mathbf{X} \in \mathbb{R}^{n \times m}$
+\State $\text{score} = \Call{LOF}{\mathbf{X}, k}$
+\State $\widehat{\text{kde}} = \Call{KDE}{\text{score}, K, h}$
+\State Extrapolate $t$
+\For{$i=1:n$}
+  \If{$\text{score}_i \geq t$}
+    \State Subset $\mathbf{X}_i$ as TFP
+    \Comment True and False Positives (possible anomalies)
+  \Else 
+    \State Subset $\mathbf{X}_i$ as TN
+    \Comment True Negatives (normal)
+  \EndIf
+\EndFor
+\State Sample from TN
+\State $\mathbf{M} \gets$ Merge the sample with TFP
+\end{algorithmic}
+
+\end{algorithm}
+
+
+\newpage
+%%% PHASE 2
+\subsection{Phase 2}
+Let $\mathbf{\epsilon} = \{ 0.1, 0.2, \dotsc, 1 \} \in \mathbb{R}$ 
+
+
+\begin{algorithm}
+\caption{Phase 2}
+\label{alg2}
+
+\begin{algorithmic}
+\Require $\mathbf{M} \in \mathbb{R}^{\ast \times m}$
+
+\end{algorithmic}
+
+\end{algorithm}
+
+
+
+
+
+
+\newpage
+% -------------------------
+% SECTION 2: Demonstration
+% -------------------------
+\section{Demonstration}
+\label{methods:sec2}
+
+The demonstration is presented using a particular set of instances that seems to accurately portray the sort of results one can expect to obtain. Assuming the LOF algorithm is successfully performed on the data and their respective LOF scores are produced as a result, the kernel density estimates are presented as shown in Figure \ref{fig:kde-example}. The plot shows a major curvature whose probability, of approximately 0.73, is greater than any other curves and therefore must correspond to normal. We draw the threshold, as the dashed line, at a point about 10\% to the left of the first local minimum to maximise classification. A random sample of 1,000 instances, whose scores are less than the threshold, is merged with the set of possible anomalies and DBSCAN is performed on the merged set. Figure~\ref{fig:kde-example2} presents a plot of the two previously discussed proportions as a heuristic as well as the system TPR and FPR. There is a relatively large decrease in $p_c$ between the $Eps$ of 0.6 and 0.7, which can also be observed for the TPR. As our heuristic suggestion to select the $Eps$ just before a major decrease in the $p_c$ appears to be the best choice to obtain the most promising TPR and FPR. The line representing $p_r$ can be used to assure that at $Eps=0.6$ \emph{every} instance from the random sample is included in this cluster to further confirm our belief that the cluster indeed consists of non-intrusion instances.
+
+
+
+% \subsection{Phase 1}
+% \label{methods:sec5.1}
+% For the purpose of this demonstration, we assume that a vector of LOF scores is computed for an arbitrary dataset and its kernel density estimates are graphed as seen in Figure \ref{fig:kde-example}. We can observe from this graph that the curvature located around the score of one corresponds to a large probability (approximately 0.73) and the instances that reside within this boundary should be normal, or non-intrusions. Hence instances belonging to the left of the threshold become an NI set while those to the right become a PA set. Also observable from the graph are the four small curves which could suggest that there might four different types of attacks in the PA set. This means we could set $n_c$, from the equation \ref{methods:eq1}, to be 4 and compute the random sample size needed.
+
+<<kde-example, echo=FALSE, fig.align='center', fig.cap="Density of an arbitrary set of LOF scores", out.width="0.68\\linewidth">>=
+load(file = "lof_scores.RData")
+d = density(lof_30p, bw = "nrd", kernel = "gaussian")
+plot(d, xlab = "LOF scores", main = "Probability distribution of LOF scores")
+local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)
+local_max = min(which(diff(sign(diff(d$y))) ==  -2) + 1)
+abline(v = d$x[local_min]-diff(c(d$x[local_max], d$x[local_min]))*0.1, lty = 5, col = "grey20")
+# legend("topright", "threshold", lty = 5, col = "grey20")
+text(c(2.2, 1.2), "threshold", pos = 4, cex = 1.2)
+## probability
+# ind = which.min(abs(threshold - d$x))
+# sfsmisc::integrate.xy(d$x[1:ind], d$y[1:ind])
+@
+
+<<kde-example2, echo=FALSE, fig.align='center', fig.cap="Results of DBSCAN", out.width="0.68\\linewidth">>=
+load("~/../Desktop/masters-project/Data/System_results/dat1_30a.RData")
+plot(seq(0,1,by=.1), seq(0,1,by=.1), type="n", xlab = "Eps", ylab = "Rate", main = "Various rates across Eps")
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$p2.proportion.within.cluster[4,])
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$p2.proportion.within.sample[4,], lty = 4)
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$system.detection.rate[4,], col = "blue")
+lines(seq(.1,1,by=.1), system.results_dat1_30a30k$system.false.alarm.rate[4, ], col = "red")
+legend("right", legend = c(expression('p'[c]), expression("p"[r]), "TPR", "FPR"), col = c("black","black","blue","red"), lty=c(1,4,1,1))
+@
+
+
+
+
+<<knn-example, echo=FALSE, eval=FALSE, fig.align='center', fig.cap="kNN distance plot for k=5", out.width="0.6\\linewidth", fig.pos="h">>=
+load(file = "knn.RData")
+dbscan::kNNdistplot(normalized[,-35], k = 5)
+@
+
+
+
+% Comment below out when building the whole doc:
+\bibliographystyle{ieeetr}
+\bibliography{../Main/bibliography}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <<echo=FALSE,eval=FALSE>>=
 # % Using the general scheme described in the previous section, our proposed two-phase intrusion detection system is built as represented in Figure \ref{fig:methods-sys}. The overall high-level structure of the system is identical to that of the previous schematic with two phases tasked with the same objectives: (1) maximise sensitivity and (2) minimise false positives. A major difference is that the phases of the system consist of sub-processes that collectively accomplish the set objectives. The overall high-level system overview is summarised as follows:
@@ -371,72 +491,6 @@ Phase 2 accepts the merged set as its input and performs the DBSCAN algorithm on
 # % The similarty measure to be used as a comparison
 
 @
-
-
-% -------------------------
-% SECTION 2: Demonstration
-% -------------------------
-\section{Demonstration}
-\label{methods:sec2}
-
-The demonstration is presented using a particular set of instances that seems to accurately portray the sort of results one can expect to obtain. Assuming the LOF algorithm is successfully performed on the data and their respective LOF scores are produced as a result, the kernel density estimates are presented as shown in Figure \ref{fig:kde-example}. The plot shows a major curvature whose probability, of approximately 0.73, is greater than any other curves and therefore must correspond to normal. We draw the threshold, as the dashed line, at a point about 10\% to the left of the first local minimum to maximise classification. A random sample of 1,000 instances, whose scores are less than the threshold, is merged with the set of possible anomalies and DBSCAN is performed on the merged set. Figure \ref{fig:kde-example2} presents a plot of the two previously discussed proportions as a heuristic as well as the system TPR and FPR. There is a relatively large decrease in $p_c$ between the $Eps$ of 0.6 and 0.7, which can also be observed for the TPR. As our heuristic suggestion to select the $Eps$ just before a major decrease in the $p_c$ appears to be the best choice to obtain the most promising TPR and FPR. The line representing $p_r$ can be used to assure that at $Eps=0.6$ \emph{every} instance from the random sample is included in this cluster to further confirm our belief that the cluster indeed consists of non-intrusion instances.
-
-
-
-% \subsection{Phase 1}
-% \label{methods:sec5.1}
-% For the purpose of this demonstration, we assume that a vector of LOF scores is computed for an arbitrary dataset and its kernel density estimates are graphed as seen in Figure \ref{fig:kde-example}. We can observe from this graph that the curvature located around the score of one corresponds to a large probability (approximately 0.73) and the instances that reside within this boundary should be normal, or non-intrusions. Hence instances belonging to the left of the threshold become an NI set while those to the right become a PA set. Also observable from the graph are the four small curves which could suggest that there might four different types of attacks in the PA set. This means we could set $n_c$, from the equation \ref{methods:eq1}, to be 4 and compute the random sample size needed.
-
-<<kde-example, echo=FALSE, fig.align='center', fig.cap="Density of an arbitrary set of LOF scores", out.width="0.68\\linewidth">>=
-load(file = "lof_scores.RData")
-d = density(lof_30p, bw = "nrd", kernel = "gaussian")
-plot(d, xlab = "LOF scores", main = "Probability distribution of LOF scores")
-local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)
-local_max = min(which(diff(sign(diff(d$y))) ==  -2) + 1)
-abline(v = d$x[local_min]-diff(c(d$x[local_max], d$x[local_min]))*0.1, lty = 5, col = "grey20")
-# legend("topright", "threshold", lty = 5, col = "grey20")
-text(c(2.2, 1.2), "threshold", pos = 4, cex = 1.2)
-## probability
-# ind = which.min(abs(threshold - d$x))
-# sfsmisc::integrate.xy(d$x[1:ind], d$y[1:ind])
-@
-
-<<kde-example2, echo=FALSE, fig.align='center', fig.cap="Result of DBSCAN", out.width="0.68\\linewidth">>=
-load("~/../Desktop/masters-project/Data/System_results/dat1_30a.RData")
-plot(seq(0,1,by=.1), seq(0,1,by=.1), type="n", xlab = "Eps", ylab = "Rate", main = "Various rates across Eps")
-lines(seq(.1,1,by=.1), system.results_dat1_30a30k$p2.proportion.within.cluster[4,])
-lines(seq(.1,1,by=.1), system.results_dat1_30a30k$p2.proportion.within.sample[4,], lty = 4)
-lines(seq(.1,1,by=.1), system.results_dat1_30a30k$system.detection.rate[4,], col = "blue")
-lines(seq(.1,1,by=.1), system.results_dat1_30a30k$system.false.alarm.rate[4, ], col = "red")
-legend("right", legend = c(expression('p'[c]), expression("p"[r]), "TPR", "FPR"), col = c("black","black","blue","red"), lty=c(1,4,1,1))
-@
-
-
-
-
-<<knn-example, echo=FALSE, eval=FALSE, fig.align='center', fig.cap="kNN distance plot for k=5", out.width="0.6\\linewidth", fig.pos="h">>=
-load(file = "knn.RData")
-dbscan::kNNdistplot(normalized[,-35], k = 5)
-@
-
-
-
-% Comment below out when building the whole doc:
-% \bibliographystyle{plain}
-% \bibliography{../Main/bibliography}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

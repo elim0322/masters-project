@@ -59,7 +59,6 @@ box()
 @
 
 
-\newpage
 %---------------------------
 % Kernel density estimation
 %---------------------------
@@ -82,43 +81,150 @@ legend("topright", "threshold", lty=4, col="blue")
 Thus we have decided to include KDE as a threshold generating tool that allows us to preliminarily explore the distribution of LOF scores and infer the regions of normal and anomalous groups to find a suitable threshold that separates those groups out accordingly.
 
 
-%% WORK FROM HERE
+
 %-------------------------------------------------------------
 % Density-based spatial clustering of applications with noise
 %-------------------------------------------------------------
 \section{DBSCAN}
-DBSCAN is a density-based clustering algorithm proposed by Ester el al. \cite{est96} that offers its own version of anomaly detection. A \emph{core point}, as it defines, is a data instance surrounded by at least $k$ neighbouring instances within the radius of $\epsilon$, and those neighbours are said to be \emph{directly reachable} from the core point. Then all these neighbouring points form a cluster around the core point while non-reachable points form the border of the cluster. All points that are not reachable from any point are labelled as outliers.
+Density-based spatial clustering of applications with noise (DBSCAN) is a density-based clustering algorithm proposed by Ester el al. \cite{est96} that offers two unique features: (1) it does not force each data instance into a cluster and (2) it is capable of distinguishing isolated points as noise. These noise points are analogous to anomalies as they are highly isolated from the rest of data thus not conforming to the expected pattern of the data. Understanding how DBSCAN works requires three preliminaries. First, a point, $p$, is a core point if there are at least $k$ neighbouring points within the distance of $\epsilon$ and these points are said to be directly density-reachable from $p$. Second, a point, $q$, is said to be density-reachable if there is a chain of directly density-reachable points connecting to $q$ and the density-reachable points, such as $q$, are border points. Lastly, points that are not reachable from any other points are considered as noise. A cluster is then formed with a single or multiple core points and their surrounding border points. A simple diagram in Figure \ref{fig:back3} illustrates an example where the core point and two border points form a cluster. Further extending the concept, Figure \ref{fig:back4} can be scrutinised as a more complex example.
 
-The fact that DBSCAN shares similarity with LOF in terms of the local density-based approach is what has appealed to us the most. Like LOF, the DBSCAN algorithm is not affected by the shapes of data and is extremely robust against any shapes and types of data. We initially considered DBSCAN as an alternative option to LOF due to their similarity. However we settled with the idea of using DBSCAN as a way to reinforce our implementation of LOF because of the very nature of the high compatibility between the two.
+<<back3, fig.pos="H", echo=FALSE, cache=TRUE, out.width="0.7\\linewidth", fig.align='center', fig.cap="DBSCAN preliminaries">>=
+ax = 7*cos( seq(0,2*pi, length.out=360) )
+ay = 7*sin( seq(0,2*pi, length.out=360) )
+plot(0, 0, type="n", asp=1, axes=FALSE, xlab="", ylab="", xlim=c(-15, 17), ylim=c(-10.5, 10))
+box()
+xx1 = -2.5 + ax
+yy1 = 1 + ay
+lines(xx1,yy1, col='blue')
+points(-2.5, 1, pch=4)
+text(-2.5, 1, "core point", pos=3, cex=1.2)
+#lines(c(-2.5, 4.5), c(1, 1))
+arrows(-2.5, 1, 4.5, 1, length = 0.12, code=3, angle=90, lty=4)
+text(2, 1, expression(epsilon), pos=1, cex=1.2)
+text(2, 1, expression(epsilon), pos=1, cex=1.2)
+points(c(-5, -1), c(5, -2), pch=4)
+points(c(-7, 2), c(-3, 3), pch=4)
+lines(-7 + ax, -3 + ay, col="red")
+lines(2 + ax, 3 + ay, col="red")
+text(-7, -3, "border point", pos=1, cex=1.2)
+text(2, 3, "border point", pos=4, cex=1.2)
+points(10, -4, pch=4)
+lines(10 + ax, -4 + ay)
+text(10, -4, "noise point", pos=4, cex=1.2)
+@
+
+<<back4, echo=FALSE, cache=TRUE, out.width="0.7\\linewidth", fig.align='center', fig.cap="An extensive example to illustrate how DBSCAN forms a cluster.">>=
+ax = 7*cos( seq(0,2*pi, length.out=360) )
+ay = 7*sin( seq(0,2*pi, length.out=360) )
+plot(0, 0, type="n", asp=1, axes=FALSE, xlab="", ylab="", xlim=c(-25,17), ylim=c(-15,15))
+box()
+xx1 = -2.5 + ax
+yy1 = 1 + ay
+lines(xx1,yy1, col='blue')
+points(-2.5, 1, pch=4)
+points(c(-5, -1), c(5, -2), pch=4)
+
+xx2 = -8 + ax
+yy2 = ay
+lines(xx2, yy2, col='blue')
+points(-8, 0, pch=4)
+points(c(-10, -11), c(-2, 5), pch=4)
+lines(-11 + ax, 5 + ay, col="red")
+lines(-10 + ax, -2 + ay, col="red")
+
+xx3 = 2 + ax
+yy3 = -1 + ay
+lines(xx3, yy3, col='blue')
+points(2, -1, pch=4)
+points(c(6,7), c(-3,0), pch=4)
+lines(6 + ax, -3 + ay, col="red")
+lines(7 + ax, ay, col="red")
+
+points(-18, -8, pch=4)
+lines(-18 + ax, -8 + ay)
+points(11, 10, pch=4)
+lines(11 + ax, 10 + ay)
+@
+
+DBSCAN is used in Phase 2 of our method. The purpose of Phase 2 is to cluster False Positives (normal instances output from Phase 1) for subsequent elimination such that only the anomalies, i.e., threats, remain in the result. Unlike other clustering schemes, the DBSCAN algorithm is relatively flexible as the assignment of each instance into a cluster is not mandatory. Merits of such flexibility are debatable for different domains and applications but certainly exist in our case. The reason is as follows. We run the density-based LOF algorithm on a given test data to obtain possible anomalies residing in sparse regions. An emphasis must be made that these potential anomalies are highly isolated points, having been previously filtered by LOF. This means DBSCAN is highly likely to leave the isolated points out from clustering thus unaffecting overall detection capability. In addition, the fact that DBSCAN shares similarity with LOF in terms of the local density-based approach is also attractive. Rather than using a clustering scheme based on different metrics, such as distance or angle, our decision to implement both density-based algorithms ensures that the entire system of our method is robust and consistent as well as highly synergistic.
+
 
 %---------
 % X-means
 %---------
 \section{Other schemes}
-\subsection{X-means}
-The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00x}, is an extension of K-means that finds an optimal value for $k$ under the Bayesian Information Criterion (BIC). It performs ordinary K-means on given data and then, for each resulting cluster, incrementally run additional K-means using $k$ increased by a factor of two until the BIC cannot be minimised further.
+There are a couple of schemes used in our experiments, namely the X-means clustering algorithm and Principal Component Analysis (PCA), that are worthwhile discussing.
 
-The main advantage of X-means is the absence of the parameter, $k$, as it computes it for users. The manual, inefficient process of having to perform multiple runs of K-means on the same data just to find an optimal $k$ can be completely avoided using X-means. Also X-means scales well computationally, that is it is capable of handling larger data more efficiently than its K-means counterpart.
+\subsubsection{X-means}
+The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00x}, is an extension of K-means that iteratively finds an optimal number of clusters, $k$. The objective of the K-means clustering algorithm is to minimise within-cluster variance into $k$ partitions, that is effectively minimising
+\begin{equation}
+\underset{\mathbf{S}}{\text{arg min}} = \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_i} \Vert \mathbf{x} - \boldsymbol{\mu}_i \Vert^2,
+\end{equation}
+where $\boldsymbol{\mu}_i$ is the mean of points in $S_i$. Minimising the within-cluster variance automatically minimises between-cluster variance, which is a duality that makes the algorithm efficient. What X-means adds on top is further partitioning of each partitioned cluster by the multiple of 2. For each successive partitioning, a Bayesian Information Criterion (BIC) is computed using the following from Kass and Wasserman \cite{kas95}
+\begin{equation}
+BIC(M_j) = \hat{l}_j(D) - \frac{p_j}{2} \cdot log R,
+\end{equation}
+where $\hat{l}_j(D)$ is the maximum log-likelihood of the data, $D$, at the $j$-th model, $p_j$ is the number of parameters in $M_j$ and $R$ is the number of points in $M_j$. The successive partitioning is incrementally carried out until BIC can no longer be minimised. Figure \ref{fig:back5} presents an example where the data is partitioned with the ordinary k-means partitioning (plot on the left) and the result of one step of X-means partioning (plot on the right). The BIC for $k = 1$ and $k = 2$ are compared to evaluate whether further partioning is required.
+
+<<back5, echo=FALSE, fig.pos="H", fig.show='hold', cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of X-means.">>=
+plot(0, 0, type="n", xlim=c(-3, 3), ylim=c(-3, 3), axes=FALSE, xlab="", ylab="", main="Initial partitioning of k-means")
+box()
+set.seed(2)
+points(runif(100, -3, -1), runif(100, -2, 2), pch=20)
+set.seed(3)
+points(runif(100, 1, 3), runif(100, -2, 2), pch=20)
+lines(c(0,0), c(-3,3), lty=3)
+lines(c(-3.5,-0.5), c(2,-1.5), col="red")
+lines(c(0.5,3.5), c(1.5, -1.5), col="red")
+text(-1.5,2.6, "BIC(k = 1)")
+text(-2, -2.6, "BIC(k = 1)")
+text(1.5, -2.5, "BIC(k = 1)")
+text(2,2.5, "BIC(k = 1)")
 
 
-%-------------------------------------
-% SECTION 3: Dimensionality reduction
-%-------------------------------------
-\section{Dimensionality reduction}
-%------------------------------
-% Principal component analysis
-%------------------------------
-\subsection{Principal component analysis}
-Principal component analysis (PCA) is initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to vertically for the case of linear regression models. In essence, PCA is an orthogonal transformation technique that projects a given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
+plot(0, 0, type="n", xlim=c(-3, 3), ylim=c(-3, 3), axes=FALSE, xlab="", ylab="", main="A subsequent partitioning of X-means")
+box()
+set.seed(2)
+points(runif(100, -3, -1), runif(100, -2, 2), pch=20)
+set.seed(3)
+points(runif(100, 1, 3), runif(100, -2, 2), pch=20)
+lines(c(0,0), c(-3,3), lty=3)
+lines(c(-3.5,-0.5), c(2,-1.5), col="red")
+lines(c(0.5,3.5), c(1.5, -1.5), col="red")
+
+lines(c(-2,-2.5), c(0,-2.5), col="red")
+lines(c(-2,-1), c(0.5,2.5), col="red")
+lines(c(1,2), c(-2,-0.3), col="red")
+lines(c(1.9,3), c(0.5,2), col="red")
+
+text(-1.5,2.6, "BIC(k = 2)")
+text(-2, -2.6, "BIC(k = 2)")
+text(1.5, -2.5, "BIC(k = 2)")
+text(2,2.5, "BIC(k = 2)")
+@
+
+The main advantage of X-means is the absence of the parameter, $k$, as it computes it for users. The manual, inefficient process of having to perform multiple runs of K-means on the same data just to find an optimal $k$ can be completely avoided using X-means. Also X-means scales well computationally, which means it is capable of handling larger data more efficiently than its K-means counterpart.
+
+
+\subsubsection{Principal component analysis}
+Principal component analysis (PCA) is initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to minimising the errors in response for the case of linear regression models (Figure \ref{fig:back6}). In essence, PCA is an orthogonal transformation technique that projects a given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
 
 We considered PCA as a preliminary step to reduce the dimensionality of data in an attempt to increase the efficiency of the expensive algorithms such as LOF and DBSCAN. While it allowed us to visualise the data in two-dimensions, the projected data was not an effective representation of the original data as it lost too much information along the way. Hence we used PCA only as an exploratory visualisation tool to help us develop ideas.
 
+
+<<back6, echo=FALSE, fig.pos="H", cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of simple linear regression and PCA.">>=
+plot(0,0, type="n", xlim=c(0.3,0.7), ylim=c(0.2,0.7), asp=1, axes=FALSE, xlab="", ylab="")
+abline(0, 1)
+lines(c(0.5,0.7), c(0.5,0.3), col="blue")
+lines(c(0.5,0.5), c(0.5,0.15), col="blue")
+text(0.6, 0.4, pos=4, "PCA", cex=2)
+text(0.5, 0.2, pos=4, "regression", cex=2)
+@
 
 
 % Comment below out when building the whole doc:
 \bibliographystyle{ieeetr}
 \bibliography{../Main/bibliography}
-
 
 
 %----------------------------------
