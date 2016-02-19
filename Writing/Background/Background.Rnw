@@ -1,4 +1,4 @@
-<<set-parent, echo=FALSE, cache=FALSE>>=
+<<set-parent3, echo=FALSE, cache=FALSE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
@@ -223,8 +223,8 @@ text(0.5, 0.2, pos=4, "regression", cex=2)
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{ieeetr}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{ieeetr}
+% \bibliography{../Main/bibliography}
 
 
 %----------------------------------

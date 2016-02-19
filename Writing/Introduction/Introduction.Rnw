@@ -1,4 +1,4 @@
-<<set-parent, echo=FALSE, cache=FALSE>>=
+<<set-parent1, echo=FALSE, cache=FALSE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
@@ -105,5 +105,5 @@ If more and more aspects of the society are to lean towards digitalisation and h
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{ieeetr}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{ieeetr}
+% \bibliography{../Main/bibliography}

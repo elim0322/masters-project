@@ -1,4 +1,4 @@
-<<set-parent, echo=FALSE, cache=FALSE>>=
+<<set-parent2, echo=FALSE, cache=FALSE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
@@ -52,6 +52,6 @@ There are other contributions in the field that are not mentioned in this chapte
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{ieeetr}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{ieeetr}
+% \bibliography{../Main/bibliography}
 

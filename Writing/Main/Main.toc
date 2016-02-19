@@ -1,5 +1,22 @@
-\contentsline {chapter}{\numberline {1}Method}{1}
-\contentsline {section}{\numberline {1.1}Phase 1}{1}
-\contentsline {subsection}{\numberline {1.1.1}Local Outlier Factor}{1}
-\contentsline {section}{\numberline {1.2}Phase 2}{1}
-\contentsline {subsection}{\numberline {1.2.1}X-Means}{1}
+\contentsline {chapter}{\numberline {1}Introduction}{1}
+\contentsline {chapter}{\numberline {2}Background}{5}
+\contentsline {section}{\numberline {2.1}Local outlier factor}{5}
+\contentsline {section}{\numberline {2.2}Kernel density estimation}{7}
+\contentsline {section}{\numberline {2.3}DBSCAN}{8}
+\contentsline {section}{\numberline {2.4}Other schemes}{10}
+\contentsline {subsubsection}{X-means}{11}
+\contentsline {subsubsection}{Principal component analysis}{12}
+\contentsline {chapter}{\numberline {3}Literature Review}{13}
+\contentsline {section}{\numberline {3.1}Clustering-based}{13}
+\contentsline {section}{\numberline {3.2}Others}{15}
+\contentsline {chapter}{\numberline {4}Methods}{17}
+\contentsline {section}{\numberline {4.1}System overview}{18}
+\contentsline {subsection}{\numberline {4.1.1}Phase 1}{20}
+\contentsline {subsection}{\numberline {4.1.2}Phase 2}{22}
+\contentsline {section}{\numberline {4.2}Demonstration}{23}
+\contentsline {chapter}{\numberline {5}Evaluation}{25}
+\contentsline {section}{\numberline {5.1}Validation of ideas}{25}
+\contentsline {subsubsection}{Phase 1}{26}
+\contentsline {subsubsection}{Phase 2}{26}
+\contentsline {section}{\numberline {5.2}System evaluation}{28}
+\contentsline {section}{\numberline {5.3}Our method vs. others}{29}

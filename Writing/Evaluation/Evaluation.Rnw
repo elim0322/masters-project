@@ -1,22 +1,36 @@
-<<set-parent, echo=FALSE, cache=FALSE>>=
+<<set-parent5, echo=FALSE, cache=FALSE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 <<scores, cache=TRUE, echo=FALSE>>=
-load(file = "~/../Desktop/masters-project/Data/LOF_scores/scores.RData")
+# load(file = "~/../Desktop/masters-project/Data/LOF_scores/scores.RData")
+load(file = "//Users/eric/masters-project/Data/LOF_scores/scores.RData")
 @
 <<result, cache=TRUE, echo=FALSE>>=
-load(file = "~/../Desktop/masters-project/Data/System_results/dat1_05a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat1_10a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat1_20a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat1_30a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat1_40a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat1_50a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat2_05a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat2_10a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat2_20a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat2_30a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat2_40a.RData")
-load(file = "~/../Desktop/masters-project/Data/System_results/dat2_50a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat1_05a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat1_10a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat1_20a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat1_30a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat1_40a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat1_50a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat2_05a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat2_10a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat2_20a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat2_30a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat2_40a.RData")
+# load(file = "~/../Desktop/masters-project/Data/System_results/dat2_50a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat1_05a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat1_10a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat1_20a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat1_30a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat1_40a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat1_50a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat2_05a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat2_10a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat2_20a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat2_30a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat2_40a.RData")
+load(file = "//Users/eric/masters-project/Data/System_results/dat2_50a.RData")
+
 processResults = function(results, graph = FALSE) {
     d = numeric()
     f = numeric()
@@ -262,9 +276,10 @@ arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
 We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches. For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into the principal subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination through hundreds of scree plots. Another difference is that we replace $k$-means with $X$-means \cite{pel00} as to avoid, again, manually having to determine optimal number of clusters, $k$. Lastly the largest cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances, therefore mostly contain non-intrusion instances. For the clustering-based approach, we use simply use the $X$-means algorithm and remove the largest cluster based on the same previously mentioned assumption. As a third comparison, we hoped to reproduce a subspace clustering approach proposed in \cite{cas12, cas14} because it is the most recent work with the most promising results and involves DBSCAN. However we failed to reproduce their work and decided to leave it out of the comparison. Random samples of the same seeds as our previous experiments are used to provide fair comparision between the methods. All the methods operate under the unsupervised learning paradigm to further assure comparability. The results are presented in Figure \ref{fig:compareTPR}.
 
 <<compareTPR, dependson="sysResults", cache=TRUE, echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of TPRs across different methods">>=
-load("~/../Desktop/masters-project/Data/System_results/pca.results.RData")
-load("~/../Desktop/masters-project/Data/System_results/xmeans.results.RData")
-
+# load("~/../Desktop/masters-project/Data/System_results/pca.results.RData")
+# load("~/../Desktop/masters-project/Data/System_results/xmeans.results.RData")
+load("//Users/eric/masters-project/Data/System_results/pca.results.RData")
+load("//Users/eric/masters-project/Data/System_results/xmeans.results.RData")
 ## x-axis
 # w = 0.1  # width
 w = 0.09
@@ -889,5 +904,5 @@ To conclude, our method is the most reliable out of all three approaches as long
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{plain}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{ieeetr}
+% \bibliography{../Main/bibliography}
