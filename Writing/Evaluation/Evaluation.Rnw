@@ -151,11 +151,240 @@ Each experiment is conducted using a random sample of 5,000 instances from the 1
 
 %The parameter $k$ for the LOF algorithm is varied to assess whether the value of $k$ has an impact on the performance of LOF.
 
+
+
+\newpage
+% ----------------------------
+% SECTION 1: data description
+% ----------------------------
+\section{Data description}
+\label{evaluation:sec1}
+
+The KDD Cup 1999 dataset is prepared by Stolfo et al. \cite{sto00} based on a much larger dataset called DARPA'98. The original DARPA'98 data was captured at MIT Lincoln Laboratory over a period of 9 weeks as a part of the 1998 DARPA Intrusion Evaluation Program \cite{lip00}.
+
+From DARPA'98, the 7 weeks of network traffic, that correspond to about 4 gigabytes of compressed raw binary TCP dump data were processed into 4,898,431 individual connection records to make up the training set of the KDD'99 data. And the 2 weeks of network traffic were processed into 2,984,154 individual connection records to make up the test data for KDD'99. A connection is a sequence of TCP packets that flow from a source IP address to a destination IP address in some well defined time period. Hence there is no information on the IP addresses in the datasets.
+
+The KDD'99 data is fully labelled with either normal or an attack. Each attack belongs to a category of four types: Denial of Service (DoS), Remote to Local (R2L), User to Root (U2R) and probing attacks. The DoS attacks are associated with overloading network and machine resources to make them preoccupied such that the services become unavailable to legitimate users. The R2L attacks occur when an attacker sends packets to a target machine in order to gain access as a local user of the machine. The U2R attacks involve gaining unauthorised access to root previlages on a system, followed by preobtained access as a normal user. Lastly, the probing attacks are usually precursory attacks to scan networks and machines to gain information on any exploitable vulnerabilities. The training data for KDD'99 contain 22 different attacks, which are summarised in Table~\ref{eval:attack1}, where the type, name and description of each attack is presented in each column. The test data of KDD'99 contains 14 novel attacks that are not present in the training set. The list of these novel attacks is presented in Table~\ref{eval:attack2} in a similar manner to the previous table. For more extensive information on the attacks and their attack signatures, Lincoln Laboratory's Intrusion Detection Attacks Database \cite{darpa} should be referred to.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{List of training attack types in KDD'99 data.}
+\label{eval:attack1}
+\small
+\begin{tabular}{ |p{1.6cm}||p{3.2cm}|p{10cm}| }
+\hline
+Type & Name & Summary \\
+\hline
+\hline
+\textbf{DoS}
+& \texttt{back} & URLs containing many front slashes are requested on the target server. \\
+& \texttt{land} & Local Area Network Denial; a spoofed SYN packet is sent to the victim. \\
+& \texttt{neptune} & SYN flood; floods of TCP/SYN packets are sent using the neptune exploit code. \\
+& \texttt{pod} & Ping of Death; malformed ping packets are sent to cause a system crash. \\
+& \texttt{smurf} & Large numbers of IP packets are sent to all hosts in a network through the broadcast address of the network. \\
+& \texttt{teardrop} & Mingled, or invalid, IP packets are sent to the target machine to crash the operating system. \\
+\cline{1-3}
+
+\textbf{R2L}
+& \texttt{ftp\_write} & A common anonymous FTP misconfiguration is exploited. \\
+& \texttt{guess\_passwd} & The password of target machine is guessed via dictionary attacks. \\
+& \texttt{imap} & A buffer overflow is exploited in the IMAP server. \\
+& \texttt{multihop} & No information given. \\
+& \texttt{phf} & Poorly written CGI scripts are exploited to execute commands with the privilege level of the http server. \\
+& \texttt{spy} & No information given. \\
+& \texttt{warezclient} & Followed by a warezmaster attack (see below) where the victim downloads the uploaded warez via the FTP. \\
+& \texttt{warezmaster} & System bugs associated with FTP servers are exploited to create copies of illegal software, \emph{warez} \\
+\cline{1-3}
+
+\textbf{U2R}
+& \texttt{buffer\_overflow} & Abuse of a buffer overflow in which codes in the extra data enable unauthorised root access. \\
+& \texttt{loadmodule} & A program that loads modules into a kernel to gain root access on the local machine. \\
+& \texttt{perl} & An exploit of a bug in some Perl implementations. \\
+& \texttt{rootkit} & Softwares that enable unauthorised root access. \\
+\cline{1-3}
+
+\textbf{Probing}
+& \texttt{ipsweep} & A scan to determine which hosts are listening on a network. \\
+& \texttt{nmap} & Network Mapper; a general-purpose scanning tool that provides different types of network scans. \\
+& \texttt{portsweep} & Multiple hosts are scanned for a specific listening port. \\
+& \texttt{satan} & A network vulnerability scanner and a predecessor of the SAINT scanning program. \\
+\hline
+\end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{List of test attack types in KDD'99 data.}
+\label{eval:attack2}
+\small
+\begin{tabular}{ |p{1.6cm}||p{2.8cm}|p{11cm}| }
+\hline
+Type & Name & Summary \\
+\hline
+\hline
+\textbf{DoS}
+& \texttt{apache2} & Requests with many http headers are sent to target an apache server. \\
+& \texttt{mailbomb} & Many messages are sent to a server to overflow the server's mail queue. \\
+& \texttt{processtable} & The process table of a target machine is flooded with multiple instantiations of network servers using an exploit of root previlages \\
+& \texttt{snmpgetattack} & No information. \\
+& \texttt{snmpguess} & No information. \\
+& \texttt{udpstorm} & Two UDP connections that produce output are established to produce a high number of packets \\
+& \texttt{worm} & No information. \\
+\cline{1-3}
+
+\textbf{R2L}
+& \texttt{httptunnel} & An HTTP client is set up and configured in the target machine to send information to the attacker's web server. \\
+& \texttt{named} & An exploit of a buffer overflow, where a maliciously formatted inverse query on a TCP stream is sent to a name server. \\
+& \texttt{sendmail} & An exploit of a buffer overflow, malicious email messages are sent to a target system running a vulnerable version of sendmail. \\
+& \texttt{xlock} & An attacker displays remotely a modified version of the xlock program in the hope that the legitimate user types the password \\
+& \texttt{xsnoop} & An attacker watches keystrokes processed by an unprotected server to gain access to the victim system. \\
+\cline{1-3}
+
+\textbf{U2R}
+& \texttt{ps} & Exploit of race condition in the version of 'ps' distributed with Solaris 2.5 \\
+& \texttt{xterm} & An exploit of a butter overflow in the Xaw library, especially in the xterm programs that use the library. \\
+\cline{1-3}
+
+\textbf{Probing}
+& \texttt{mscan} & A probing tool to use DNS zone and scan IP addresses. \\
+& \texttt{saint} & Security Administrator's Integrated Network Tool; an attacker can use the tool to gain security information, despite its original intention. \\
+
+\hline
+\end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%
+
+
+
+For both the training and test datasets of KDD'99, each connection record consists of about 100 bytes and 42 features where the last feature contains the attack labels. Out of the 42 features, 9 of them represent basic features of individual TCP connections. The complete list of the basic features is presented in Table~\ref{eval:tab1}, where each column represents the feature names, descriptions and data types, respectively. The binary and nominal features are categorical features that contain two and three or more unique values, respectively, and the continuous features are numeric ones defined in their own unique interval. The basic features can all be extracted from a TCP connection using a standard packet sniffer.
+%Something worth mentioning is that there are 70 levels for \texttt{service}, each representing different types of service, in both the training and test datasets but the 10\% subset versions of the datasets, which we use for our experiments, only contain 65 and 66 of them.
+
+%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{List of basic features in KDD'99 data, retrieved and modified from \cite{kdd99}.}
+\label{eval:tab1}
+\small
+ \begin{tabular}{ |p{2.9cm}||p{10cm}|p{1.9cm}| }
+ \hline
+ Feature & Description & Type \\
+ \hline
+ \hline
+ \texttt{duration} & length of the connection in seconds & continuous \\
+ \texttt{protocol\_type} & type of the protocol & nominal \\
+ \texttt{service} & network service on the destination & nominal \\
+ \texttt{flag} & normal or error status of the connection & nominal \\
+ \texttt{src\_bytes} & amount of data in bytes from source to destination & continuous \\
+ \texttt{dst\_bytes} & amount of data in bytes from destination to source & continuous \\
+ \texttt{land} & 1 if connection is from the same host or port; 0 otherwise & binary \\
+ \texttt{wrong\_fragment} & number of ``wrong'' fragments & continuous \\
+ \texttt{urgent} & number of urgent packets & continuous \\
+ \hline
+ \end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%
+
+The remaining 32 features (excluding the last one for the labels) are derived features that fall into two categories: (1) content and (2) traffic features. Firstly, the content features (13 of the 32 features) are created from the domain knowledge of Stolfo et al. and are listed in Table~\ref{eval:tab2} with the same structure as the previous table. The purpose of these features is to provide information that can be used to detect the U2R and R2L attacks which lack intrusion frequent sequential patterns. Unlike the DoS and probing attacks, which happen in bursts in a very short period of time, the U2R and R2L attacks are usually embedded in the data portion of the packets and involve only a single connection, which make them difficult to be detected based only on the basic features. For example, \texttt{num\_failed\_logins} can provide useful information to help capture threats such as dictionary attacks.
+
+Secondly, the traffic features (19 of the 32 features) are time-based, created using a two-second time window, and are further divided into two types: (1) same-host and (2) same-service features. The same-host features examine connections in the past 2 seconds that have the same destination as the current connection. Similarly, the same-service features examine the connections that have the same feature as the current connection in the past 2 seconds. The complete list of the same-host and the same-service features is presented in Table~\ref{eval:tab3}, where each column represents the sub-type of the traffic features, feature names and their descriptions, respectively. The data types are not included in the table as these features are all continuous.
+
+There is a potential problem with the traffic features, especially the two-second time window, where some probing attacks are deployed gradually in duration that spans more than 2 seconds. These slow attacks are difficult to detect using the aforementioned traffic features, which led to 10 additional traffic features to be created. They are derived from the same-host and same-service features based on the connection window of 100 connections rather than the two-second time window. These are called the host-based traffic features and their complete list is presented in Table~\ref{eval:tab4}. In the table, all the feature names have a prefix of ``\texttt{dst\_host\_}" and their descriptions are synonymous with the matching features from Table~\ref{eval:tab3}. For example, \texttt{dst\_host\_diff\_srv\_rate} represents the percentage of connections to different services within the connection window of 100 connections.
+
+
+%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{List of content features within a connection suggested by domain knowledge in KDD'99 data, retrieved and modified from \cite{kdd99}.}
+\label{eval:tab2}
+\small
+ \begin{tabular}{ |p{3.8cm}||p{9.5cm}|p{1.9cm}| }
+ \hline
+ Feature & Description & Type \\
+ \hline
+ \hline
+ \texttt{hot} & number of ``hot'' indicators & continuous \\
+ \texttt{num\_failed\_logins} & number of failed login attempts & continuous \\
+ \texttt{logged\_in} & 1 if successfully logged in; 0 otherwise & binary \\
+ \texttt{num\_compromised} & number of ``compromised'' conditions & continuous \\
+ \texttt{root\_shell} & 1 if root shell is obtained; 0 otherwise & binary \\
+ \texttt{su\_attempted} & 1 if ``su root'' command attempted; 0 otherwise & binary \\
+ \texttt{num\_root} & number of root accesses & continuous \\
+ \texttt{num\_file\_creations} & number of file creation operations & continuous \\
+ \texttt{num\_shells} & number of shell prompts & continuous \\
+ \texttt{num\_access\_files} & number of operations on access control files & continuous \\
+ \texttt{num\_outbound\_cmds} & number of outbound commands in an ftp session & continuous \\
+ \texttt{is\_hot\_login} & 1 if the login belongs to the ``hot'' list; 0 otherwise & binary \\
+ \texttt{is\_guest\_login} & 1 if the login is a ``guest''login; 0 otherwise & binary \\
+ \hline
+ \end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{List of traffic features in KDD'99 data, retrieved and modified from \cite{kdd99}.}
+\label{eval:tab3}
+\small
+ \begin{tabular}{ |p{2.32cm}|p{3.62cm}||p{8.7cm}| }
+ \hline
+ Traffic Type & Feature & Description\\
+ \hline
+ \hline
+ & \texttt{count} & number of connections to the same host as the current connection in the past two seconds \\
+ \hline
+ Same-host & \texttt{serror\_rate} & \% of connections that have ``SYN'' errors \\
+ & \texttt{rerror\_rate} & \% of connections that have ``REJ'' errors \\
+ & \texttt{same\_srv\_rate} & \% of connections to the same service \\
+ & \texttt{diff\_srv\_rate} & \% of connections to different services \\
+ & \texttt{srv\_count} & number of connections to the same service as the current connection in the past two seconds \\
+ \hline
+ Same-service & \texttt{srv\_serror\_rate} & \% of connections that have ``SYN'' errors \\
+ & \texttt{srv\_rerror\_rate} & \% of connections that have ``REJ'' errors \\
+ & \texttt{srv\_diff\_host\_rate} & \% of connections to different hosts \\
+ \hline
+ \end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%
+\begin{table}
+\caption{List of host-based traffic features in KDD'99 data}
+\label{eval:tab4}
+\small
+ \begin{tabular}{ |p{15.56cm}| }
+ \hline
+ Feature \\
+ \hline
+ \hline
+ \texttt{dst\_host\_count, dst\_host\_srv\_count, dst\_host\_same\_srv\_rate, dst\_host\_diff\_srv\_rate, dst\_host\_same\_src\_port\_rate, dst\_host\_srv\_diff\_host\_rate, dst\_host\_serror\_rate, dst\_host\_srv\_serror\_rate, dst\_host\_rerror\_rate, dst\_host\_srv\_rerror\_rate} \\
+ \hline
+ \end{tabular}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%
+
+All the features with their types and how they were created have been described. The following section describes how we set up our experiments to test our ideas.
+
+
+% ----------------------------------
+% SECTION 2: Experimental framework
+% ----------------------------------
+\section{Data description}
+\label{evaluation:sec1}
+
+
+
+
+
+
+
+
+
+\newpage
 % -------------------------------
 % SECTION 1: Validation of ideas
 % -------------------------------
 \section{Validation of ideas}
-\label{evaluation:sec1}
+% \label{evaluation:sec1}
 The two-phase structure of our proposed NIDS, each with its unique objective, means that each phase must be evaluated to show the assigned objective is successfully accomplished. As presented in the previous chapter, the first phase is intended for maximum classification of all possible intrusions at the cost of higher false positive rate. Therefore Phase 1 is evaluated with its: (1) TPR to test our hypothesis that it is capable of achieving the said maximal classification and (2) FPR to confirm our belief that a higher number of false positives, than under ordinary circumstances, is resulted as expected. For Phase 2, our primary interest, as well as its purpose, is in the reduction of overall false positive rate thus percentage reductions in the FPR are investigated.
 % Lastly, our claim that the system of our proposal is truly comparable to DBSCAN clustering algorithm is tested with their respective TPR and FPR across the parameter, $\epsilon$ (Eps). The other parameter of DBSCAN, minPts, is fixed at 6 as we have experimentally determined that the result is not critically affected by varying the parameter.
 
@@ -904,5 +1133,5 @@ To conclude, our method is the most reliable out of all three approaches as long
 
 
 % Comment below out when building the whole doc:
-% \bibliographystyle{ieeetr}
-% \bibliography{../Main/bibliography}
+\bibliographystyle{ieeetr}
+\bibliography{../Main/bibliography}
