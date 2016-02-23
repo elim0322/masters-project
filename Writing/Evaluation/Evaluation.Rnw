@@ -34,6 +34,7 @@ load(file = "//Users/eric/masters-project/Data/System_results/dat2_50a.RData")
 processResults = function(results, graph = FALSE) {
     d = numeric()
     f = numeric()
+    e = vector()
     for (i in 1:100) {
         dif     = diff(results$p2.proportion.within.cluster[i, 2:10])
         dif.neg = which(dif < 0)
@@ -41,6 +42,11 @@ processResults = function(results, graph = FALSE) {
         # mn      = which.min(dif[dif.neg]) + 2
         d       = c(d, results$system.detection.rate[i, mn])
         f       = c(f, results$system.false.alarm.rate[i, mn])
+        if (length(mn)==0) {
+            e = c(e, NULL)
+        } else {
+            e = c(e, mn)
+        }
     }
     if (graph) {
         avg.TPR = colMeans(results$system.detection.rate)
@@ -53,7 +59,7 @@ processResults = function(results, graph = FALSE) {
         lines(avg.pwc)
         lines(avg.pws)
     }
-    return(list(TPR = mean(d), FPR = mean(f), TPR.sd = sd(d), FPR.sd = sd(f)))
+    return(list(TPR = mean(d), FPR = mean(f), TPR.sd = sd(d), FPR.sd = sd(f), FPRs))
 }
 a = function(results) {
     tpr = numeric()
@@ -111,6 +117,19 @@ dat2.sd.40k = b(list(system.results_dat2_05a40k, system.results_dat2_10a40k, sys
 dat2.sd.50k = b(list(system.results_dat2_05a50k, system.results_dat2_10a50k, system.results_dat2_20a50k, system.results_dat2_30a50k, system.results_dat2_40a50k, system.results_dat2_50a50k))
 }
 
+dat1.res05a = processResults(system.results_dat1_05a05k)
+dat1.res10a = processResults(system.results_dat1_10a30k)
+dat1.res20a = processResults(system.results_dat1_20a20k)
+dat1.res30a = processResults(system.results_dat1_30a40k)
+dat1.res40a = processResults(system.results_dat1_40a20k)
+dat1.res50a = processResults(system.results_dat1_50a05k)
+dat2.res05a = processResults(system.results_dat2_05a20k)
+dat2.res10a = processResults(system.results_dat2_10a30k)
+dat2.res20a = processResults(system.results_dat2_20a20k)
+dat2.res30a = processResults(system.results_dat2_30a30k)
+dat2.res40a = processResults(system.results_dat2_40a20k)
+dat2.res50a = processResults(system.results_dat2_50a05k)
+
 ## dat1
 dat1.means.05a = a(list(system.results_dat1_05a05k, system.results_dat1_05a10k, system.results_dat1_05a20k, system.results_dat1_05a30k, system.results_dat1_05a40k, system.results_dat1_05a50k))
 dat1.means.10a = a(list(system.results_dat1_10a05k, system.results_dat1_10a10k, system.results_dat1_10a20k, system.results_dat1_10a30k, system.results_dat1_10a40k, system.results_dat1_10a50k))
@@ -126,6 +145,31 @@ dat2.means.20a = a(list(system.results_dat2_20a05k, system.results_dat2_20a10k, 
 dat2.means.30a = a(list(system.results_dat2_30a05k, system.results_dat2_30a10k, system.results_dat2_30a20k, system.results_dat2_30a30k, system.results_dat2_30a40k, system.results_dat2_30a50k))
 dat2.means.40a = a(list(system.results_dat2_40a05k, system.results_dat2_40a10k, system.results_dat2_40a20k, system.results_dat2_40a30k, system.results_dat2_40a40k, system.results_dat2_40a50k))
 dat2.means.50a = a(list(system.results_dat2_50a05k, system.results_dat2_50a10k, system.results_dat2_50a20k, system.results_dat2_50a30k, system.results_dat2_50a40k, system.results_dat2_50a50k))
+
+########################################################################################
+d = function(result,a,res) {
+    ind = which(!is.na(res$e))
+    p2.fpr = numeric()
+    for (i in 1:length(ind)) {
+        p2.fpr = c(p2.fpr, result$system.false.alarm[ind[i], res$e[ind[i]]])
+    }
+    fp = ( (5000 * (1-a*0.01) * result$P1.false.alarm.rate[ind]) - (5000 * (1-a*0.01) * p2.fpr) ) / (5000 * (1-a*0.01) * result$P1.false.alarm.rate[ind])
+    list(mean(fp), sd(fp))
+}
+
+p2_dat1_05a = d(system.results_dat1_05a05k, 5, res05a)
+p2_dat1_10a = d(system.results_dat1_10a30k, 23, res10a)
+p2_dat1_20a = d(system.results_dat1_20a20k, 20, res20a)
+p2_dat1_30a = d(system.results_dat1_30a40k, 40, res30a)
+p2_dat1_40a = d(system.results_dat1_40a20k, 20, res40a)
+p2_dat1_50a = d(system.results_dat1_50a05k, 5, res50a)
+
+p2_dat2_05a = d(system.results_dat2_05a20k, 20, res05a)
+p2_dat2_10a = d(system.results_dat2_10a30k, 30, res10a)
+p2_dat2_20a = d(system.results_dat2_20a20k, 20, res20a)
+p2_dat2_30a = d(system.results_dat2_30a30k, 30, res30a)
+p2_dat2_40a = d(system.results_dat2_40a20k, 20, res40a)
+p2_dat2_50a = d(system.results_dat2_50a05k, 5, res50a)
 @
 
 % --------------------
@@ -402,7 +446,9 @@ As mentioned previously, the intrusion frequencies are varied between 0.05, 0.1,
 
 Firstly, we evaluate the effect of varying $k$ on the performance of LOF. For this, we fixed the intrusion frequency and varied $k_p$, and a hundred runs of LOF, using different samples each time, were performed. Then we summarised the computed LOF scores by using KDE to produce graphical output. Each of this experiment is repeated for different values of the intrusion frequencies. We kept the random seeds for the one hundred random samples and used them for different experiments so that the results of each experiment is fully comparable. Appendices~\ref{appendixa} and \ref{appendixb} present the results, where each \emph{figure} represents the plots for the corresponding intrusion frequency and each \emph{plot} corresponds to each of the different values of $k_p$, as indicated by the plot title. The appendices are divided such that they present the results for the training and test data, respectively. There are one hundred density curves on each plot, as previously described, and the transparency of $\alpha=0.2$ is used for all curves such that the curves of similar patterns are more visually apparent. Examining between the plots and comparing them for each figure, we can observe that as we increase the value of $k_p$, the computed LOF scores become less noisy and the differences in the densities, i.e., different peaks, are more clearly visible. If $k$ is set too low, the range of the resulting LOF scores is too great with noise, meaning an inflated score is given to each connection record. This leads to too many points being considered anomalies.. From this, we conclude that the greater values of $k$ are preferred but the question remains as to how much $k$ is appropriate. The optimal value for $k$ should depend on data but the scores appear to be the most stable when $k_p=0.5$. Also, $k_p$ must not be less than the actual intrusion frequency. For example, in Figure~\ref{dat1-a3}, we observe that the scores are more stable for $k_p=0.3$, $k_p=0.4$ and $k_p=0.5$.
 
-Secondly, we evaluate the performance of LOF assuming that an appropriate value for $k$ is chosen for each experiment. We present the resulting TPR and FPR in Figure~\ref{fig:lofResults}, where the TPR and FPR are represented by the solid and dashed lines, respectively, with the horizontal error bars. Figure \ref{fig:lofResults} reveals that the anomaly detection of LOF in Phase~1 is very accurate for the training data as shown by the very high TPR. The TPR for the test data are slightly lower than that for the training data. Upon manual examination, we have found that, for the test data, many intrusion instances share similar local densities as their non-intrusion counterparts leading to failure in finding adequate thresholds. When the kernel density estimates  were plotted, a number of intrusion instances had unusually low LOF scores than the rest, which made them difficult for detection. The LOF algorithm was not able to differentiate between the non-intrusion and the intrusion instances because their respective local densities were similar. On the other hand, Phase~1 anomaly detection is extremely precise for both the training and test data as the lengths of the error bars are nearly invisible. Tables~\ref{tab:app-tab1} and \ref{tab:app-tab2}, in the appendices, present the numerical results used to plot the figure, where the values for the small error bars can be examined.
+Secondly, we evaluate the performance of LOF assuming that an appropriate value for $k$ is chosen for each experiment. We present the resulting TPR and FPR in Figure~\ref{fig:lofResults}, where the TPR and FPR are represented by the solid and dashed lines, respectively, with the horizontal error bars. It must be noted that the TPR and FPR for each value of the intrusion frequencies are the means of one hundred TPR and FPR, respectively. Similarly, the standard deviations are also averaged and represented by the error bars.
+
+Figure \ref{fig:lofResults} reveals that the anomaly detection of LOF in Phase~1 is very accurate for the training data as shown by the very high TPR. The TPR for the test data are slightly lower than that for the training data. Upon manual examination, we have found that, for the test data, many intrusion instances share similar local densities as their non-intrusion counterparts leading to failure in finding adequate thresholds. When the kernel density estimates  were plotted, a number of intrusion instances had unusually low LOF scores than the rest, which made them difficult for detection. The LOF algorithm was not able to differentiate between the non-intrusion and the intrusion instances because their respective local densities were similar. On the other hand, Phase~1 anomaly detection is extremely precise for both the training and test data as the lengths of the error bars are nearly invisible. Tables~\ref{tab:app-tab1} and \ref{tab:app-tab2}, in the appendices, present the numerical results used to plot the figure, where the values for the small error bars can be examined.
 
 When the intrusion frequency is 0.5, we observe a steep drop in the TPR. The reason may be that, at that intrusion frequency, the corresponding data become perfectly balanced with the equal numbers of the attack and normal instances. In this case, it becomes difficult to tell which cluster is the correct representative of the normal, or the attack, pattern. For example, if the given data are distributed such that the intrusion instances are positioned in closer proximity to one another than their normal counterparts, the results from an anomaly detection task may unintentionally label the normal as anomalies. In any case, the intrusion frequency of 0.5 is simply too high for any network unless nearly half of its users suddenly become mischievous.
 
@@ -410,7 +456,7 @@ Lastly, the FPR appear to be high as expected. If we adjusted the threshold, $t$
 
 We conclude that the anomaly detection using LOF in Phase~1 performs well. As we hypothesised in the previous chapter, using the optimistic threshold, $t$, can achieve maximal detection at the cost of higher FPR. In addition, it is strongly likely that the results will be lower than expected when (1) the given data are perfectly balanced (i.e., when the intrusion frequency is 0.5) and (2) the local densities of normal and attacks are similar. For the cases where the local densities are similar, an anomaly detection algorithm that is not density-based could be a more viable alternative.
 
-<<lofResults, dependson="result", echo=FALSE, out.width="0.6\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
+<<lofResults, dependson="result", echo=FALSE, out.width="0.7\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
 x = 1:6
 y1 = c(dat1.means.05a[[1]], dat1.means.10a[[1]], dat1.means.20a[[1]], dat1.means.30a[[1]], dat1.means.40a[[1]], dat1.means.50a[[1]])
 y2 = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
@@ -447,15 +493,35 @@ Figure \ref{fig:dbscanResults} presents percentage reduction in FPRs from Phase~
 
 Some of the FPs remain included in the result, limiting further percentage reduction in FPR, because they are incorrectly classified, or clustered, by the DBSCAN algorithm. These FPs are positioned in relatively dense regions nearby some of the intrusion instances to make them indistinguishable from one another based on density. Therefore the DBSCAN algorithm fails to cluster them with non-intrusion instances by definition.
 
-<<dbscanResults, dependson="result", echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="Percentage reduction in FPR across intrusion frequencies from the training and test sets">>=
-dat1.FPR = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
-dat2.FPR = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means.30a[[2]], dat2.means.40a[[2]], dat2.means.50a[[2]])
-y1 = 100 * (dat1.FPR - c(processResults(system.results_dat1_05a10k)$FPR,processResults(system.results_dat1_10a30k)$FPR,processResults(system.results_dat1_20a20k)$FPR,processResults(system.results_dat1_30a30k)$FPR,processResults(system.results_dat1_40a20k)$FPR,processResults(system.results_dat1_50a05k)$FPR)) / dat1.FPR
-y2 = 100 * (dat2.FPR - c(processResults(system.results_dat2_05a10k)$FPR,processResults(system.results_dat2_10a20k)$FPR,processResults(system.results_dat2_20a20k)$FPR,processResults(system.results_dat2_30a30k)$FPR,processResults(system.results_dat2_40a30k)$FPR,processResults(system.results_dat2_50a10k)$FPR)) / dat2.FPR
+<<dbscanResults, dependson="result", echo=FALSE, out.width="0.7\\linewidth", fig.show='hold', fig.align='center', fig.cap="Percentage reduction in FPR across intrusion frequencies from the training and test sets">>=
+# dat1.FPR = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
+# dat2.FPR = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means.30a[[2]], dat2.means.40a[[2]], dat2.means.50a[[2]])
+# y1 = 100 * (dat1.FPR - c(processResults(system.results_dat1_05a10k)$FPR,processResults(system.results_dat1_10a30k)$FPR,processResults(system.results_dat1_20a20k)$FPR,processResults(system.results_dat1_30a30k)$FPR,processResults(system.results_dat1_40a20k)$FPR,processResults(system.results_dat1_50a05k)$FPR)) / dat1.FPR
+# y2 = 100 * (dat2.FPR - c(processResults(system.results_dat2_05a10k)$FPR,processResults(system.results_dat2_10a20k)$FPR,processResults(system.results_dat2_20a20k)$FPR,processResults(system.results_dat2_30a30k)$FPR,processResults(system.results_dat2_40a30k)$FPR,processResults(system.results_dat2_50a10k)$FPR)) / dat2.FPR
+x = 1:6
+y1.mean = 100*c(p2_dat1_05a[[1]], p2_dat1_10a[[1]], p2_dat1_20a[[1]], p2_dat1_30a[[1]], p2_dat1_40a[[1]], p2_dat1_50a[[1]])
+y2.mean = 100*c(p2_dat2_05a[[1]], p2_dat2_10a[[1]], p2_dat2_20a[[1]], p2_dat2_30a[[1]], p2_dat2_40a[[1]], p2_dat2_50a[[1]])
+y1.sd = 100*c(p2_dat1_05a[[2]], p2_dat1_10a[[2]], p2_dat1_20a[[2]], p2_dat1_30a[[2]], p2_dat1_40a[[2]], p2_dat1_50a[[2]])
+y2.sd = 100*c(p2_dat2_05a[[2]], p2_dat2_10a[[2]], p2_dat2_20a[[2]], p2_dat2_30a[[2]], p2_dat2_40a[[2]], p2_dat2_50a[[2]])
+
+
+plot(y1.mean, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
+axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
+arrows(x, y1.mean-y1.sd, x, y1.mean+y1.sd, length=0.05, angle=90, code=3)
+
+
+lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
+arrows(x, y2-y2.sd, x, y2+y2.sd, length=0.05, angle=90, code=3)
+
+
 plot(y1, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Training data")
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 plot(y2, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Test data")
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
+
+
+
 @
 
 
@@ -476,17 +542,17 @@ For the \emph{test} dataset, both the TPRs and FPRs are generally lower compared
 
 <<sysResults, dependson="result", cache=TRUE, echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="System TPR and FPR across intrusion frequencies from the training and test sets">>=
 # res05a = processResults(system.results_dat1_10a30k)
-res05a = processResults(system.results_dat1_05a05k)
-res10a = processResults(system.results_dat1_10a30k)
-res20a = processResults(system.results_dat1_20a20k)
-res30a = processResults(system.results_dat1_30a40k)
-res40a = processResults(system.results_dat1_40a20k)
-res50a = processResults(system.results_dat1_50a05k)
+# dat1.res05a = processResults(system.results_dat1_05a05k)
+# dat1.res10a = processResults(system.results_dat1_10a30k)
+# dat1.res20a = processResults(system.results_dat1_20a20k)
+# dat1.res30a = processResults(system.results_dat1_30a40k)
+# dat1.res40a = processResults(system.results_dat1_40a20k)
+# dat1.res50a = processResults(system.results_dat1_50a05k)
 x = 1:6
-y1 = c(res05a$TPR, res10a$TPR, res20a$TPR, res30a$TPR, res40a$TPR, res50a$TPR)
-y2 = c(res05a$FPR, res10a$FPR, res20a$FPR, res30a$FPR, res40a$FPR, res50a$FPR)
-y1.sd = c(res05a$TPR.sd, res10a$TPR.sd, res20a$TPR.sd, res30a$TPR.sd, res40a$TPR.sd, res50a$TPR.sd)
-y2.sd = c(res05a$FPR.sd, res10a$FPR.sd, res20a$FPR.sd, res30a$FPR.sd, res40a$FPR.sd, res50a$FPR.sd)
+y1 = c(dat1.res05a$TPR, dat1.res10a$TPR, dat1.res20a$TPR, dat1.res30a$TPR, dat1.res40a$TPR, dat1.res50a$TPR)
+y2 = c(dat1.res05a$FPR, dat1.res10a$FPR, dat1.res20a$FPR, dat1.res30a$FPR, dat1.res40a$FPR, dat1.res50a$FPR)
+y1.sd = c(dat1.res05a$TPR.sd, dat1.res10a$TPR.sd, dat1.res20a$TPR.sd, dat1.res30a$TPR.sd, dat1.res40a$TPR.sd, dat1.res50a$TPR.sd)
+y2.sd = c(dat1.res05a$FPR.sd, dat1.res10a$FPR.sd, dat1.res20a$FPR.sd, dat1.res30a$FPR.sd, dat1.res40a$FPR.sd, dat1.res50a$FPR.sd)
 
 plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
 lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
@@ -495,13 +561,12 @@ legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjus
 arrows(x, y1-y1.sd, x, y1+y1.sd, length=0.05, angle=90, code=3)
 arrows(x, y2-y2.sd, x, y2+y2.sd, length=0.05, angle=90, code=3)
 
-
-dat2.res05a = processResults(system.results_dat2_05a20k)
-dat2.res10a = processResults(system.results_dat2_10a30k)
-dat2.res20a = processResults(system.results_dat2_20a20k)
-dat2.res30a = processResults(system.results_dat2_30a30k)
-dat2.res40a = processResults(system.results_dat2_40a20k)
-dat2.res50a = processResults(system.results_dat2_50a05k)
+# dat2.res05a = processResults(system.results_dat2_05a20k)
+# dat2.res10a = processResults(system.results_dat2_10a30k)
+# dat2.res20a = processResults(system.results_dat2_20a20k)
+# dat2.res30a = processResults(system.results_dat2_30a30k)
+# dat2.res40a = processResults(system.results_dat2_40a20k)
+# dat2.res50a = processResults(system.results_dat2_50a05k)
 y3 = c(dat2.res05a$TPR, dat2.res10a$TPR, dat2.res20a$TPR, dat2.res30a$TPR, dat2.res40a$TPR, dat2.res50a$TPR)
 y4 = c(dat2.res05a$FPR, dat2.res10a$FPR, dat2.res20a$FPR, dat2.res30a$FPR, dat2.res40a$FPR, dat2.res50a$FPR)
 y3.sd = c(dat2.res05a$TPR.sd, dat2.res10a$TPR.sd, dat2.res20a$TPR.sd, dat2.res30a$TPR.sd, dat2.res40a$TPR.sd, dat2.res50a$TPR.sd)
