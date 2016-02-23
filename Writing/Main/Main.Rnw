@@ -69,6 +69,7 @@ I would like to acknowledge and thank: ...
 \bibliography{bibliography}
 
 <<appendix, cache=TRUE, child='../Appendix/AppendixA.Rnw'>>=
+
 @
 
 \end{document}

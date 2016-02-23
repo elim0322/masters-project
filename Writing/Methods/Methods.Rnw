@@ -211,10 +211,12 @@ First a container, $C$, is initialised for storing the results of the DBSCAN alg
 
 Our suggestion begins with finding the cluster with the most members associated, denoted by $c_{\text{max}}$ (line 5), and counting the number of elements in that cluster that are from the random sample, $\textit{sample}_\text{N}$ (line 6). This can be done by simply matching the corresponding indices. We denote this number as $n_\text{sample}$. Then we compute two measures. First is the proportion of $n_\text{sample}$ in $c_\text{max}$, given by
 \begin{equation}
+\label{eq:pc}
 p_c = \frac{n_\text{sample}}{n(c_\text{max})},
 \end{equation}
 that is to evaluate the proportion of the largest cluster that corresponds to the False Negatives from the random sample. We expect to observe an increasing pattern in the values of $p_c$ as we increase $\epsilon$, that is because the size of the boundaries considered to be a cluster increases thus increasing the number of False Negatives added to $c_\text{max}$. We also expect to observe a drop in $p_c$, which  means $\epsilon$ is becoming too large to start adding the actual anomalies into $c_\text{max}$ to result in (1) an increase in overall size, thus (2) a decrease in the proportion. The second measure of our suggested heuristic is the proportion of $n_\text{sample}$ in $\textit{sample}_{\text{N}}$, given by
 \begin{equation}
+\label{eq:ps}
 p_s = \frac{n_\text{sample}}{n(\textit{sample}_{\text{N}})},
 \end{equation}
 to evaluate the proportion of $\textit{sample}_{\text{N}}$ successfully clustered in $c_\text{max}$. We expect to observe a very high value for $p_s$, very close to 1, to ensure that most of $\textit{sample}_{\text{N}}$ is successfully assigned to the largest cluster, $c_\text{sample}$. In summary, we choose the value of $\epsilon$ where just before $p_c$ begins to decrease and confirm that $c_\text{max}$ is indeed the cluster made of the normal instances from a high value of $p_s$. A graphic example will be presented in Section~\ref{methods:sec2}.

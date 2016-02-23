@@ -15,4 +15,5 @@
 \contentsline {subsection}{\numberline {4.1.2}Phase 2}{22}
 \contentsline {section}{\numberline {4.2}Demonstration}{24}
 \contentsline {section}{\numberline {4.3}Summary}{26}
-\contentsline {chapter}{Appendix: Supplementary graphical output}{33}
+\contentsline {chapter}{Supplementary output for the training set of KDD'99 data}{33}
+\contentsline {chapter}{Supplementary output for the test set of KDD'99 data}{41}

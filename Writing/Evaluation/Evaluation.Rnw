@@ -43,7 +43,7 @@ processResults = function(results, graph = FALSE) {
         d       = c(d, results$system.detection.rate[i, mn])
         f       = c(f, results$system.false.alarm.rate[i, mn])
         if (length(mn)==0) {
-            e = c(e, NULL)
+            e = c(e, NA)
         } else {
             e = c(e, mn)
         }
@@ -59,7 +59,7 @@ processResults = function(results, graph = FALSE) {
         lines(avg.pwc)
         lines(avg.pws)
     }
-    return(list(TPR = mean(d), FPR = mean(f), TPR.sd = sd(d), FPR.sd = sd(f), FPRs))
+    return(list(TPR = mean(d), FPR = mean(f), TPR.sd = sd(d), FPR.sd = sd(f), e=e))
 }
 a = function(results) {
     tpr = numeric()
@@ -84,6 +84,15 @@ b = function(results) {
     }
     w = which.max(tpr)
     list(tpr[w], fpr[w])
+}
+d = function(result,a,res) {
+    ind = which(!is.na(res$e))
+    p2.fpr = numeric()
+    for (i in 1:length(ind)) {
+        p2.fpr = c(p2.fpr, result$system.false.alarm[ind[i], res$e[ind[i]]])
+    }
+    fp = 100 * ( (5000 * (1-a*0.01) * result$P1.false.alarm.rate[ind]) - (5000 * (1-a*0.01) * p2.fpr) ) / (5000 * (1-a*0.01) * result$P1.false.alarm.rate[ind])
+    list(mean(fp), sd(fp))
 }
 {
 dat1.means.05k = a(list(system.results_dat1_05a05k, system.results_dat1_10a05k, system.results_dat1_20a05k, system.results_dat1_30a05k, system.results_dat1_40a05k, system.results_dat1_50a05k))
@@ -117,19 +126,6 @@ dat2.sd.40k = b(list(system.results_dat2_05a40k, system.results_dat2_10a40k, sys
 dat2.sd.50k = b(list(system.results_dat2_05a50k, system.results_dat2_10a50k, system.results_dat2_20a50k, system.results_dat2_30a50k, system.results_dat2_40a50k, system.results_dat2_50a50k))
 }
 
-dat1.res05a = processResults(system.results_dat1_05a05k)
-dat1.res10a = processResults(system.results_dat1_10a30k)
-dat1.res20a = processResults(system.results_dat1_20a20k)
-dat1.res30a = processResults(system.results_dat1_30a40k)
-dat1.res40a = processResults(system.results_dat1_40a20k)
-dat1.res50a = processResults(system.results_dat1_50a05k)
-dat2.res05a = processResults(system.results_dat2_05a20k)
-dat2.res10a = processResults(system.results_dat2_10a30k)
-dat2.res20a = processResults(system.results_dat2_20a20k)
-dat2.res30a = processResults(system.results_dat2_30a30k)
-dat2.res40a = processResults(system.results_dat2_40a20k)
-dat2.res50a = processResults(system.results_dat2_50a05k)
-
 ## dat1
 dat1.means.05a = a(list(system.results_dat1_05a05k, system.results_dat1_05a10k, system.results_dat1_05a20k, system.results_dat1_05a30k, system.results_dat1_05a40k, system.results_dat1_05a50k))
 dat1.means.10a = a(list(system.results_dat1_10a05k, system.results_dat1_10a10k, system.results_dat1_10a20k, system.results_dat1_10a30k, system.results_dat1_10a40k, system.results_dat1_10a50k))
@@ -146,30 +142,31 @@ dat2.means.30a = a(list(system.results_dat2_30a05k, system.results_dat2_30a10k, 
 dat2.means.40a = a(list(system.results_dat2_40a05k, system.results_dat2_40a10k, system.results_dat2_40a20k, system.results_dat2_40a30k, system.results_dat2_40a40k, system.results_dat2_40a50k))
 dat2.means.50a = a(list(system.results_dat2_50a05k, system.results_dat2_50a10k, system.results_dat2_50a20k, system.results_dat2_50a30k, system.results_dat2_50a40k, system.results_dat2_50a50k))
 
-########################################################################################
-d = function(result,a,res) {
-    ind = which(!is.na(res$e))
-    p2.fpr = numeric()
-    for (i in 1:length(ind)) {
-        p2.fpr = c(p2.fpr, result$system.false.alarm[ind[i], res$e[ind[i]]])
-    }
-    fp = ( (5000 * (1-a*0.01) * result$P1.false.alarm.rate[ind]) - (5000 * (1-a*0.01) * p2.fpr) ) / (5000 * (1-a*0.01) * result$P1.false.alarm.rate[ind])
-    list(mean(fp), sd(fp))
-}
+dat1.res05a = processResults(system.results_dat1_05a05k)
+dat1.res10a = processResults(system.results_dat1_10a30k)
+dat1.res20a = processResults(system.results_dat1_20a20k)
+dat1.res30a = processResults(system.results_dat1_30a40k)
+dat1.res40a = processResults(system.results_dat1_40a20k)
+dat1.res50a = processResults(system.results_dat1_50a05k)
+dat2.res05a = processResults(system.results_dat2_05a20k)
+dat2.res10a = processResults(system.results_dat2_10a30k)
+dat2.res20a = processResults(system.results_dat2_20a20k)
+dat2.res30a = processResults(system.results_dat2_30a30k)
+dat2.res40a = processResults(system.results_dat2_40a20k)
+dat2.res50a = processResults(system.results_dat2_50a05k)
 
-p2_dat1_05a = d(system.results_dat1_05a05k, 5, res05a)
-p2_dat1_10a = d(system.results_dat1_10a30k, 23, res10a)
-p2_dat1_20a = d(system.results_dat1_20a20k, 20, res20a)
-p2_dat1_30a = d(system.results_dat1_30a40k, 40, res30a)
-p2_dat1_40a = d(system.results_dat1_40a20k, 20, res40a)
-p2_dat1_50a = d(system.results_dat1_50a05k, 5, res50a)
-
-p2_dat2_05a = d(system.results_dat2_05a20k, 20, res05a)
-p2_dat2_10a = d(system.results_dat2_10a30k, 30, res10a)
-p2_dat2_20a = d(system.results_dat2_20a20k, 20, res20a)
-p2_dat2_30a = d(system.results_dat2_30a30k, 30, res30a)
-p2_dat2_40a = d(system.results_dat2_40a20k, 20, res40a)
-p2_dat2_50a = d(system.results_dat2_50a05k, 5, res50a)
+p2_dat1_05a = d(system.results_dat1_05a05k, 5, dat1.res05a)
+p2_dat1_10a = d(system.results_dat1_10a30k, 23, dat1.res10a)
+p2_dat1_20a = d(system.results_dat1_20a20k, 20, dat1.res20a)
+p2_dat1_30a = d(system.results_dat1_30a40k, 40, dat1.res30a)
+p2_dat1_40a = d(system.results_dat1_40a20k, 20, dat1.res40a)
+p2_dat1_50a = d(system.results_dat1_50a05k, 5, dat1.res50a)
+p2_dat2_05a = d(system.results_dat2_05a20k, 20, dat2.res05a)
+p2_dat2_10a = d(system.results_dat2_10a30k, 30, dat2.res10a)
+p2_dat2_20a = d(system.results_dat2_20a20k, 20, dat2.res20a)
+p2_dat2_30a = d(system.results_dat2_30a30k, 30, dat2.res30a)
+p2_dat2_40a = d(system.results_dat2_40a20k, 20, dat2.res40a)
+p2_dat2_50a = d(system.results_dat2_50a05k, 5, dat2.res50a)
 @
 
 % --------------------
@@ -456,7 +453,7 @@ Lastly, the FPR appear to be high as expected. If we adjusted the threshold, $t$
 
 We conclude that the anomaly detection using LOF in Phase~1 performs well. As we hypothesised in the previous chapter, using the optimistic threshold, $t$, can achieve maximal detection at the cost of higher FPR. In addition, it is strongly likely that the results will be lower than expected when (1) the given data are perfectly balanced (i.e., when the intrusion frequency is 0.5) and (2) the local densities of normal and attacks are similar. For the cases where the local densities are similar, an anomaly detection algorithm that is not density-based could be a more viable alternative.
 
-<<lofResults, dependson="result", echo=FALSE, out.width="0.7\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
+<<lofResults, dependson="result", echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
 x = 1:6
 y1 = c(dat1.means.05a[[1]], dat1.means.10a[[1]], dat1.means.20a[[1]], dat1.means.30a[[1]], dat1.means.40a[[1]], dat1.means.50a[[1]])
 y2 = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
@@ -464,7 +461,7 @@ y1.sd = c(dat1.means.05a[[3]], dat1.means.10a[[3]], dat1.means.20a[[3]], dat1.me
 y2.sd = c(dat1.means.05a[[4]], dat1.means.10a[[4]], dat1.means.20a[[4]], dat1.means.30a[[4]], dat1.means.40a[[4]], dat1.means.50a[[4]])
 
 # par(xpd = T, mar = par()$mar+c(0,0,0,3))
-plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
+plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rate", lwd = 1.3, type="b", main="Training data")
 lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
@@ -476,7 +473,7 @@ y4 = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means
 y3.sd = c(dat2.means.05a[[3]], dat2.means.10a[[3]], dat2.means.20a[[3]], dat2.means.30a[[3]], dat2.means.40a[[3]], dat2.means.50a[[3]])
 y4.sd = c(dat2.means.05a[[4]], dat2.means.10a[[4]], dat2.means.20a[[4]], dat2.means.30a[[4]], dat2.means.40a[[4]], dat2.means.50a[[4]])
 
-plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Test data")
+plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rate", lwd = 1.3, type="b", main="Test data")
 lines(y4, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
@@ -489,89 +486,102 @@ arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
 
 \subsection{Phase 2}
 \label{evaluation:sec3.2}
-Figure \ref{fig:dbscanResults} presents percentage reduction in FPRs from Phase~1 to Phase~2. It seems that the FP elimination step of Phase~2 works really well, especially for the \emph{test} dataset. The unusual decline in the percentage at the intrusion frequency of 0.2 for the \emph{training} dataset is not something to worry about as the initial FPR, from Phase~1, has been quite low to begin with.
+We evaluate how much of the False Positives produced in Phase 1 are deleted in this section. We carry out the experiments using the same seeds as in the previous section to make sure the results are comparable. We assume that an appropriate value for $\epsilon$, that yields the best results, is chosen for each experiment and the choice of the values for $\epsilon$ is consistent in the following sections to ensure the comparability of the results.
 
-Some of the FPs remain included in the result, limiting further percentage reduction in FPR, because they are incorrectly classified, or clustered, by the DBSCAN algorithm. These FPs are positioned in relatively dense regions nearby some of the intrusion instances to make them indistinguishable from one another based on density. Therefore the DBSCAN algorithm fails to cluster them with non-intrusion instances by definition.
+We decided that in order to evaluate reduction in the numbers of False Positives, from Phase 1 to Phase 2, the percentage decrease, or reduction, in their numbers was an appropriate measure. The percentage reduction is computed as follows:
+\begin{equation}
+\text{Percentage reduction} = 100\% \times \frac{\mathit{FP}_\text{P1}-\mathit{FP}_\text{P2}}{\mathit{FP}_\text{P1}},
+\end{equation}
+where $\textit{FP}_\text{P1}$ and $\textit{FP}_\text{P2}$ are the number of False Positives for Phase 1 and Phase 2, respectively. Again we summarised the percentage reduction for each of one hundred runs as the mean and standard deviation. Figure~\ref{fig:dbscanResults} presents the plots of the results. It appears from the plots that the numbers of the False Positives are well reduced: averaging between 58 and 91 per cent of the False Positives from Phase 1 are successfully clustered and removed.
 
-<<dbscanResults, dependson="result", echo=FALSE, out.width="0.7\\linewidth", fig.show='hold', fig.align='center', fig.cap="Percentage reduction in FPR across intrusion frequencies from the training and test sets">>=
-# dat1.FPR = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
-# dat2.FPR = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means.30a[[2]], dat2.means.40a[[2]], dat2.means.50a[[2]])
-# y1 = 100 * (dat1.FPR - c(processResults(system.results_dat1_05a10k)$FPR,processResults(system.results_dat1_10a30k)$FPR,processResults(system.results_dat1_20a20k)$FPR,processResults(system.results_dat1_30a30k)$FPR,processResults(system.results_dat1_40a20k)$FPR,processResults(system.results_dat1_50a05k)$FPR)) / dat1.FPR
-# y2 = 100 * (dat2.FPR - c(processResults(system.results_dat2_05a10k)$FPR,processResults(system.results_dat2_10a20k)$FPR,processResults(system.results_dat2_20a20k)$FPR,processResults(system.results_dat2_30a30k)$FPR,processResults(system.results_dat2_40a30k)$FPR,processResults(system.results_dat2_50a10k)$FPR)) / dat2.FPR
+The error bars on the plots appear to be longer than observed from Figure~\ref{lofResults} to indicate that there is some variation in them. One metric we found to be relevant in evaluating the standard deviations is a measure of dispersion called the coefficient of variation, $c_v$, given by
+\[ c_v = \frac{\sigma}{\mu}, \]
+where $\sigma$ is the standard deviation and $\mu$ is the mean. This measure evaluates the degree of variability with respect to the corresponding mean. Table~\ref{tab:p-r} presents the computed $c_v$ for all values of the averaged percentage reduction, and it reveals that all the values of $c_v$ are well under 1 to suggest that the variability in the results is small in relation to their means. So we conclude that (1) DBSCAN in Phase 2 is able to successfully form clusters of normal instances and (2) the process is precise.
+
+Some of the False Positives are retained in the result, limiting further percentage reduction in them, because they are incorrectly clustered by the DBSCAN algorithm. These False Positives are positioned in relatively dense regions nearby some of the intrusion instances to make them difficult to tell apart from one another based on their local densities. Not much can be done for these particular False Positives other than to try different clustering algorithms not based on density.
+
+<<dbscanResults, dependson="result", echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="Percentage reduction in FPR across intrusion frequencies from the training and test sets">>=
 x = 1:6
-y1.mean = 100*c(p2_dat1_05a[[1]], p2_dat1_10a[[1]], p2_dat1_20a[[1]], p2_dat1_30a[[1]], p2_dat1_40a[[1]], p2_dat1_50a[[1]])
-y2.mean = 100*c(p2_dat2_05a[[1]], p2_dat2_10a[[1]], p2_dat2_20a[[1]], p2_dat2_30a[[1]], p2_dat2_40a[[1]], p2_dat2_50a[[1]])
-y1.sd = 100*c(p2_dat1_05a[[2]], p2_dat1_10a[[2]], p2_dat1_20a[[2]], p2_dat1_30a[[2]], p2_dat1_40a[[2]], p2_dat1_50a[[2]])
-y2.sd = 100*c(p2_dat2_05a[[2]], p2_dat2_10a[[2]], p2_dat2_20a[[2]], p2_dat2_30a[[2]], p2_dat2_40a[[2]], p2_dat2_50a[[2]])
+y1.mean = c(p2_dat1_05a[[1]], p2_dat1_10a[[1]], p2_dat1_20a[[1]], p2_dat1_30a[[1]], p2_dat1_40a[[1]], p2_dat1_50a[[1]])
+y2.mean = c(p2_dat2_05a[[1]], p2_dat2_10a[[1]], p2_dat2_20a[[1]], p2_dat2_30a[[1]], p2_dat2_40a[[1]], p2_dat2_50a[[1]])
+y1.sd = c(p2_dat1_05a[[2]], p2_dat1_10a[[2]], p2_dat1_20a[[2]], p2_dat1_30a[[2]], p2_dat1_40a[[2]], p2_dat1_50a[[2]])
+y2.sd = c(p2_dat2_05a[[2]], p2_dat2_10a[[2]], p2_dat2_20a[[2]], p2_dat2_30a[[2]], p2_dat2_40a[[2]], p2_dat2_50a[[2]])
 
-
-plot(y1.mean, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
+plot(y1.mean, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Training data")
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
-legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
 arrows(x, y1.mean-y1.sd, x, y1.mean+y1.sd, length=0.05, angle=90, code=3)
 
-
-lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
-arrows(x, y2-y2.sd, x, y2+y2.sd, length=0.05, angle=90, code=3)
-
-
-plot(y1, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Training data")
+plot(y2.mean, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Test data")
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
-plot(y2, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Test data")
-axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
-
-
-
+arrows(x, y2.mean-y2.sd, x, y2.mean+y2.sd, length=0.05, angle=90, code=3)
 @
 
+<<p-reduction, dependson="dbscanResults", echo=FALSE, results='asis'>>=
+suppressWarnings(library(xtable))
+
+train = y1.sd/y1.mean
+names(train) = c(0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
+test = y2.sd/y2.mean
+tab = rbind(train, test)
+
+xtab = xtable(tab, caption = "The coefficient of variation, $c_v$, for the percentage reduction in False Positive counts.", label = "p-r")
+align(xtab) = "lrrrrrr"
+addtorow = list()
+addtorow$pos = list(0, 0)
+addtorow$command = c(paste0("\\multicolumn{1}{c}{} & \\multicolumn{5}{c}{", "\\textbf{Intrusion Freq.}", "}", "\\\\"), "\\multicolumn{1}{c}{} & 0.05 & 0.1 & 0.2 & 0.3 & 0.4 & 0.5 \\\\")
+print.xtable(xtab, booktabs = F, caption.placement = "top", sanitize.text.function = function(x) x, add.to.row=addtorow, include.colnames = F)
+@
+
+\subsection{Summary}
+We evaluated Phase~1 and 2 individually. The results were promising to suggest that the phases served their purposes well. There were some normal instances in the data that were isolated from the other normal instances, therefore had similar local densities as the anomalous intrusion instances. These irregularities were difficult to recognise hence remained as False Positives throughout the end.
+
+Upon the confirmation that the phases are working correctly, we move on to system evaluation in the following sections.
 
 
 % -----------------------------
-% SECTION 2: System evaluation
+% SECTION 4: System evaluation
 % -----------------------------
 \section{System evaluation}
-\label{evaluation:sec3}
+\label{evaluation:sec4}
+In the previous chapter, we discussed a heuristic to choose the best performing $\epsilon$. We suggested (1) computing two measures, $p_c$ and $p_s$, using Equations~\ref{eq:pc} and \ref{eq:ps} respectively, and (2) choosing the value of $\epsilon$ where $p_c$ begins to decrease steeply, checking that $p_s$ is very close to 1 at that point. The results presented in this section are all computed using our suggested heuristic. We experienced one dilemma where it was impossible to summarise the values we obtained for $p_c$ and $p_s$ in a meaningful and presentable way. The chosen values for $\epsilon$ were all very different, as they could be any value in $(0,1]$, and the values for $p_c$ and $p_s$ were also very different between the experiments. Because the choice of $\epsilon$ is different for each experiment, we could not summarise $p_c$ and $p_s$ as averages for each $\epsilon$. It would be simply meaningless to do so. Instead, we present the system TPR and FPR under the assumption that the best performing $\epsilon$ has been chosen. It should be emphasised once again that we followed our suggested heuristic in choosing the best $\epsilon$. The results are presented in Figure~\ref{fig:sysResults}, where the averaged TPR and FPR are represented by the solid and dashed lines, respectively, and the corresponding standard deviations by the error bars.
 
-Figure \ref{fig:sysResults} presents the system evaluation results for the \emph{training} and \emph{test} datasets. For the \emph{training} dataset between the intrusion frequencies of 0.05 and 0.4, we can infer graphically that the system is accurate, as the TPRs are very close to 1, and precise, as the lengths of the error bars are short. We suspect that the decrease in performance from the intrusion frequency of 0.5 is caused by the balanced nature of the classes in the random samples. As the data become more balanced, there is higher chance for DBSCAN to form balanced clusters. This in turn increases the likelihood that the largest clusters, which we remove, actually consist of intrusion instances to result in a decrease in overall TPR. Because our method assumes of higher frequencies of non-intrusion instances in test data, a mendatory assumption for any anomaly-based intrusion detection, and removes the largest resulting clusters under that assumption, it cannot be functional if that assumption is violated. In other words, perfectly balanced data cannot be classified correctly in an unsupervised learning manner unless some external information is available. The unusually high variation in the TPR at this particular intrusion frequency means that the system was highly indecisive because there were essentially no classification criteria. In fact about half of the hundred runs produced better results than the other half to further support our reasoning.
+For the training data between the intrusion frequencies of 0.05 and 0.4, we observe that the system is highly accurate and precise, as indicated by the very high TPR (very close to 1) and the very short error bars, respectively. We suspect that the decrease in performance for the intrusion frequency of 0.5 is caused by the balanced nature of the data. For the intrusion frequency at 0.5, if we compare the results from Phase~1 and the overall results, in Figures~\ref{fig:lofResults} and \ref{fig:sysResults}, we notice that the TPR and FPR are much higher in Phase~1 than in the system results. This indicates that (1) the False Positives were successfully clustered and removed in Phase~2, because the FPR was reduced in the system results, and (2) the True Positives were also clustered and removed in the process. This means the largest cluster, which we established as the cluster of False Positives, also included some True Positives. Any by removing the cluster, the overall TPR was decreased drastically. The cause could be due to (1) some inherent problems with our heuristic or (2) the balanced nature of the data. Considering our method performed well \emph{consistently} for all the other intrusion frequencies, we strongly suspect that the balanced nature of the data was the cause. Because our method assumes of higher frequencies of normal instances in the given data, that is a mendatory assumption for an unsupervised anomaly detection task, it cannot be functional if that assumption is violated. In other words, perfectly balanced data cannot be classified correctly in an unsupervised learning manner unless some external information is available. The high variation in the TPR, observed by the error bar, at this particular intrusion frequency means that the system was highly indecisive because there were essentially no classification criteria. In fact about half of the hundred runs produced better results than the other half to further support our reasoning.
 
-For the \emph{test} dataset, both the TPRs and FPRs are generally lower compared to those from the \emph{training} dataset. We suspect the primary cause of this to be the similarities in local densities introducing challenges against effective classification. Also the performance starts to decrease at the intrusion frequency of 0.4, that is lower compared to the \emph{training} set. This can also be explained by the similarities between the local densities that scale down the previously mentioned threshold at which the classification criteria cease to exist. The problem of indistinguishable local densities is difficult to address because each dataset is associated with a unique degree of similarity within its respective local densities. For data that suffer from extremely similar densities, the best solution may be to avoid using anything distance-based, because densities are essentially computed using distances, and rather attempt to incorporate some external information capable of describing different types of instances. Another possible cause may be associated with our random sampling method. We attempted to cover as much portion of the data as possible by running repeated experiments as well as by sampling without replacement. However running repeated experiments with small samples, which may not be fitting representatives of the entire dataset, can skew the results in certain directions. In addition, samples, randomly selected without replacement, are no longer independent of one another, which may have an effect on the overall results. We could not increase the sample size further due to the expensive nature of the LOF algorithm.
+For the test data, both the TPRs and FPRs are generally lower compared to those from the training data. We suspect the primary cause of this to be the similarities in the local densities as discussed in Section~\ref{evaluation:sec3.1}. Also the performance starts to decrease at the intrusion frequency of 0.4, that is lower compared to the training data. This could be explained by the similarities between the local densities, which the DBSCAN algorithm cannot differentiate between and forms clusters around the intrusions.
+
+\subsection{Summary}
+Our method performs well in both accuracy and precision. At least $95\%$ of the intrusions up to $98\%$ at maximum in the training data were successfully captured by our method while somewhere between $2\%$ and $8\%$ of the normal instances were incorrectly captured as intrusions. About $88\%$ of the intrusions in the test data were successfully detected as intrusions while between $1.5\%$ and $5\%$ of the normal instances were identified as intrusions. Not \emph{all} of the intrusions were able to be captured because some shared similar local densities as the normal instances.
+
+The problem of similarities in local densities is difficult to address because each dataset is associated with a unique degree of similarity within its respective local densities. For data that suffer from extremely similar densities, the best solution may be to avoid using anything distance-based, because densities are essentially computed using distances, and rather attempt to incorporate some external information capable of describing different types of instances.
+
+Another possible limitation may be associated with our random sampling method. We attempted to analyse as much portion of the data as possible by running repeated experiments as well as by sampling without replacement. However running repeated experiments with small samples, which may not be fitting representatives of the entire dataset, can skew the results in certain directions. In addition, samples, randomly selected without replacement, are no longer independent of one another, which may have an effect on the overall results. We could not increase the sample size of 5,000 connection records further due to the expensive nature of the local density-based algorithms, LOF and DBSCAN.
+
+In the following section, we compare our method against other methods.
+
 
 % One relevant metric, as a measure of dispersion, to evaluate the standard deviations is the \emph{coefficient of variation}, $c_v$, given by
 % \[ c_v = \frac{\sigma}{\mu}, \]
 % all of which are well under 1 to support the preciseness of our results for those intrusion frequencies.
 
 <<sysResults, dependson="result", cache=TRUE, echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="System TPR and FPR across intrusion frequencies from the training and test sets">>=
-# res05a = processResults(system.results_dat1_10a30k)
-# dat1.res05a = processResults(system.results_dat1_05a05k)
-# dat1.res10a = processResults(system.results_dat1_10a30k)
-# dat1.res20a = processResults(system.results_dat1_20a20k)
-# dat1.res30a = processResults(system.results_dat1_30a40k)
-# dat1.res40a = processResults(system.results_dat1_40a20k)
-# dat1.res50a = processResults(system.results_dat1_50a05k)
 x = 1:6
 y1 = c(dat1.res05a$TPR, dat1.res10a$TPR, dat1.res20a$TPR, dat1.res30a$TPR, dat1.res40a$TPR, dat1.res50a$TPR)
 y2 = c(dat1.res05a$FPR, dat1.res10a$FPR, dat1.res20a$FPR, dat1.res30a$FPR, dat1.res40a$FPR, dat1.res50a$FPR)
 y1.sd = c(dat1.res05a$TPR.sd, dat1.res10a$TPR.sd, dat1.res20a$TPR.sd, dat1.res30a$TPR.sd, dat1.res40a$TPR.sd, dat1.res50a$TPR.sd)
 y2.sd = c(dat1.res05a$FPR.sd, dat1.res10a$FPR.sd, dat1.res20a$FPR.sd, dat1.res30a$FPR.sd, dat1.res40a$FPR.sd, dat1.res50a$FPR.sd)
 
-plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
+plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rate", lwd = 1.3, type="b", main="Training data")
 lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjust=0, xpd=TRUE)
 arrows(x, y1-y1.sd, x, y1+y1.sd, length=0.05, angle=90, code=3)
 arrows(x, y2-y2.sd, x, y2+y2.sd, length=0.05, angle=90, code=3)
 
-# dat2.res05a = processResults(system.results_dat2_05a20k)
-# dat2.res10a = processResults(system.results_dat2_10a30k)
-# dat2.res20a = processResults(system.results_dat2_20a20k)
-# dat2.res30a = processResults(system.results_dat2_30a30k)
-# dat2.res40a = processResults(system.results_dat2_40a20k)
-# dat2.res50a = processResults(system.results_dat2_50a05k)
 y3 = c(dat2.res05a$TPR, dat2.res10a$TPR, dat2.res20a$TPR, dat2.res30a$TPR, dat2.res40a$TPR, dat2.res50a$TPR)
 y4 = c(dat2.res05a$FPR, dat2.res10a$FPR, dat2.res20a$FPR, dat2.res30a$FPR, dat2.res40a$FPR, dat2.res50a$FPR)
 y3.sd = c(dat2.res05a$TPR.sd, dat2.res10a$TPR.sd, dat2.res20a$TPR.sd, dat2.res30a$TPR.sd, dat2.res40a$TPR.sd, dat2.res50a$TPR.sd)
 y4.sd = c(dat2.res05a$FPR.sd, dat2.res10a$FPR.sd, dat2.res20a$FPR.sd, dat2.res30a$FPR.sd, dat2.res40a$FPR.sd, dat2.res50a$FPR.sd)
-plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Training data")
+plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rate", lwd = 1.3, type="b", main="Test data")
 lines(y4, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjust=0, xpd = TRUE)
@@ -581,12 +591,14 @@ arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
 
 
 
+% ----------------------
+% SECTION 5: Comparison
+% ----------------------
+\section{Comparison}
+\label{evaluation:sec5}
+We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches. For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a Principal Component Analysis (PCA) on test data to project it into the principal subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manually examining through hundreds of scree plots. Another difference is that we replace $k$-means with $X$-means \cite{pel00} as to avoid, again, manually having to determine optimal number of clusters, $k$. Lastly the largest cluster is removed under the assumption that the size of such cluster should correspond to the high frequency of normal instances, provided that the clustering algorithm is effective. For the clustering-based approach, we use simply use the $X$-means algorithm and remove the largest cluster based on the same previously mentioned assumption. As a third comparison, we hoped to reproduce a subspace clustering approach proposed in \cite{cas12, cas14} because it is the most recent work with the most promising results and involves DBSCAN. However, it seemed that the authors intended their approach as a binary classifier where test data consist of normal and intrusion instances of one attack type. Hence, when we ran it using data with mixed types of attacks, as we have done in all our experiments, the results were not comparable and meaningless.
 
-% ----------------------
-% SECTION 3: Comparison
-% ----------------------
-\section{Our method vs. others}
-We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches. For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a \emph{Principal Component Analysis} (PCA) on test data to project it into the principal subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manual examination through hundreds of scree plots. Another difference is that we replace $k$-means with $X$-means \cite{pel00} as to avoid, again, manually having to determine optimal number of clusters, $k$. Lastly the largest cluster is removed under an assumption that the size of such cluster should correspond to the high frequency of normal instances, therefore mostly contain non-intrusion instances. For the clustering-based approach, we use simply use the $X$-means algorithm and remove the largest cluster based on the same previously mentioned assumption. As a third comparison, we hoped to reproduce a subspace clustering approach proposed in \cite{cas12, cas14} because it is the most recent work with the most promising results and involves DBSCAN. However we failed to reproduce their work and decided to leave it out of the comparison. Random samples of the same seeds as our previous experiments are used to provide fair comparision between the methods. All the methods operate under the unsupervised learning paradigm to further assure comparability. The results are presented in Figure \ref{fig:compareTPR}.
+The same randoms seeds as our previous experiments are used to provide fair comparison between the methods. All the methods operate under an unsupervised learning manner to further assure comparability. The results are presented in Figure \ref{fig:compareTPR}.
 
 <<compareTPR, dependson="sysResults", cache=TRUE, echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of TPRs across different methods">>=
 # load("~/../Desktop/masters-project/Data/System_results/pca.results.RData")
@@ -620,19 +632,20 @@ arw = 0.5 * (x1.r - x1.l)
 arw.length = 0.03
 arw.lwd = 0.8
 sat = 0.3
-TPR.col = grey.colors(1, 11.5/12)
-FPR.col = grey.colors(1, 10/12)
+our.col = grey.colors(1, 11/12)
+xmean.col = grey.colors(1, 5/12)
+pca.col = grey.colors(1, 8/12)
 
 ## plot
 par(mar = par()$mar+c(0,0,1,0))
 plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="TPR", type="n", main="Training data")
-legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
+legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), fill=c(our.col,xmean.col,pca.col))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
 ## rect
-rect(x1.l, 0, x1.r, y1, col = TPR.col)
-rect(x2.l, 0, x2.r, y5)
-rect(x3.l, 0, x3.r, y7, col = "black", density=10, angle=45)
+rect(x1.l, 0, x1.r, y1, col = our.col)
+rect(x2.l, 0, x2.r, y5, col = xmean.col)
+rect(x3.l, 0, x3.r, y7, col = pca.col)
 ## arrows
 arrows(x1.l+arw, y1-y1.sd, x1.l+arw, y1+y1.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
 arrows(x2.l+arw, y5-y5.sd, x2.l+arw, y5+y5.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
@@ -652,13 +665,13 @@ y12.sd = c(sd(pca.results.dat2.05a$FPR),sd(pca.results.dat2.10a$FPR),sd(pca.resu
 
 ## plot
 plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="TPR", type="n", main="Test data")
-legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
+legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), fill=c(our.col,xmean.col,pca.col))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
 ## rect
-rect(x1.l, 0, x1.r, y3, col = TPR.col)
-rect(x2.l, 0, x2.r, y9)
-rect(x3.l, 0, x3.r, y11, col = "black", density=10, angle=45)
+rect(x1.l, 0, x1.r, y3, col = our.col)
+rect(x2.l, 0, x2.r, y9, col = xmean.col)
+rect(x3.l, 0, x3.r, y11, col = pca.col)
 ## arrows
 arrows(x1.l+arw, y3-y3.sd, x1.l+arw, y3+y3.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
 arrows(x2.l+arw, y9-y9.sd, x2.l+arw, y9+y9.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
@@ -670,13 +683,13 @@ arrows((x3.l+arw)[c(5:6)], (y11-y11.sd)[c(5:6)], (x3.l+arw)[c(5:6)], 1, length=a
 par(mar = par()$mar+c(0,0,1,0))
 plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main="Training data")
 # legend(30.12, 0.52, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
-legend("topright", xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
+legend("topright", xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), fill=c(our.col,xmean.col,pca.col))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
 ## rect
-rect(x1.l, 0, x1.r, y2, col = TPR.col)
-rect(x2.l, 0, x2.r, y6)
-rect(x3.l, 0, x3.r, y8, col = "black", density=10, angle=45)
+rect(x1.l, 0, x1.r, y2, col = our.col)
+rect(x2.l, 0, x2.r, y6, col = xmean.col)
+rect(x3.l, 0, x3.r, y8, col = pca.col)
 ## arrows
 arrows(x1.l+arw, y2-y2.sd, x1.l+arw, y2+y2.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
 arrows(x2.l+arw, y6-y6.sd, x2.l+arw, y6+y6.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
@@ -684,13 +697,13 @@ arrows((x3.l+arw)[-c(5,6)], (y8-y8.sd)[-c(5,6)], (x3.l+arw)[-c(5,6)], (y8+y8.sd)
 arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y8+y8.sd)[c(5,6)], length=arw.length, angle=90, code=2, lwd=arw.lwd)  ## goes below 0
 
 plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main="Test data")
-legend("topright", xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
+legend("topright", xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), fill=c(our.col,xmean.col,pca.col))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
 ## rect
-rect(x1.l, 0, x1.r, y4, col = TPR.col)
-rect(x2.l, 0, x2.r, y10)
-rect(x3.l, 0, x3.r, y12, col = "black", density=10, angle=45)
+rect(x1.l, 0, x1.r, y4, col = our.col)
+rect(x2.l, 0, x2.r, y10, col = xmean.col)
+rect(x3.l, 0, x3.r, y12, col = pca.col)
 ## arrows
 arrows(x1.l+arw, y4-y4.sd, x1.l+arw, y4+y4.sd, length=arw.length, angle=90, code=3, lwd=arw.lwd)
 arrows((x2.l+arw)[-c(2:5)], (y10-y10.sd)[-c(2:5)], (x2.l+arw)[-c(2:5)], (y10+y10.sd)[-c(2:5)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
