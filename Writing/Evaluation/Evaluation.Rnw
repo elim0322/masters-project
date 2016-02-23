@@ -168,8 +168,8 @@ The KDD'99 data is fully labelled with either normal or an attack. Each attack b
 
 
 %%%%%%%%%%%%%%%%%%%%
-\begin{table}
-\caption{List of training attack types in KDD'99 data.}
+\begin{table}[h]
+\caption{List of training attack types in KDD'99 data, retrieved and modified from \cite{darpa}.}
 \label{eval:attack1}
 \small
 \begin{tabular}{ |p{1.6cm}||p{3.2cm}|p{10cm}| }
@@ -215,8 +215,8 @@ Type & Name & Summary \\
 %%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%
-\begin{table}
-\caption{List of test attack types in KDD'99 data.}
+\begin{table}[h]
+\caption{List of test attack types in KDD'99 data, retrieved and modified from \cite{darpa}.}
 \label{eval:attack2}
 \small
 \begin{tabular}{ |p{1.6cm}||p{2.8cm}|p{11cm}| }
@@ -285,7 +285,7 @@ For both the training and test datasets of KDD'99, each connection record consis
 \end{table}
 %%%%%%%%%%%%%%%%%%%%
 
-The remaining 32 features (excluding the last one for the labels) are derived features that fall into two categories: (1) content and (2) traffic features. Firstly, the content features (13 of the 32 features) are created from the domain knowledge of Stolfo et al. and are listed in Table~\ref{eval:tab2} with the same structure as the previous table. The purpose of these features is to provide information that can be used to detect the U2R and R2L attacks which lack intrusion frequent sequential patterns. Unlike the DoS and probing attacks, which happen in bursts in a very short period of time, the U2R and R2L attacks are usually embedded in the data portion of the packets and involve only a single connection, which make them difficult to be detected based only on the basic features. For example, \texttt{num\_failed\_logins} can provide useful information to help capture threats such as dictionary attacks.
+The remaining 32 features (excluding the last one for the labels) are derived features that fall into two categories: (1) content and (2) traffic features. Firstly, the content features (13 of the 32 features) are created from the domain knowledge of Stolfo et al. and are listed in Table~\ref{eval:tab2} with the same structure as the previous table. The purpose of these features is to provide information that can be used to detect the U2R and R2L attacks which lack intrusion frequent sequential patterns. Unlike the DoS and probing attacks, which happen in bursts in a very short period of time, the U2R and R2L attacks are usually embedded in the data portion of the packets and involve only a single connection, which make them difficult to be detected based only on the basic features. For example, \texttt{num\_failed\_logins} can provide useful information to help capture threats such as dictionary attacks. A couple of points to be made about the content features are: (1) there are three unique values (0, 1 and 2) in \texttt{su\_attempted}, despite its description being a binary variable, and (2) \texttt{num\_outbound\_cmds} is redundant as it contains only one unique value of 0. No information on the discrepancy in \texttt{su\_attempted} was available for clarification and more domain knowledge was needed to determine whether it was intended or a data entry error. In addition, the numbers for the values of 0 are exceedingly dominant compared to those for the values of 1 and 2, e.g., the odds are $40/4898431$ for 1's and $70/4898431$ for 2's for the training set and even lower odds for the test set. Thus the results will not be affected much.
 
 Secondly, the traffic features (19 of the 32 features) are time-based, created using a two-second time window, and are further divided into two types: (1) same-host and (2) same-service features. The same-host features examine connections in the past 2 seconds that have the same destination as the current connection. Similarly, the same-service features examine the connections that have the same feature as the current connection in the past 2 seconds. The complete list of the same-host and the same-service features is presented in Table~\ref{eval:tab3}, where each column represents the sub-type of the traffic features, feature names and their descriptions, respectively. The data types are not included in the table as these features are all continuous.
 
@@ -297,7 +297,7 @@ There is a potential problem with the traffic features, especially the two-secon
 \caption{List of content features within a connection suggested by domain knowledge in KDD'99 data, retrieved and modified from \cite{kdd99}.}
 \label{eval:tab2}
 \small
- \begin{tabular}{ |p{3.8cm}||p{9.5cm}|p{1.9cm}| }
+ \begin{tabular}{ |p{3.5cm}||p{9.3cm}|p{1.8cm}| }
  \hline
  Feature & Description & Type \\
  \hline
@@ -362,40 +362,55 @@ There is a potential problem with the traffic features, especially the two-secon
 \end{table}
 %%%%%%%%%%%%%%%%%%%%
 
+Finally, it must be emphasised that the training and test data are not from the same probability distribution, i.e., the two datasets are statistically different.
+
 All the features with their types and how they were created have been described. The following section describes how we set up our experiments to test our ideas.
 
 
 % ----------------------------------
 % SECTION 2: Experimental framework
 % ----------------------------------
-\section{Data description}
-\label{evaluation:sec1}
+\section{Experimental framework}
+\label{evaluation:sec2}
+
+All our experiments are performed using random samples from the 10\% subset versions of the training and test KDD'99 data. We used 5,000 connection records, sampled without replacement, for each run of our experiment, and repeated a hundred times using different samples each time. We summarised the results of the one hundred repeated runs using the mean and the standard deviation for each experiment. The mean was used because it provided the best summary statistics of the results by providing the inference on their central locations. The standard deviation was necessary to evaluate the stability and statistical dispersion among the results. The mean and standard deviation measures, coupled together, described our results from a few hundred runs well.
+
+We considered variations in the frequencies of intrusion instances in data an important problem because unsupervised anomaly-based intrusion detection relies on the assumption that the frequencies of intrusions are much less than those of normal in the given data. To evaluate the effect of the variations in the intrusion frequencies, we varied the value with 0.05, 0.1, 0.2, 0.3, 0.4 and 0.5 in our experiments. For example, a dataset for the intrusion frequency of 0.1 consists of $0.1 \times 5000 = 500$ intrusions and $(1-0.1) \times 5000 = 4500$ normal instances. For this particular set, a random sample of 500 intrusions would be taken from the group of intrusions and 4,500 normal instances from that of normal instances, separately, to make up a total of 5,000 instances.
+
+As mentioned in the previous section, the training and test datasets are statistically different, which means they can be treated as two distinct and independent sets of data. Furthermore, we can ignore the attack labels during the experiments as our method runs under a fully unsupervised learnning manner. The attack labels are only used at the \emph{end} of the experiments to carry out external evaluation on the performance. Therefore, each of our experiments on the training and test data should be regarded as two independent experiments performed on two different datasets. The meaning of \emph{training} and \emph{test} data are hence conveniently ignored from here on.
+
+The first hypotheses we test are whether each phase is achieving its objective, as discussed in the previous chapter. Then we evaluate the overll system performance and compare it with other existing methods in the following sections.
 
 
 
-
-
-
-
-
-
-\newpage
 % -------------------------------
-% SECTION 1: Validation of ideas
+% SECTION 3: Phase evaluation
 % -------------------------------
-\section{Validation of ideas}
-% \label{evaluation:sec1}
-The two-phase structure of our proposed NIDS, each with its unique objective, means that each phase must be evaluated to show the assigned objective is successfully accomplished. As presented in the previous chapter, the first phase is intended for maximum classification of all possible intrusions at the cost of higher false positive rate. Therefore Phase 1 is evaluated with its: (1) TPR to test our hypothesis that it is capable of achieving the said maximal classification and (2) FPR to confirm our belief that a higher number of false positives, than under ordinary circumstances, is resulted as expected. For Phase 2, our primary interest, as well as its purpose, is in the reduction of overall false positive rate thus percentage reductions in the FPR are investigated.
-% Lastly, our claim that the system of our proposal is truly comparable to DBSCAN clustering algorithm is tested with their respective TPR and FPR across the parameter, $\epsilon$ (Eps). The other parameter of DBSCAN, minPts, is fixed at 6 as we have experimentally determined that the result is not critically affected by varying the parameter.
+\section{Phase evaluation}
+\label{evaluation:sec3}
 
-\subsubsection{Phase 1}
-Appendix A presents numerical and graphical results from experiments where intrusion frequency in a test set and $k$ are varied as proportions of the sample size. What we have inferred from the results is that $k$ is the most appropriate when set to be greater or equal to the actual number of intrusion instances in a test set. If $k$ is set too low, the range of resulting LOF scores increases along with noise to introduce difficulties in inferring thresholds. As $k$ is increased towards the number of intrusion instances, the resulting LOF scores tend to stabilise in a range within more manageable boundaries. For the purpose of this section, we assume that $k$ is chosen appropriately for each intrusion frequency, that is we report on the best scenario of $k$ from here on.
+Our proposed intrusion detection framework was built upon a two-phase structure, as previously discussed, where each phase was designed and tasked with a unique objective. As the first step of evaluating our method, the two phases must be tested to show the objectives are met.
 
-Figure \ref{fig:lofResults} reveals that the classification process of Phase 1 is reasonably accurate for the \emph{training} dataset as shown by the very high TPRs but not as accurate for the \emph{test} dataset. Upon manual examination, we have found that, for the \emph{test} dataset, many intrusion instances share similar local densities as their non-intrusion counterparts leading to failure in finding adequate thresholds. When the kernel density esimates  were plotted, a number of intrusion instances had unusually low LOF scores than the rest to be positioned within the supposed region of non-intrusion instances, and vice versa. In other words, the LOF algorithm was not able to differentiate between the non-intrusion and the intrusion instances because their respective local densities are analogous. On the other hand, the detection is quite precise as the lengths of the error bars are extremely small.
+As presented in the previous chapter, the first phase was intended to detect as many anomalies as possible, i.e., achieve maximal TPR, at the cost of allowing a few False Positives to also arise. Thus, Phase~1 is evaluated with its: (1) TPR to test our hypothesis that it is capable of achieving the said maximal detection rate and (2) FPR to assess the amount of False Positives in the results. Additionally, two parameters are varied: the input parameter, $k$, for LOF and the intrusion frequency to evaluate their effect on the performance of LOF. For Phase~2, our primary interest, as well as its purpose, is in the reduction of overall FPR thus percentage reductions in the FPR are investigated.
 
-We conclude that our classification method implemented in Phase 1 performs well as long as the proportion of intrusion is not too large and the local densities are reasonably different between intrusion and non-intrusion instances. For the cases where local densities are similar, an anomaly detection algorithm that is not density-based could be a more viable alternative.
+Sections \ref{evaluation:sec3.1} and \ref{evaluation:sec3.2} that follow describe the results 
 
-<<lofResults, dependson="result", echo=FALSE, out.width="0.49\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
+
+\subsection{Phase 1}
+\label{evaluation:sec3.1}
+As mentioned previously, the intrusion frequencies are varied between 0.05, 0.1, 0.2, 0.3, 0.4 and 0.5. The parameter, $k$, is also varied as a proportion of the given data, which we denoted as $k_p$, using the same values of 0.05, 0.1, 0.2,$\dotsc$, 0.5 such that $k_p=0.05$ is equivalent to $k=0.05 \times 5000 = 250$. The reason for such variation method is that small values of $k$, e.g., anything below 250, produced extremely noisy output. As such the resulting TPR was low while the FPR was high. Also, the LOF algorithm considers $k$ points as a cluster, which means if the value of $k$ is set too low, fewer points are needed for a cluster and more points will be excluded from the cluster. This will cause more points to be recognised as anomalies. Hence, $k$ is varied as a proportion of the given data so that it is effectively adjusted for the size of the data.
+
+Firstly, we evaluate the effect of varying $k$ on the performance of LOF. For this, we fixed the intrusion frequency and varied $k_p$, and a hundred runs of LOF, using different samples each time, were performed. Then we summarised the computed LOF scores by using KDE to produce graphical output. Each of this experiment is repeated for different values of the intrusion frequencies. We kept the random seeds for the one hundred random samples and used them for different experiments so that the results of each experiment is fully comparable. Appendices~\ref{appendixa} and \ref{appendixb} present the results, where each \emph{figure} represents the plots for the corresponding intrusion frequency and each \emph{plot} corresponds to each of the different values of $k_p$, as indicated by the plot title. The appendices are divided such that they present the results for the training and test data, respectively. There are one hundred density curves on each plot, as previously described, and the transparency of $\alpha=0.2$ is used for all curves such that the curves of similar patterns are more visually apparent. Examining between the plots and comparing them for each figure, we can observe that as we increase the value of $k_p$, the computed LOF scores become less noisy and the differences in the densities, i.e., different peaks, are more clearly visible. If $k$ is set too low, the range of the resulting LOF scores is too great with noise, meaning an inflated score is given to each connection record. This leads to too many points being considered anomalies.. From this, we conclude that the greater values of $k$ are preferred but the question remains as to how much $k$ is appropriate. The optimal value for $k$ should depend on data but the scores appear to be the most stable when $k_p=0.5$. Also, $k_p$ must not be less than the actual intrusion frequency. For example, in Figure~\ref{dat1-a3}, we observe that the scores are more stable for $k_p=0.3$, $k_p=0.4$ and $k_p=0.5$.
+
+Secondly, we evaluate the performance of LOF assuming that an appropriate value for $k$ is chosen for each experiment. We present the resulting TPR and FPR in Figure~\ref{fig:lofResults}, where the TPR and FPR are represented by the solid and dashed lines, respectively, with the horizontal error bars. Figure \ref{fig:lofResults} reveals that the anomaly detection of LOF in Phase~1 is very accurate for the training data as shown by the very high TPR. The TPR for the test data are slightly lower than that for the training data. Upon manual examination, we have found that, for the test data, many intrusion instances share similar local densities as their non-intrusion counterparts leading to failure in finding adequate thresholds. When the kernel density estimates  were plotted, a number of intrusion instances had unusually low LOF scores than the rest, which made them difficult for detection. The LOF algorithm was not able to differentiate between the non-intrusion and the intrusion instances because their respective local densities were similar. On the other hand, Phase~1 anomaly detection is extremely precise for both the training and test data as the lengths of the error bars are nearly invisible. Tables~\ref{tab:app-tab1} and \ref{tab:app-tab2}, in the appendices, present the numerical results used to plot the figure, where the values for the small error bars can be examined.
+
+When the intrusion frequency is 0.5, we observe a steep drop in the TPR. The reason may be that, at that intrusion frequency, the corresponding data become perfectly balanced with the equal numbers of the attack and normal instances. In this case, it becomes difficult to tell which cluster is the correct representative of the normal, or the attack, pattern. For example, if the given data are distributed such that the intrusion instances are positioned in closer proximity to one another than their normal counterparts, the results from an anomaly detection task may unintentionally label the normal as anomalies. In any case, the intrusion frequency of 0.5 is simply too high for any network unless nearly half of its users suddenly become mischievous.
+
+Lastly, the FPR appear to be high as expected. If we adjusted the threshold, $t$, to lower the FPR, we would not have achieved the extremely high TPR. Not much comment can be made on the FPR other than to visualise them along with the TPR.
+
+We conclude that the anomaly detection using LOF in Phase~1 performs well. As we hypothesised in the previous chapter, using the optimistic threshold, $t$, can achieve maximal detection at the cost of higher FPR. In addition, it is strongly likely that the results will be lower than expected when (1) the given data are perfectly balanced (i.e., when the intrusion frequency is 0.5) and (2) the local densities of normal and attacks are similar. For the cases where the local densities are similar, an anomaly detection algorithm that is not density-based could be a more viable alternative.
+
+<<lofResults, dependson="result", echo=FALSE, out.width="0.6\\linewidth", fig.show='hold', fig.align='center', fig.cap="TPR and FPR across intrusion frequencies from the training and test sets">>=
 x = 1:6
 y1 = c(dat1.means.05a[[1]], dat1.means.10a[[1]], dat1.means.20a[[1]], dat1.means.30a[[1]], dat1.means.40a[[1]], dat1.means.50a[[1]])
 y2 = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1.means.30a[[2]], dat1.means.40a[[2]], dat1.means.50a[[2]])
@@ -403,7 +418,7 @@ y1.sd = c(dat1.means.05a[[3]], dat1.means.10a[[3]], dat1.means.20a[[3]], dat1.me
 y2.sd = c(dat1.means.05a[[4]], dat1.means.10a[[4]], dat1.means.20a[[4]], dat1.means.30a[[4]], dat1.means.40a[[4]], dat1.means.50a[[4]])
 
 # par(xpd = T, mar = par()$mar+c(0,0,0,3))
-plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
 lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
@@ -415,7 +430,7 @@ y4 = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means
 y3.sd = c(dat2.means.05a[[3]], dat2.means.10a[[3]], dat2.means.20a[[3]], dat2.means.30a[[3]], dat2.means.40a[[3]], dat2.means.50a[[3]])
 y4.sd = c(dat2.means.05a[[4]], dat2.means.10a[[4]], dat2.means.20a[[4]], dat2.means.30a[[4]], dat2.means.40a[[4]], dat2.means.50a[[4]])
 
-plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main=expression(italic("Test dataset")))
+plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Test data")
 lines(y4, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6, 0.6, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), cex = 1.2, xjust=1)
@@ -423,8 +438,12 @@ arrows(x, y3-y3.sd, x, y3+y3.sd, length=0.05, angle=90, code=3)
 arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
 @
 
-\subsubsection{Phase 2}
-Figure \ref{fig:dbscanResults} presents percentage reduction in FPRs from Phase 1 to Phase 2. It seems that the FP elimination step of Phase 2 works really well, especially for the \emph{test} dataset. The unusual decline in the percentage at the intrusion frequency of 0.2 for the \emph{training} dataset is not something to worry about as the initial FPR, from Phase 1, has been quite low to begin with.
+
+
+
+\subsection{Phase 2}
+\label{evaluation:sec3.2}
+Figure \ref{fig:dbscanResults} presents percentage reduction in FPRs from Phase~1 to Phase~2. It seems that the FP elimination step of Phase~2 works really well, especially for the \emph{test} dataset. The unusual decline in the percentage at the intrusion frequency of 0.2 for the \emph{training} dataset is not something to worry about as the initial FPR, from Phase~1, has been quite low to begin with.
 
 Some of the FPs remain included in the result, limiting further percentage reduction in FPR, because they are incorrectly classified, or clustered, by the DBSCAN algorithm. These FPs are positioned in relatively dense regions nearby some of the intrusion instances to make them indistinguishable from one another based on density. Therefore the DBSCAN algorithm fails to cluster them with non-intrusion instances by definition.
 
@@ -433,9 +452,9 @@ dat1.FPR = c(dat1.means.05a[[2]], dat1.means.10a[[2]], dat1.means.20a[[2]], dat1
 dat2.FPR = c(dat2.means.05a[[2]], dat2.means.10a[[2]], dat2.means.20a[[2]], dat2.means.30a[[2]], dat2.means.40a[[2]], dat2.means.50a[[2]])
 y1 = 100 * (dat1.FPR - c(processResults(system.results_dat1_05a10k)$FPR,processResults(system.results_dat1_10a30k)$FPR,processResults(system.results_dat1_20a20k)$FPR,processResults(system.results_dat1_30a30k)$FPR,processResults(system.results_dat1_40a20k)$FPR,processResults(system.results_dat1_50a05k)$FPR)) / dat1.FPR
 y2 = 100 * (dat2.FPR - c(processResults(system.results_dat2_05a10k)$FPR,processResults(system.results_dat2_10a20k)$FPR,processResults(system.results_dat2_20a20k)$FPR,processResults(system.results_dat2_30a30k)$FPR,processResults(system.results_dat2_40a30k)$FPR,processResults(system.results_dat2_50a10k)$FPR)) / dat2.FPR
-plot(y1, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+plot(y1, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Training data")
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
-plot(y2, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+plot(y2, ylim=c(0,100), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Test data")
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 @
 
@@ -445,7 +464,7 @@ axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 % SECTION 2: System evaluation
 % -----------------------------
 \section{System evaluation}
-\label{evaluation:sec2}
+\label{evaluation:sec3}
 
 Figure \ref{fig:sysResults} presents the system evaluation results for the \emph{training} and \emph{test} datasets. For the \emph{training} dataset between the intrusion frequencies of 0.05 and 0.4, we can infer graphically that the system is accurate, as the TPRs are very close to 1, and precise, as the lengths of the error bars are short. We suspect that the decrease in performance from the intrusion frequency of 0.5 is caused by the balanced nature of the classes in the random samples. As the data become more balanced, there is higher chance for DBSCAN to form balanced clusters. This in turn increases the likelihood that the largest clusters, which we remove, actually consist of intrusion instances to result in a decrease in overall TPR. Because our method assumes of higher frequencies of non-intrusion instances in test data, a mendatory assumption for any anomaly-based intrusion detection, and removes the largest resulting clusters under that assumption, it cannot be functional if that assumption is violated. In other words, perfectly balanced data cannot be classified correctly in an unsupervised learning manner unless some external information is available. The unusually high variation in the TPR at this particular intrusion frequency means that the system was highly indecisive because there were essentially no classification criteria. In fact about half of the hundred runs produced better results than the other half to further support our reasoning.
 
@@ -469,7 +488,7 @@ y2 = c(res05a$FPR, res10a$FPR, res20a$FPR, res30a$FPR, res40a$FPR, res50a$FPR)
 y1.sd = c(res05a$TPR.sd, res10a$TPR.sd, res20a$TPR.sd, res30a$TPR.sd, res40a$TPR.sd, res50a$TPR.sd)
 y2.sd = c(res05a$FPR.sd, res10a$FPR.sd, res20a$FPR.sd, res30a$FPR.sd, res40a$FPR.sd, res50a$FPR.sd)
 
-plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+plot(y1, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Rates", lwd = 1.3, type="b", main="Training data")
 lines(y2, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjust=0, xpd=TRUE)
@@ -487,7 +506,7 @@ y3 = c(dat2.res05a$TPR, dat2.res10a$TPR, dat2.res20a$TPR, dat2.res30a$TPR, dat2.
 y4 = c(dat2.res05a$FPR, dat2.res10a$FPR, dat2.res20a$FPR, dat2.res30a$FPR, dat2.res40a$FPR, dat2.res50a$FPR)
 y3.sd = c(dat2.res05a$TPR.sd, dat2.res10a$TPR.sd, dat2.res20a$TPR.sd, dat2.res30a$TPR.sd, dat2.res40a$TPR.sd, dat2.res50a$TPR.sd)
 y4.sd = c(dat2.res05a$FPR.sd, dat2.res10a$FPR.sd, dat2.res20a$FPR.sd, dat2.res30a$FPR.sd, dat2.res40a$FPR.sd, dat2.res50a$FPR.sd)
-plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main=expression(italic("Training dataset")))
+plot(y3, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="Percentage Reduction in FPR", lwd = 1.3, type="b", main="Training data")
 lines(y4, ylim=c(0,1), xaxt="n", lwd = 1.3, type="b", lty=2)
 axis(1, at=1:6, labels=c(0.05,0.1,0.2,0.3,0.4,0.5))
 legend(6*1.034, 1.04, c("TPR", "FPR"), lty=c(1,2), lwd=rep(1.3,2), xjust=1, yjust=0, xpd = TRUE)
@@ -541,7 +560,7 @@ FPR.col = grey.colors(1, 10/12)
 
 ## plot
 par(mar = par()$mar+c(0,0,1,0))
-plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="TPR", type="n", main=expression(italic("Training dataset")))
+plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="TPR", type="n", main="Training data")
 legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
@@ -567,7 +586,7 @@ y11.sd = c(sd(pca.results.dat2.05a$TPR),sd(pca.results.dat2.10a$TPR),sd(pca.resu
 y12.sd = c(sd(pca.results.dat2.05a$FPR),sd(pca.results.dat2.10a$FPR),sd(pca.results.dat2.20a$FPR),sd(pca.results.dat2.30a$FPR),sd(pca.results.dat2.40a$FPR),sd(pca.results.dat2.50a$FPR))
 
 ## plot
-plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="TPR", type="n", main=expression(italic("Test dataset")))
+plot(x, ylim=c(0,1), xlab = "Intrusion Freq.", xaxt="n", ylab="TPR", type="n", main="Test data")
 legend(30.12, 1.04, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
@@ -584,7 +603,7 @@ arrows((x3.l+arw)[c(5:6)], (y11-y11.sd)[c(5:6)], (x3.l+arw)[c(5:6)], 1, length=a
 
 <<compareFPR, dependson="compareTPR", echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of FPRs across different methods">>=
 par(mar = par()$mar+c(0,0,1,0))
-plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main=expression(italic("Training dataset")))
+plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main="Training data")
 # legend(30.12, 0.52, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
 legend("topright", xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
@@ -599,7 +618,7 @@ arrows(x2.l+arw, y6-y6.sd, x2.l+arw, y6+y6.sd, length=arw.length, angle=90, code
 arrows((x3.l+arw)[-c(5,6)], (y8-y8.sd)[-c(5,6)], (x3.l+arw)[-c(5,6)], (y8+y8.sd)[-c(5,6)], length=arw.length, angle=90, code=3, lwd=arw.lwd)
 arrows((x3.l+arw)[c(5,6)], 0, (x3.l+arw)[c(5,6)], (y8+y8.sd)[c(5,6)], length=arw.length, angle=90, code=2, lwd=arw.lwd)  ## goes below 0
 
-plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main=expression(italic("Test dataset")))
+plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main="Test data")
 legend("topright", xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
 axis(1, at = seq(2.5, 30, by=5), labels = c(0.05,0.1,0.2,0.3,0.4,0.5), tick = FALSE)
 axis(1, at = seq(0, 30, by=5), labels = NA)
