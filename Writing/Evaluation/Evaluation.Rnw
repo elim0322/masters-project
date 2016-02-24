@@ -194,7 +194,6 @@ Each experiment is conducted using a random sample of 5,000 instances from the 1
 
 
 
-\newpage
 % ----------------------------
 % SECTION 1: data description
 % ----------------------------
@@ -596,11 +595,9 @@ arrows(x, y4-y4.sd, x, y4+y4.sd, length=0.05, angle=90, code=3)
 % ----------------------
 \section{Comparison}
 \label{evaluation:sec5}
-We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches. For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a Principal Component Analysis (PCA) on test data to project it into the principal subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manually examining through hundreds of scree plots. Another difference is that we replace $k$-means with $X$-means \cite{pel00} as to avoid, again, manually having to determine optimal number of clusters, $k$. Lastly the largest cluster is removed under the assumption that the size of such cluster should correspond to the high frequency of normal instances, provided that the clustering algorithm is effective. For the clustering-based approach, we use simply use the $X$-means algorithm and remove the largest cluster based on the same previously mentioned assumption. As a third comparison, we hoped to reproduce a subspace clustering approach proposed in \cite{cas12, cas14} because it is the most recent work with the most promising results and involves DBSCAN. However, it seemed that the authors intended their approach as a binary classifier where test data consist of normal and intrusion instances of one attack type. Hence, when we ran it using data with mixed types of attacks, as we have done in all our experiments, the results were not comparable and meaningless.
+We compare our method with other possible approaches based on some of the proposed schemes in the literature, that is PCA-based and clustering-based approaches. For the PCA-based approach, we implement a scheme similar to \cite{lak05}, in which the authors perform a Principal Component Analysis (PCA) on test data to project it into the principal subspace and the $k$-means algorithm on the subspace to compare resulting clusters with the trained clusters of known anomalies, essentially in a semi-supervised manner. One difference in our approach is that we select the number of Principal Components based on the Zoski and Jurs' $b$ coefficient \cite{zos93, zos96}, which is a robust non-graphical alternative to Cattell's scree plots discussed in \cite{rai13}, to avoid inefficiency in manually examining through hundreds of scree plots. Another difference is that we replace $k$-means with $X$-means \cite{pel00} as to avoid, again, manually having to determine optimal number of clusters, $k$. Lastly the largest cluster is removed under the assumption that the size of such cluster should correspond to the high frequency of normal instances, provided that the clustering algorithm is effective. For the clustering-based approach, we use simply use the $X$-means algorithm and remove the largest cluster based on the same previously mentioned assumption. As a third comparison, we hoped to reproduce a subspace clustering approach proposed in \cite{cas12, cas14} because it is the most recent work with the most promising results and involves DBSCAN. However, it seemed that the authors intended their approach as a binary classifier where test data consist of normal and intrusion instances of one attack type. Hence, when we ran it using data with mixed types of attacks, as we have done in all our experiments, the results were not comparable and meaningless. The same random seeds as our previous experiments are used to provide fair comparison between the methods. All the methods operate under an unsupervised learning manner to further assure comparability. The results are separately presented in Figure~\ref{fig:compareTPR} for the comparison of TPR and in Figure~\ref{fig:compareFPR} for the comparison of FPR.
 
-The same randoms seeds as our previous experiments are used to provide fair comparison between the methods. All the methods operate under an unsupervised learning manner to further assure comparability. The results are presented in Figure \ref{fig:compareTPR}.
-
-<<compareTPR, dependson="sysResults", cache=TRUE, echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of TPRs across different methods">>=
+<<compareTPR, dependson="sysResults", cache=TRUE, echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of TPR across different methods">>=
 # load("~/../Desktop/masters-project/Data/System_results/pca.results.RData")
 # load("~/../Desktop/masters-project/Data/System_results/xmeans.results.RData")
 load("//Users/eric/masters-project/Data/System_results/pca.results.RData")
@@ -633,8 +630,8 @@ arw.length = 0.03
 arw.lwd = 0.8
 sat = 0.3
 our.col = grey.colors(1, 11/12)
-xmean.col = grey.colors(1, 5/12)
-pca.col = grey.colors(1, 8/12)
+xmean.col = grey.colors(1, 8/12)
+pca.col = grey.colors(1, 5/12)
 
 ## plot
 par(mar = par()$mar+c(0,0,1,0))
@@ -679,7 +676,7 @@ arrows((x3.l+arw)[-c(5:6)], (y11-y11.sd)[-c(5:6)], (x3.l+arw)[-c(5:6)], (y11+y11
 arrows((x3.l+arw)[c(5:6)], (y11-y11.sd)[c(5:6)], (x3.l+arw)[c(5:6)], 1, length=arw.length, angle=90, code=1, lwd=arw.lwd)
 @
 
-<<compareFPR, dependson="compareTPR", echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of FPRs across different methods">>=
+<<compareFPR, dependson="compareTPR", echo=FALSE, out.width="0.65\\linewidth", fig.show='hold', fig.align='center', fig.cap="Comparison of FPR across different methods">>=
 par(mar = par()$mar+c(0,0,1,0))
 plot(x, ylim=c(0,0.5), xlab = "Intrusion Freq.", xaxt="n", ylab="FPR", type="n", main="Training data")
 # legend(30.12, 0.52, xjust=1, yjust=0, xpd=TRUE, c("Our Method","X-Means-based","PCA-based"), density=c(NA,NA,20), angle=c(NA,NA,45), fill=c(TPR.col,NA,"black"))
@@ -712,11 +709,19 @@ arrows((x2.l+arw)[3:5], 0, (x2.l+arw)[3:5], (y10+y10.sd)[3:5], length=arw.length
 arrows(x3.l+arw, 0, x3.l+arw, y12+y12.sd, length=arw.length, angle=90, code=2, lwd=arw.lwd)  ## goes below 0
 @
 
+For the training data, our method is the most precise compared to the other methods, as indicated by the small error bars. This is a promising piece of information to claim that our method functions exactly as designed and is very robust as the performance is consistent and independent of any discrepancies between the random samples. The accuracy of our method is also comparable to the others, especially as it manages to keep the FPR at a very low level. One exception is when the intrusion frequency reaches at 0.5, but such frequency of intrusions in data may be too high for an unsupervised anomaly detection task, as we established in the previous sections. The simple $X$-means-based method produced unexpectedly high TPR but their respective FPR are generally too high to be a reliable method. A steady decrease in the FPR towards a higher intrusion frequency can be observed to suggest that the $X$-means-based method may be a more reliable alternative for the balanced data. However one shortcoming of the $X$-means algorithm that it favours balanced data must be carefully noted here. In any case, our method outperforms the $X$-means-based method at the lower intrusion frequencies. The PCA-based approach is too imprecise to be a reliable method, even though \emph{most} of the runs produced reasonably high TPR, on average, to bring up the overall detection rate. Because the PCA-based approach is just an extended version of the $X$-means approach, that implements PCA, we can deduce that the PCA part may contribute to the poor performance. The ineffectiveness of PCA means that the information contained in the data cannot be effectively summarised in lower dimensions and the dimensionality reduction using linear transformation is ineffective for the data. Our conclusion from this finding is that the shape of the data cloud may be too spherical to find a suitable subspace that explains a sufficient amount of the information contained in the data: it is not linearly structured.
+
+The results for the \emph{test} data presents similar patterns in accordance with the previously examined findings. One noticeable exception is observed for the X-means-based approach, where the FPR are very high for the intrusion frequencies at 0.05 and 0.1. This means that a lot of False Positives were retained in the final results to suggest the X-means algorithm was not effective at forming clusters of normal instances.
+
+To conclude, our method is the most reliable out of all three approaches as long as the intrusion frequency is kept below 0.5. The expected outcome of our method can be dependent on the type of data, in terms of local densities, but the good side is that the number of False Positives will be kept at a low level. The promise of low false alarm rate, as evidently from the low FPR, is valuable as users will be further assured that the detected intrusion instances are that much more likely to be what they wish to catch. In addition, a low false alarm rate can reduce the cost of resources spent on analysing erroneously detected legitimate connections.
 
 
-For the \emph{training} dataset, our method appears to be more precise than the other methods as indicated by the small variation. This is a promising piece of information to claim that our method functions exactly as designed and is very robust as the performance is reliable and independent of any discrepancies between the random samples.  The accuracy of our method is also reasonably comparable to the others, especially as it manages to retain the FPRs at a relatively low level. One exception is when the intrusion frequency reaches at 0.5, and we have already established that such frequency of intrusion instances may be too high for any anomaly detection schemes. The simple $X$-means-based method produced unexpectedly high TPRs but their respective FPRs are generally too high to be reliable. A steady decrease in the FPRs towards a higher intrusion frequency can be observed to suggest that the $X$-means-based method may be a more reliable alternative for balanced data. However one shortcoming of the $X$-means algorithm that it favours balanced data must be carefully noted here. In any case, our method outperforms the $X$-means-based method at the lower intrusion frequencies. The PCA-based approach is too imprecise to be a reliable method, even though \emph{most} of the runs produced reasonably high TPRs, on average, to bring up the overall detection rate. Because the PCA-based approach is just an extended version of the $X$-means approach that implements PCA, we can deduce that the PCA part solely explains the poor performance. The ineffectiveness of PCA means that the information contained in the data cannot be effectively summarised in lower dimensions and the dimensionality reduction using linear transformation is inefficient for the data. Our conclusion from this finding is that the shape of the data cloud is too spherical to find a suitable subspace that explains a sufficient amount of the information contained in the data as an acceptable alternative representation in lower dimensions. The \emph{test} dataset presents similar patterns in accordance with the previously examined findings.
 
-To conclude, our method is the most reliable out of all three approaches as long as intrusion frequencies are not overly high, that is, most definitely, not as high as 0.5 but somewhere less than 0.4. The expected outcome of our method can be dependent on the type of data, in terms of densities, but the good side is that resulting FPs will be kept at a moderately low level. The promise of low false alarm rate is valuable as users will be further assured that the detected intrusion instances are that much more likely to be what they wish to catch.
+\section{Summary}
+\label{evaluation:sec6}
+We evaluated our unsupervised anomaly-based intrusion detection framework both (1) separately for each of the two phases and (2) as a whole to evaluate the system performance. We found that both Phase~1 and 2 work as intended with promising results. We compared our method against other possible approaches and found that our proposed method is the most reliable in terms of both accuracy and precision. One limitation we found was when the given data is perfectly balanced with the equal amounts of normal and intrusion instances, the detection rate, or the TPR, is unusually low compared to those from the other intrusion frequencies. We discussed that the balanced nature of the data violates the fundamental assumption required for an unsupervised anomaly detection task and makes it difficult for our method to differentiate between normal and intrusions.
+
+In the following chapter, we discuss summarise our research and discuss the limitations and future work of this thesis.
 
 
 
@@ -1230,5 +1235,5 @@ To conclude, our method is the most reliable out of all three approaches as long
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{ieeetr}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{ieeetr}
+% \bibliography{../Main/bibliography}

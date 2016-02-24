@@ -1,19 +1,20 @@
-<<set-parent, echo=FALSE, cache=FALSE>>=
+<<set-parent6, echo=FALSE, cache=FALSE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 
 \chapter{Conclusion}
 \label{ch:conclusion}
+
 We have described a new two-phase approach in unsupervised anomaly-based network intrusion detection. We showed the new method is capable of achieving a high detection rate while maintaining a low false alarm rate in the presence of different types of attacks. In addition, we compared the method against other unsupervised techniques to show that the new method outperforms the others in both accuracy and precision. Our proposed method runs in a truly unsupervised manner, that requires neither labels in data nor a training stage and can successfully detect previously unseen threats.
 
 \section{Future work}
-A major drawback of our method is its inefficiency. Both LOF and DBSCAN algorithms are expensive, which can be reduced by replacing them with more efficient methods if such methods exist. Also the fact that all numeric attributes in a given data are used as input suggests some feature selection method, as a data pre-processing method, may be useful to speed up the process. Running permutations in appropriate subspaces and accumulating results for each data instance may also improve efficiency. In addition, a parallelised variant of DBSCAN called MR-DBSCAN proposed in \cite{he11} can be used instead of DBSCAN for Phase 2.
+A major drawback of our method is its inefficiency. Both LOF and DBSCAN algorithms are expensive, which can be reduced by replacing them with more efficient methods if such methods exist. Also the fact that all numeric attributes in a given data are used as input suggests some feature selection method, as a data pre-processing method, may be useful to speed up the process. Running permutations in appropriate subspaces and accumulating results for each data instance may also improve efficiency. In addition, a parallelised variant of DBSCAN called MR-DBSCAN proposed in \cite{he11} can be used instead of DBSCAN for Phase~2.
 
-The use of LOF in Phase 1 can be replaced with the Local Correlation Integral (LOCI) algorithm proposed by Papadimitriou et al. \cite{pap03}. A measure that is a variant of LOF called Multi-granularity Deviation Factor (MDEF) is proposed by the authors, which makes the LOCI algorithm closely related to the original LOF algorithm. LOCI is more robust than LOF in that it can find anomalous micro-clusters as well as anomalous instances. LOCI does not require input parameter, for example $k$ in LOF, which can add a layer of automation to our method. But it suffers from increased complexity because of the autonomous nature. Coupled with LOCI, DBSCAN in Phase 2 can also be replaced with OPTICS proposed by Ankerst et al. \cite{ank99} to further increase automation.
+The use of LOF in Phase~1 can be replaced with the Local Correlation Integral (LOCI) algorithm proposed by Papadimitriou et al. \cite{pap03}. A measure that is a variant of LOF called Multi-granularity Deviation Factor (MDEF) is proposed by the authors, which makes the LOCI algorithm closely related to the original LOF algorithm. LOCI is more robust than LOF in that it can find anomalous micro-clusters as well as anomalous instances. LOCI does not require input parameter, for example $k$ in LOF, which can add a layer of automation to our method. But it suffers from increased complexity because of the autonomous nature. Coupled with LOCI, DBSCAN in Phase~2 can also be replaced with OPTICS proposed by Ankerst et al. \cite{ank99} to further increase automation.
 
 
 
 
 % Comment below out when building the whole doc:
-\bibliographystyle{ieeetr}
-\bibliography{../Main/bibliography}
+% \bibliographystyle{ieeetr}
+% \bibliography{../Main/bibliography}
