@@ -38,8 +38,8 @@
 \DeclareOption{singlespace}{\Ua@singlesptrue}
 \DeclareOption{twoside}{\PassOptionsToPackage{twoside}{geometry}}
 \DeclareOption{examcopy}{\Ua@examcptrue}
-\DeclareOption{PhD}{\newcommand{\degreetitle}{Doctor of Philosophy in
-    Science}}
+\DeclareOption{PhD}{\newcommand{\degreetitle}{Master of Science in
+    Computer Science}}
 \DeclareOption{ME}{\renewcommand{\degreetitle}{Master of Engineering}}
 \DeclareOption{picture}{\Ua@picturetrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
@@ -312,7 +312,7 @@
       %\mbox{\includegraphics[scale=0.8]{unilogo}} &
       %\parbox[b]{100mm}
       \vspace{2cm}
-      {\sc A thesis submitted in partial fulfillment of the requirements of\\ \degreetitle} \\
+      {\sc A thesis submitted in fulfillment of the requirements for \\ \degreetitle} \\
     %\end{tabular}
   }%
   \@thanks

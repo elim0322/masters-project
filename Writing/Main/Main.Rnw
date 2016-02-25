@@ -37,15 +37,18 @@
 
 
 \begin{document}
-\title{Unsupervised density-based anomaly intrusion detector in network}
+\title{Unsupervised Density- and Anomaly-based Intrusion Detector in Networks}
 \author{Eric Lim}
 \department{Computer Science}
-\supervisor{Prof Gill Dobbie}{Dr Yun Sing Koh}
+\supervisor{Prof. Gill Dobbie}{Dr. Yun Sing Koh}
 \maketitle
 
 \frontmatter
 \begin{abstract}
-The abstract
+
+
+
+
 \end{abstract}
 
 \begin{acknowledgements}
@@ -56,9 +59,9 @@ I would like to acknowledge and thank: ...
 \tableofcontents
 
 \mainmatter
-<<main, cache=TRUE, child=c('../Introduction/Introduction.Rnw', '../Background/Background.Rnw', '../Review/Review.Rnw', '../Methods/Methods.Rnw', '../Evaluation/Evaluation.Rnw', '../Conclusion/Conclusion.Rnw')>>=
-
-@
+%' <<main, cache=TRUE, child=c('../Introduction/Introduction.Rnw', '../Background/Background.Rnw', '../Review/Review.Rnw', '../Methods/Methods.Rnw', '../Evaluation/Evaluation.Rnw', '../Conclusion/Conclusion.Rnw')>>=
+%' 
+%' @
 
 
 % % include more chapters here...
@@ -66,8 +69,8 @@ I would like to acknowledge and thank: ...
 
 \backmatter
 % uncomment below when building the whole doc:
-\bibliographystyle{plain}
-\bibliography{bibliography}
+% \bibliographystyle{plain}
+% \bibliography{bibliography}
 
 <<appendix, cache=TRUE, child='../Appendix/AppendixA.Rnw'>>=
 

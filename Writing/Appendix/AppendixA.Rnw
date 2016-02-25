@@ -4,7 +4,7 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 <<a-score, cache=TRUE, echo=FALSE>>=
 load(file = "//Users/eric/masters-project/Data/LOF_scores/scores.RData")
-require(scales)
+suppressWarnings(require(scales))
 densityCurves = function(scores, xlim=c(0,15),...) {
     d = apply(scores, 2, function(x) max(density(x)$y))
     maxd = which.max(d)

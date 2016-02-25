@@ -13,5 +13,6 @@ Writing/**/*.blg
 Writing/**/cache
 Writing/**/*.bbl
 Writing/**/*.csv
+Writing/**/figure
 
 .Rproj.user
