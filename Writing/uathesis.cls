@@ -312,7 +312,7 @@
       %\mbox{\includegraphics[scale=0.8]{unilogo}} &
       %\parbox[b]{100mm}
       \vspace{2cm}
-      {\sc A thesis submitted in fulfillment of the requirements for \\ \degreetitle} \\
+      {\sc A thesis submitted in fulfillment of the requirements for the degree of \\ \degreetitle} \\
     %\end{tabular}
   }%
   \@thanks
