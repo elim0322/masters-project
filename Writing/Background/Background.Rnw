@@ -4,13 +4,13 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 
 \chapter{Background}
 \label{ch:background}
-Discussions in this chapter highlight the schemes implemented in our approach to unsupervised anomaly-based network intrusion detection. All the schemes are unsupervised learning tasks as our primary interest lies in the detection of novel threats without the use of labels.
+Discussions in this chapter highlight the algorithms implemented in our approach to unsupervised anomaly-based network intrusion detection. All the schemes are unsupervised learning tasks as our primary interest lies in the detection of novel threats without the use of labels.
 
 %----------------------
 % Local outlier factor
 %----------------------
 \section{Local outlier factor}
-Local outlier factor (LOF) is a density-based anomaly scoring algorithm proposed by Breunig et al. \cite{bre00} which assigns each instance in a given data with a score of being an anomaly. The LOF algorithm is based on the notion of local density of an object, that is its $k$-nearest neighbours, and comparisons between the local density of the object and those of its neighbours. Then objects with relatively low densities comapred to their neighbours are considered to be anomalies under the assumption that these objects in the sparse regions are more isolated from the rest of the data than those in the dense regions.
+Local outlier factor (LOF) is a density-based anomaly scoring algorithm proposed by Breunig et al. \cite{bre00} which assigns each instance in given data a score of being an anomaly. The LOF algorithm is based on the notion of local density of an object, that is its $k$-nearest neighbours, and comparisons between the local density of the object and those of its neighbours. Then objects with relatively low densities compared to their neighbours are considered to be anomalies under the assumption that these objects in the sparse regions are more isolated from the rest of the data than those in the dense regions.
 
 To find the local density of an object, $p$, first its reachability-distance with respect to an object, $o$, is computed as follows
 \newcommand\rdist{\mathop{\mbox{$reach$-$\mathit{dist}_k$}}}
@@ -24,7 +24,7 @@ where $\kdist(o)$ is the distance between the object, $o$, and its $k$-th neares
 \label{eq2}
 lrd(p) = 1/\left( \frac{\sum_{B \in N_k(p)} \rdist(p, o)}{|N_k(p)|} \right),
 \end{equation}
-where $N_k(p)$ is the set of the $k$-nearest neighbours of $p$. In words, (1) the radius of the smallest hypersphere, that accomodates $k$ nearest neighbours, is computed for an object and for all its $k$ neighbours ($\kdist$), (2) the sum of the radii is computed and (3) the volume of the hypersphere is divided by the sum. Lastly, the LOF score of $p$ is given by
+where $N_k(p)$ is the set of the $k$-nearest neighbours of $p$. In words, (1) the radius of the smallest hypersphere, that accommodates $k$ nearest neighbours, is computed for an object and for all its $k$ neighbours ($\kdist$), (2) the sum of the radii is computed and (3) the volume of the hypersphere is divided by the sum. Lastly, the LOF score of $p$ is given by
 \begin{equation}
 \label{eq3}
 LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
@@ -34,11 +34,11 @@ which can be further simplified to
 \label{eq4}
 LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)}.
 \end{equation}
-Equation \ref{eq:4} indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another. This provides a heuristic to suggest that an object whose LOF score is less than 1 is an inlier while the opposite is an outlier.
+Equation \ref{eq4} indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another. This provides a heuristic to suggest that an object whose LOF score is less than 1 is an inlier while the opposite is an outlier.
 
 The LOF algorithm is used in Phase 1 of our method. Our decision to implement LOF is largely due to its local density-based approach, which allows it to be very robust in finding anomalies embedded deep within clusters. To illustrate this, consider a set of two-dimensional objects plotted as presented in Figure \ref{fig:back1}. Using a simple global nearest neighbour approach, the object, $p1$, cannot be identified as an outlier because distance between any pair of points in the sparse region is always greater than that between $p1$ and its nearest neighbours. However, using the local density-based approach, LOF can recognise both $p1$ and $p2$ as outliers. This means the performance of LOF is not easily affected by the shapes of data and is robust towards data of arbitrary shapes. A downside of LOF is its expensive nature, which we regard as a trade-off for the high capacity of handling different types and shapes of data.
 
-In addition to the previously mentioned advantage, the scoring aspect of LOF is beneficial in our study. What it produces as output is a single numeric vector, of scores, that is simple to work with. One way to understand the process of LOF is that it transforms high-dimensional data into a much simpler vector of one dimension whose element, each, provides a degree of being an outlier. The luxuary to work with a numeric vector allows for setting up a highly flexible threshold, which has been suitable for running multiple experiments in our study.
+In addition to the previously mentioned advantage, the scoring aspect of LOF is beneficial in our study. What it produces as output is a single numeric vector, of scores, that is simple to work with. One way to understand the process of LOF is that it transforms high-dimensional data into a much simpler vector of one dimension whose element, each, provides a degree of being an outlier. The luxury to work with a numeric vector allows for setting up a highly flexible threshold, which has been suitable for running multiple experiments in our study.
 
 <<back1, echo=FALSE, out.width="0.6\\linewidth", fig.align='center', fig.cap="Advantages of the local approach in LOF">>=
 set.seed(1)
@@ -78,7 +78,7 @@ abline(v=1.4, lty=4, col="blue")
 legend("topright", "threshold", lty=4, col="blue")
 @
 
-Thus we have decided to include KDE as a threshold generating tool that allows us to preliminarily explore the distribution of LOF scores and infer the regions of normal and anomalous groups to find a suitable threshold that separates those groups out accordingly.
+Thus we have decided to include KDE as a threshold generating tool that allows us to explore the distribution of LOF scores and infer the regions of normal and anomalous groups to find a suitable threshold that separates those groups out accordingly.
 
 
 
@@ -152,7 +152,7 @@ DBSCAN is used in Phase 2 of our method. The purpose of Phase 2 is to cluster Fa
 %---------
 % X-means
 %---------
-\section{Other schemes}
+\section{Other algorithms}
 There are a couple of schemes used in our experiments, namely the X-means clustering algorithm and Principal Component Analysis (PCA), that are worthwhile discussing.
 
 \subsubsection{X-means}
@@ -207,7 +207,7 @@ The main advantage of X-means is the absence of the parameter, $k$, as it comput
 
 
 \subsubsection{Principal component analysis}
-Principal component analysis (PCA) is initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to minimising the errors in response for the case of linear regression models (Figure \ref{fig:back6}). In essence, PCA is an orthogonal transformation technique that projects a given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
+Principal component analysis (PCA) was initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to minimising the errors in response for the case of linear regression models (Figure \ref{fig:back6}). In essence, PCA is an orthogonal transformation technique that projects given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
 
 We considered PCA as a preliminary step to reduce the dimensionality of data in an attempt to increase the efficiency of the expensive algorithms such as LOF and DBSCAN. While it allowed us to visualise the data in two-dimensions, the projected data was not an effective representation of the original data as it lost too much information along the way. Hence we used PCA only as an exploratory visualisation tool to help us develop ideas.
 
