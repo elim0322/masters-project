@@ -3,7 +3,7 @@ knitr::set_parent(parent = "../Main/Main.Rnw")
 @
 <<a-score, cache=TRUE, echo=FALSE, message=FALSE>>=
 opts_knit$set(fig.path="../Appendix/figure/", dev="png")
-load(file = "//Users/eric/masters-project/Data/LOF_scores/scores.RData")
+load(file = "//Users/eric/masters-project/Data/LOF_scores/scores2.RData")
 suppressWarnings(require(scales))
 densityCurves = function(scores, xlim=c(0,15),...) {
     d = apply(scores, 2, function(x) max(density(x)$y))
