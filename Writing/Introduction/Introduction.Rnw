@@ -77,7 +77,7 @@ Our goal in this thesis is to present a novel unsupervised anomaly-based network
     \draw [arrow] (p2) to (out);
     \draw [arrow] (out) to (end);
   \end{tikzpicture}
-  \caption{High-level system overview.}
+  \caption{A high-level system overview of our proposed method for intrusion detection in networks.}
   \label{fig:intro}
 \end{figure}
 

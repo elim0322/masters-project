@@ -1,8 +1,8 @@
-<<set-parent, echo=FALSE, cache=FALSE>>=
+<<set-parent, echo=FALSE, cache=TRUE>>=
 knitr::set_parent(parent = "../Main/Main.Rnw")
 @
-
-<<a-score, cache=TRUE, echo=FALSE>>=
+<<a-score, cache=TRUE, echo=FALSE, message=FALSE>>=
+opts_knit$set(fig.path="../Appendix/figure/", dev="png")
 load(file = "//Users/eric/masters-project/Data/LOF_scores/scores.RData")
 suppressWarnings(require(scales))
 densityCurves = function(scores, xlim=c(0,15),...) {
@@ -65,26 +65,22 @@ dat2.sds.50a = c(sd(system.results_dat2_50a05k$P1.detection.rate), sd(system.res
 % ------------------
 % CHAPTER: Appendix
 % ------------------
-\appendix
+\begin{appendices}
+\addtocontents{toc}{\protect\setcounter{tocdepth}{0}}
 
-\chapter{Supplementary output for the training set of KDD'99 data}
+
+\chapter{Supplementary graphical output from dataset-1 of KDD'99 data}
 \label{ch:appendixa}
 
-<<app-tab1, dependson="a-result", echo=FALSE, results='asis'>>=
-suppressWarnings(library(xtable))
-## For training set
-tab1 = as.data.frame(rbind(org(dat1.means.10a, dat1.sds.10a), org(dat1.means.20a, dat1.sds.20a), org(dat1.means.30a, dat1.sds.30a), org(dat1.means.40a, dat1.sds.40a), org(dat1.means.50a, dat1.sds.50a)), row.names = FALSE)
-colnames(tab1) = c(10, 20, 30, 40, 50)
-rownames(tab1) = c(0.1, 0.2, 0.3, 0.4, 0.5)
-xtab1 = xtable(tab1, caption = "TPR from the \\emph{training set}", label = "evaluation:tab1")
-align(xtab1) = "crrrrr"
-addtorow1 = list()
-addtorow1$pos = list(0, 0)
-addtorow1$command = c(paste0("\\multicolumn{1}{c}{\\textbf{Intrusion}} & \\multicolumn{5}{c}{", "$\\boldsymbol{k_p}$", "}", "\\\\"), "\\multicolumn{1}{c}{\\textbf{Frequency}} & 0.1 & 0.2 & 0.3 & 0.4 & 0.5 \\\\")
-print.xtable(xtab1, booktabs = F, caption.placement = "top", sanitize.text.function = function(x) x, add.to.row=addtorow1, include.colnames = F)
-@
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{table}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
 
-<<dat1-a05, dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.05">>=
+Each of the figures in Appendix~\ref{ch:appendixa} corresponds to the kernel density estimates of LOF scores, computed from dataset-1 of KDD'99 using different values for (1) the parameter, $k_p$ and (2) the intrusion frequencies. The collection of the graphical output presented in the appendix allows one to visualise the effect of varying $k_p$ for each of the different intrusion frequencies, and supplements our discussion in Section~\ref{evaluation:sec5.3} that the scores are less noisy and reveal underlying densities, i.e., curvatures, to a greater extent as $k_p$ increases.
+
+
+<<dat1-a05,dependson="a-score",dev="png",echo=FALSE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.05">>=
 densityCurves(dat1_05a_05k, main=expression(paste(k[p]," = ",0.05)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_05a_10k, main=expression(paste(k[p]," = ",0.1)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_05a_20k, main=expression(paste(k[p]," = ",0.2)),cex.main=1.7,cex.lab=1.5)
@@ -92,7 +88,7 @@ densityCurves(dat1_05a_30k, main=expression(paste(k[p]," = ",0.3)),cex.main=1.7,
 densityCurves(dat1_05a_40k, main=expression(paste(k[p]," = ",0.4)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_05a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,cex.lab=1.5)
 @
-<<dat1-a1,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.1">>=
+<<dat1-a1,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.1">>=
 densityCurves(dat1_10a_05k, main=expression(paste(k[p]," = ",0.05)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_10a_10k, main=expression(paste(k[p]," = ",0.1)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_10a_20k, main=expression(paste(k[p]," = ",0.2)),cex.main=1.7,cex.lab=1.5)
@@ -100,7 +96,7 @@ densityCurves(dat1_10a_30k, main=expression(paste(k[p]," = ",0.3)),cex.main=1.7,
 densityCurves(dat1_10a_40k, main=expression(paste(k[p]," = ",0.4)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_10a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,cex.lab=1.5)
 @
-<<dat1-a2,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.2">>=
+<<dat1-a2,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.2">>=
 densityCurves(dat1_20a_05k, main=expression(paste(k[p]," = ",0.05)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_20a_10k, main=expression(paste(k[p]," = ",0.1)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_20a_20k, main=expression(paste(k[p]," = ",0.2)),cex.main=1.7,cex.lab=1.5)
@@ -108,7 +104,7 @@ densityCurves(dat1_20a_30k, main=expression(paste(k[p]," = ",0.3)),cex.main=1.7,
 densityCurves(dat1_20a_40k, main=expression(paste(k[p]," = ",0.4)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_20a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,cex.lab=1.5)
 @
-<<dat1-a3,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.3">>=
+<<dat1-a3,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.3">>=
 densityCurves(dat1_30a_05k, main=expression(paste(k[p]," = ",0.05)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_30a_10k, main=expression(paste(k[p]," = ",0.1)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_30a_20k, main=expression(paste(k[p]," = ",0.2)),cex.main=1.7,cex.lab=1.5)
@@ -116,7 +112,7 @@ densityCurves(dat1_30a_30k, main=expression(paste(k[p]," = ",0.3)),cex.main=1.7,
 densityCurves(dat1_30a_40k, main=expression(paste(k[p]," = ",0.4)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_30a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,cex.lab=1.5)
 @
-<<dat1-a4,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.4">>=
+<<dat1-a4,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.4">>=
 densityCurves(dat1_40a_05k, main=expression(paste(k[p]," = ",0.05)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_40a_10k, main=expression(paste(k[p]," = ",0.1)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_40a_20k, main=expression(paste(k[p]," = ",0.2)),cex.main=1.7,cex.lab=1.5)
@@ -124,7 +120,7 @@ densityCurves(dat1_40a_30k, main=expression(paste(k[p]," = ",0.3)),cex.main=1.7,
 densityCurves(dat1_40a_40k, main=expression(paste(k[p]," = ",0.4)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_40a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,cex.lab=1.5)
 @
-<<dat1-a5,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.5">>=
+<<dat1-a5,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.5">>=
 densityCurves(dat1_50a_05k, main=expression(paste(k[p]," = ",0.05)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_50a_10k, main=expression(paste(k[p]," = ",0.1)),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat1_50a_20k, main=expression(paste(k[p]," = ",0.2)),cex.main=1.7,cex.lab=1.5)
@@ -137,28 +133,12 @@ densityCurves(dat1_50a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,
 
 
 
-\chapter{Supplementary output for the test set of KDD'99 data}
+\chapter{Supplementary graphical output from dataset-2 of KDD'99 data}
 \label{ch:appendixb}
 
+The figures presented in Appendix~\ref{ch:appendixb} serve similar purposes to those in Appendix~\ref{ch:appendixa}, where one can visualise the effects of varying the parameters, $k_p$ and intrusion frequency on LOF scores, with one exception that the scores computed from dataset-2 of KDD'99 are presented here.
 
-
-
-<<app-tab2,dependson="a-result", echo=FALSE, results='asis'>>=
-suppressWarnings(library(xtable))
-## For testset
-tab2 = as.data.frame(rbind(org(dat2.means.10a, dat2.sds.10a), org(dat2.means.20a, dat2.sds.20a), org(dat2.means.30a, dat2.sds.30a), org(dat2.means.40a, dat2.sds.40a), org(dat2.means.50a, dat2.sds.50a)), row.names = FALSE)
-colnames(tab2) = c(10, 20, 30, 40, 50)
-rownames(tab2) = c(0.1, 0.2, 0.3, 0.4, 0.5)
-xtab2 = xtable(tab2, caption = "TPR from the \\emph{test set}", label = "evaluation:tab2")
-align(xtab2) = "crrrrr"
-addtorow2 = list()
-addtorow2$pos = list(0, 0)
-addtorow2$command = c(paste0("\\multicolumn{1}{c}{\\textbf{Intrusion}} & \\multicolumn{5}{c}{", "$\\boldsymbol{k_p}$", "}", "\\\\"), "\\multicolumn{1}{c}{\\textbf{Frequency}} & 0.1 & 0.2 & 0.3 & 0.4 & 0.5 \\\\")
-print.xtable(xtab2, booktabs = F, caption.placement = "top", sanitize.text.function = function(x) x, add.to.row=addtorow2, include.colnames = F)
-@
-
-
-<<dat2-a05,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.05">>=
+<<dat2-a05,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.05">>=
 densityCurves(dat2_05a_05k, main=expression(paste(k[p]," = ",0.05)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_05a_10k, main=expression(paste(k[p]," = ",0.1)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_05a_20k, main=expression(paste(k[p]," = ",0.2)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
@@ -166,8 +146,7 @@ densityCurves(dat2_05a_30k, main=expression(paste(k[p]," = ",0.3)), xlim=c(0,10)
 densityCurves(dat2_05a_40k, main=expression(paste(k[p]," = ",0.4)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_05a_50k, main=expression(paste(k[p]," = ",0.5)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 @
-
-<<dat2-a1,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.1">>=
+<<dat2-a1,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.1">>=
 densityCurves(dat2_10a_05k, main=expression(paste(k[p]," = ",0.05)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_10a_10k, main=expression(paste(k[p]," = ",0.1)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_10a_20k, main=expression(paste(k[p]," = ",0.2)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
@@ -175,8 +154,7 @@ densityCurves(dat2_10a_30k, main=expression(paste(k[p]," = ",0.3)), xlim=c(0,10)
 densityCurves(dat2_10a_40k, main=expression(paste(k[p]," = ",0.4)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_10a_50k, main=expression(paste(k[p]," = ",0.5)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 @
-
-<<dat2-a2,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.2">>=
+<<dat2-a2,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.2">>=
 densityCurves(dat2_20a_05k, main=expression(paste(k[p]," = ",0.05)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_20a_10k, main=expression(paste(k[p]," = ",0.1)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_20a_20k, main=expression(paste(k[p]," = ",0.2)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
@@ -184,8 +162,7 @@ densityCurves(dat2_20a_30k, main=expression(paste(k[p]," = ",0.3)), xlim=c(0,10)
 densityCurves(dat2_20a_40k, main=expression(paste(k[p]," = ",0.4)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_20a_50k, main=expression(paste(k[p]," = ",0.5)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 @
-
-<<dat2-a3,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.3">>=
+<<dat2-a3,dependson="a-score",dev="png",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.3">>=
 densityCurves(dat2_30a_05k, main=expression(paste(k[p]," = ",0.05)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_30a_10k, main=expression(paste(k[p]," = ",0.1)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_30a_20k, main=expression(paste(k[p]," = ",0.2)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
@@ -193,8 +170,7 @@ densityCurves(dat2_30a_30k, main=expression(paste(k[p]," = ",0.3)), xlim=c(0,10)
 densityCurves(dat2_30a_40k, main=expression(paste(k[p]," = ",0.4)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_30a_50k, main=expression(paste(k[p]," = ",0.5)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 @
-
-<<dat2-a4,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.4">>=
+<<dat2-a4,dependson="a-score",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.4">>=
 densityCurves(dat2_40a_05k, main=expression(paste(k[p]," = ",0.05)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_40a_10k, main=expression(paste(k[p]," = ",0.1)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_40a_20k, main=expression(paste(k[p]," = ",0.2)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
@@ -202,8 +178,7 @@ densityCurves(dat2_40a_30k, main=expression(paste(k[p]," = ",0.3)), xlim=c(0,10)
 densityCurves(dat2_40a_40k, main=expression(paste(k[p]," = ",0.4)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_40a_50k, main=expression(paste(k[p]," = ",0.5)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 @
-
-<<dat2-a5,dependson="a-score",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Probability densities of LOF scores when intrusion frequency is 0.5">>=
+<<dat2-a5,dependson="a-score",dev="png",echo=FALSE,cache=TRUE,fig.align='center',fig.show='hold',out.width="0.45\\linewidth",fig.cap="Kernel density estimates of LOF scores when intrusion frequency is 0.5">>=
 densityCurves(dat2_50a_05k, main=expression(paste(k[p]," = ",0.05)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_50a_10k, main=expression(paste(k[p]," = ",0.1)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 densityCurves(dat2_50a_20k, main=expression(paste(k[p]," = ",0.2)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
@@ -212,4 +187,34 @@ densityCurves(dat2_50a_40k, main=expression(paste(k[p]," = ",0.4)), xlim=c(0,10)
 densityCurves(dat2_50a_50k, main=expression(paste(k[p]," = ",0.5)), xlim=c(0,10),cex.main=1.7,cex.lab=1.5)
 @
 
+\end{appendices}
 
+
+
+
+<<app-tab1, eval=FALSE, dependson="a-result", echo=FALSE, results='asis'>>=
+suppressWarnings(library(xtable))
+## For training set
+tab1 = as.data.frame(rbind(org(dat1.means.10a, dat1.sds.10a), org(dat1.means.20a, dat1.sds.20a), org(dat1.means.30a, dat1.sds.30a), org(dat1.means.40a, dat1.sds.40a), org(dat1.means.50a, dat1.sds.50a)), row.names = FALSE)
+colnames(tab1) = c(10, 20, 30, 40, 50)
+rownames(tab1) = c(0.1, 0.2, 0.3, 0.4, 0.5)
+xtab1 = xtable(tab1, caption = "TPR from the \\emph{training set}", label = "app-tab1")
+align(xtab1) = "crrrrr"
+addtorow1 = list()
+addtorow1$pos = list(0, 0)
+addtorow1$command = c(paste0("\\multicolumn{1}{c}{\\textbf{Intrusion}} & \\multicolumn{5}{c}{", "$\\boldsymbol{k_p}$", "}", "\\\\"), "\\multicolumn{1}{c}{\\textbf{Frequency}} & 0.1 & 0.2 & 0.3 & 0.4 & 0.5 \\\\")
+print.xtable(xtab1, booktabs = F, caption.placement = "top", sanitize.text.function = function(x) x, add.to.row=addtorow1, include.colnames = F)
+@
+<<app-tab2, eval=FALSE, dependson="a-result", echo=FALSE, results='asis'>>=
+suppressWarnings(library(xtable))
+## For testset
+tab2 = as.data.frame(rbind(org(dat2.means.10a, dat2.sds.10a), org(dat2.means.20a, dat2.sds.20a), org(dat2.means.30a, dat2.sds.30a), org(dat2.means.40a, dat2.sds.40a), org(dat2.means.50a, dat2.sds.50a)), row.names = FALSE)
+colnames(tab2) = c(10, 20, 30, 40, 50)
+rownames(tab2) = c(0.1, 0.2, 0.3, 0.4, 0.5)
+xtab2 = xtable(tab2, caption = "TPR from the \\emph{test set}", label = "app-tab2")
+align(xtab2) = "crrrrr"
+addtorow2 = list()
+addtorow2$pos = list(0, 0)
+addtorow2$command = c(paste0("\\multicolumn{1}{c}{\\textbf{Intrusion}} & \\multicolumn{5}{c}{", "$\\boldsymbol{k_p}$", "}", "\\\\"), "\\multicolumn{1}{c}{\\textbf{Frequency}} & 0.1 & 0.2 & 0.3 & 0.4 & 0.5 \\\\")
+print.xtable(xtab2, booktabs = F, caption.placement = "top", sanitize.text.function = function(x) x, add.to.row=addtorow2, include.colnames = F)
+@

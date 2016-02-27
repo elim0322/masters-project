@@ -27,35 +27,49 @@ lrd(p) = 1/\left( \frac{\sum_{B \in N_k(p)} \rdist(p, o)}{|N_k(p)|} \right),
 where $N_k(p)$ is the set of the $k$-nearest neighbours of $p$. In words, (1) the radius of the smallest hypersphere, that accommodates $k$ nearest neighbours, is computed for an object and for all its $k$ neighbours ($\kdist$), (2) the sum of the radii is computed and (3) the volume of the hypersphere is divided by the sum. Lastly, the LOF score of $p$ is given by
 \begin{equation}
 \label{eq3}
-LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
+\mathit{LOF}_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} \frac{lrd_{k}(o)}{lrd_{k}(p)}}{|N_{k}(p)|},
 \end{equation}
 which can be further simplified to
 \begin{equation}
 \label{eq4}
-LOF_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)}.
+\mathit{LOF}_{k}(p) = \frac{\sum\limits_{o \in N_{k}(p)} lrd_{k}(o)}{|N_{k}(p)|} \cdotp \frac{1}{lrd_{k}(p)} = \frac{\sum\limits_{o \in N_{k}(p)}\frac{lrd_{k}(o)}{|N_{k}(p)|}} {lrd_{k}(p)}.
 \end{equation}
-Equation \ref{eq4} indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another. This provides a heuristic to suggest that an object whose LOF score is less than 1 is an inlier while the opposite is an outlier.
+Equation~\ref{eq4} indicates that the LOF score of $p$ is essentially the ratio of the \emph{averaged} local density of the $k$ neighbourhood and the local density of $p$ and that the two density measures are directly proportional to one another. This provides a heuristic to suggest that an object whose LOF score is less than 1 is an inlier while the opposite is an outlier.
 
-The LOF algorithm is used in Phase 1 of our method. Our decision to implement LOF is largely due to its local density-based approach, which allows it to be very robust in finding anomalies embedded deep within clusters. To illustrate this, consider a set of two-dimensional objects plotted as presented in Figure \ref{fig:back1}. Using a simple global nearest neighbour approach, the object, $p1$, cannot be identified as an outlier because distance between any pair of points in the sparse region is always greater than that between $p1$ and its nearest neighbours. However, using the local density-based approach, LOF can recognise both $p1$ and $p2$ as outliers. This means the performance of LOF is not easily affected by the shapes of data and is robust towards data of arbitrary shapes. A downside of LOF is its expensive nature, which we regard as a trade-off for the high capacity of handling different types and shapes of data.
+The LOF algorithm is used in Phase 1 of our method. Our decision to implement LOF is largely due to its local density-based approach, which allows it to be very robust in finding anomalies embedded deep within clusters. To illustrate this, consider a set of two-dimensional objects plotted as presented in Figure~\ref{fig:back1}. Using a simple global nearest neighbour approach, the object, $p1$, cannot be identified as an outlier because distance between any pair of points in the sparse region is always greater than that between $p1$ and its nearest neighbours. However, using the local density-based approach, LOF can recognise both $p1$ and $p2$ as outliers. This means the performance of LOF is not easily affected by the shapes of data and is robust towards data of arbitrary shapes. A downside of LOF is its expensive nature, which we regard as a trade-off for the high capacity of handling different types and shapes of data.
 
 In addition to the previously mentioned advantage, the scoring aspect of LOF is beneficial in our study. What it produces as output is a single numeric vector, of scores, that is simple to work with. One way to understand the process of LOF is that it transforms high-dimensional data into a much simpler vector of one dimension whose element, each, provides a degree of being an outlier. The luxury to work with a numeric vector allows for setting up a highly flexible threshold, which has been suitable for running multiple experiments in our study.
 
-<<back1, echo=FALSE, out.width="0.6\\linewidth", fig.align='center', fig.cap="Advantages of the local approach in LOF">>=
-set.seed(1)
-r1 = runif(50, 0, 1)
-set.seed(2)
-a1 = runif(50, 0, 2*pi)
-plot(r1 * cos(a1), r1 * sin(a1), asp=1, xlim=c(-1,10), ylim=c(-1,10), xlab="", ylab="", axes=FALSE)
-set.seed(1)
-r2 = runif(200, 0, 10)
-set.seed(2)
-a2 = runif(200, 0, 2*pi)
-points(12 + r2 * cos(a2), 12 + r2 * sin(a2))
-points(1.3, 1.3, pch = 4, cex=1.3)
-text(1.3, 1.3, "p1", pos=4, cex=1.3)
-points(8, 0.2, pch = 4, cex=1.3)
-text(8, 0.2, "p2", pos=4, cex=1.3)
-box()
+<<back1, echo=FALSE, out.width="0.6\\linewidth", fig.align='center', fig.cap="Advantages of the local approach in LOF.">>=
+# set.seed(1)
+# r1 = runif(50, 0, 1)
+# set.seed(2)
+# a1 = runif(50, 0, 2*pi)
+# plot(r1 * cos(a1), r1 * sin(a1), asp=1, xlim=c(-1,10), ylim=c(-1,10), xlab="", ylab="", axes=FALSE)
+# set.seed(1)
+# r2 = runif(200, 0, 10)
+# set.seed(2)
+# a2 = runif(200, 0, 2*pi)
+# points(12 + r2 * cos(a2), 12 + r2 * sin(a2))
+# points(1.3, 1.3, pch = 4, cex=1.3)
+# text(1.3, 1.3, "p1", pos=4, cex=1.3)
+# points(8, 0.2, pch = 4, cex=1.3)
+# text(8, 0.2, "p2", pos=4, cex=1.3)
+# box()
+set.seed(3)
+a = cbind(rnorm(30, mean = 10, sd = 4), rnorm(30, mean = 10, sd = 4))
+set.seed(3)
+b = cbind(rnorm(100, mean = 1, sd = 0.4), rnorm(100, mean = 1, sd = 0.4))
+xmin = min(c(min(a[,1]), min(b[,1])))
+xmax = max(c(max(a[,1]), max(b[,1])))
+ymin = min(c(min(a[,2]), min(b[,2])))
+ymax = max(c(max(a[,2]), max(b[,2])))
+plot(a[-16,], xlim = c(xmin, xmax), ylim = c(ymin, ymax), xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+points(b)
+points(x = max(b[,1])+0.3, y = max(b[,2])+0.2, pch = 4, cex = 1.2)
+text(x = max(b[,1])+0.3, y = max(b[,2])+0.2, labels = expression(p[1]), pos = 3, cex = 1.2)
+points(x=a[16,1], y=a[16,2], pch = 4, cex = 1.2)
+text(x=a[16,1], y=a[16,2], pch = 4, labels = expression(p[2]), pos = 3, cex = 1.2)
 @
 
 
@@ -69,9 +83,9 @@ Kernel density estimation (KDE) is a non-parametric method of approximating the 
 \end{equation}
 as given by Equation 1.7 in reference \cite{par62}, where $h$ is a smoothing parameter known as the \emph{bandwidth} and $K(\cdot)$ is a non-negative, real-valued function known as the \emph{kernel}. An important property of the kernel is that the integral over its boundaries is always one, to ensure the kernel density estimates always result in a PDF. The problem of KDE is implemented in anomaly detection by: (1) estimating the PDFs of a feature from training and test data and (2) comparing them for any signs of inconsistency, with an example in network intrusion detection being reference \cite{yeu02}.
 
-The most valuable aspect of KDE is that it allows one to explore the overall distribution of a given feature. If plotted, kernel density estimates provide immediate visual awareness of where the most frequent values lie and their respective frequencies. Since our interest lies in the domain of unsupervised anomaly detection, which assumes that anomalous instances are much less frequent than their normal counterparts, KDE is appropriately relevant in our case. Another advantage of KDE is that it is highly efficient. Figure \ref{fig:back2} presents a plot of kernel density estimates for an arbitrary set of LOF scores. We have established previously that a score less than or equal to 1 indicates an inlier, which is synonymous with the major peak around the score of 1 allowing for some fluctuations. Examining this plot, we can set a threshold somewhere around 1.4 so that instances whose scores are greater than 1.4 can be labelled as possible anomalies while the rest are normal. A major caveat of KDE lies in the fact that it is useful only for univariate data, which is immediately negated once it is used on the univarate data of LOF scores.
+The most valuable aspect of KDE is that it allows one to explore the overall distribution of a given feature. If plotted, kernel density estimates provide immediate visual awareness of where the most frequent values lie and their respective frequencies. Since our interest lies in the domain of unsupervised anomaly detection, which assumes that anomalous instances are much less frequent than their normal counterparts, KDE is appropriately relevant in our case. Another advantage of KDE is that it is highly efficient. Figure~\ref{fig:back2} presents a plot of kernel density estimates for an arbitrary set of LOF scores. We have established previously that a score less than or equal to 1 indicates an inlier, which is synonymous with the major peak around the score of 1 allowing for some fluctuations. Examining this plot, we can set a threshold somewhere around 1.4 so that instances whose scores are greater than 1.4 can be labelled as possible anomalies while the rest are normal. A major caveat of KDE lies in the fact that it is useful only for univariate data, which is not an issue when it is used on the univarate data of LOF scores.
 
-<<back2, echo=FALSE, cache=TRUE, out.width="0.6\\linewidth", fig.align='center', fig.cap="An example of KDE using an arbitrary set of LOF scores">>=
+<<back2, echo=FALSE, cache=TRUE, out.width="0.6\\linewidth", fig.align='center', fig.cap="An example of KDE using an arbitrary set of LOF scores.">>=
 scores = as.vector(read.csv("../../Data/LOF_scores/dat1_05a_30k.csv", header = FALSE)[1,])
 plot(density(as.numeric(scores)), xlab="Scores", main="Density of LOF scores")
 abline(v=1.4, lty=4, col="blue")
@@ -86,9 +100,10 @@ Thus we have decided to include KDE as a threshold generating tool that allows u
 % Density-based spatial clustering of applications with noise
 %-------------------------------------------------------------
 \section{DBSCAN}
-Density-based spatial clustering of applications with noise (DBSCAN) is a density-based clustering algorithm proposed by Ester el al. \cite{est96} that offers two unique features: (1) it does not force each data instance into a cluster and (2) it is capable of distinguishing isolated points as noise. These noise points are analogous to anomalies as they are highly isolated from the rest of data thus not conforming to the expected pattern of the data. Understanding how DBSCAN works requires three preliminaries. First, a point, $p$, is a core point if there are at least $k$ neighbouring points within the distance of $\epsilon$ and these points are said to be directly density-reachable from $p$. Second, a point, $q$, is said to be density-reachable if there is a chain of directly density-reachable points connecting to $q$ and the density-reachable points, such as $q$, are border points. Lastly, points that are not reachable from any other points are considered as noise. A cluster is then formed with a single or multiple core points and their surrounding border points. A simple diagram in Figure \ref{fig:back3} illustrates an example where the core point and two border points form a cluster. Further extending the concept, Figure \ref{fig:back4} can be scrutinised as a more complex example.
+Density-based spatial clustering of applications with noise (DBSCAN) is a density-based clustering algorithm proposed by Ester el al. \cite{est96} that offers two unique features: (1) it does not force each data instance into a cluster and (2) it is capable of distinguishing isolated points as noise. These noise points are analogous to anomalies as they are highly isolated from the rest of data thus not conforming to the expected pattern of the data. Understanding how DBSCAN works requires three preliminaries. First, a point, $p$, is a core point if there are at least $k$ neighbouring points within the distance of $\epsilon$ and these points are said to be directly density-reachable from $p$. Second, a point, $q$, is said to be density-reachable if there is a chain of directly density-reachable points connecting to $q$ and the density-reachable points, such as $q$, are border points. Lastly, points that are not reachable from any other points are considered as noise. A cluster is then formed with a single or multiple core points and their surrounding border points. Figure~\ref{fig:back3} presents a simple diagram to illustrate an example of a cluster computed using the DBSCAN algorithm, where the radii of the core point, two border points and noise point are represented by the solid blue red and black lines, respectively. The core point and two border points form a cluster in this example. Further extending the concept, Figure~\ref{fig:back4} is presented to provide an example of a larger cluster, where nine points form a cluster.
 
-<<back3, fig.pos="H", echo=FALSE, cache=TRUE, out.width="0.7\\linewidth", fig.align='center', fig.cap="DBSCAN preliminaries">>=
+
+<<back3, fig.pos="H", echo=FALSE, cache=TRUE, out.width="0.7\\linewidth", fig.align='center', fig.cap="An example of a simple cluster computed using DBSCAN.">>=
 ax = 7*cos( seq(0,2*pi, length.out=360) )
 ay = 7*sin( seq(0,2*pi, length.out=360) )
 plot(0, 0, type="n", asp=1, axes=FALSE, xlab="", ylab="", xlim=c(-15, 17), ylim=c(-10.5, 10))
@@ -99,7 +114,7 @@ lines(xx1,yy1, col='blue')
 points(-2.5, 1, pch=4)
 text(-2.5, 1, "core point", pos=3, cex=1.2)
 #lines(c(-2.5, 4.5), c(1, 1))
-arrows(-2.5, 1, 4.5, 1, length = 0.12, code=3, angle=90, lty=4)
+arrows(-2.5, 1, 4.5, 1, length = 0.12, code=3, angle=90, lty=2)
 text(2, 1, expression(epsilon), pos=1, cex=1.2)
 text(2, 1, expression(epsilon), pos=1, cex=1.2)
 points(c(-5, -1), c(5, -2), pch=4)
@@ -113,7 +128,7 @@ lines(10 + ax, -4 + ay)
 text(10, -4, "noise point", pos=4, cex=1.2)
 @
 
-<<back4, echo=FALSE, cache=TRUE, out.width="0.7\\linewidth", fig.align='center', fig.cap="An extensive example to illustrate how DBSCAN forms a cluster.">>=
+<<back4, echo=FALSE, cache=TRUE, out.width="0.7\\linewidth", fig.align='center', fig.cap="An example of a more sizable cluster computed using DBSCAN.">>=
 ax = 7*cos( seq(0,2*pi, length.out=360) )
 ay = 7*sin( seq(0,2*pi, length.out=360) )
 plot(0, 0, type="n", asp=1, axes=FALSE, xlab="", ylab="", xlim=c(-25,17), ylim=c(-15,15))
@@ -160,13 +175,13 @@ The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00x}, is
 \begin{equation}
 \underset{\mathbf{S}}{\text{arg min}} = \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_i} \Vert \mathbf{x} - \boldsymbol{\mu}_i \Vert^2,
 \end{equation}
-where $\boldsymbol{\mu}_i$ is the mean of points in $S_i$. Minimising the within-cluster variance automatically minimises between-cluster variance, which is a duality that makes the algorithm efficient. What X-means adds on top is further partitioning of each partitioned cluster by the multiple of 2. For each successive partitioning, a Bayesian Information Criterion (BIC) is computed using the following from Kass and Wasserman \cite{kas95}
+where $\boldsymbol{\mu}_i$ is the mean of points in cluster $S_i$. Minimising the within-cluster variance automatically minimises between-cluster variance, which is a duality that makes the algorithm efficient. What X-means adds on top is further partitioning of each partitioned cluster by a multiple of 2. For each successive partitioning, a Bayesian Information Criterion (BIC) is computed using the following from Kass and Wasserman \cite{kas95}
 \begin{equation}
-BIC(M_j) = \hat{l}_j(D) - \frac{p_j}{2} \cdot log R,
+\mathit{BIC}(M_j) = \hat{l}_j(D) - \frac{p_j}{2} \cdot log R,
 \end{equation}
-where $\hat{l}_j(D)$ is the maximum log-likelihood of the data, $D$, at the $j$-th model, $p_j$ is the number of parameters in $M_j$ and $R$ is the number of points in $M_j$. The successive partitioning is incrementally carried out until BIC can no longer be minimised. Figure \ref{fig:back5} presents an example where the data is partitioned with the ordinary k-means partitioning (plot on the left) and the result of one step of X-means partioning (plot on the right). The BIC for $k = 1$ and $k = 2$ are compared to evaluate whether further partioning is required.
+where $\hat{l}_j(D)$ is the maximum log-likelihood of the data, $D$, at the $j$-th model, $p_j$ is the number of parameters in $M_j$ and $R$ is the number of points in $M_j$. The successive partitioning is incrementally carried out until BIC can no longer be minimised. Figure~\ref{fig:back5} presents an example, where the data is partitioned with the ordinary k-means partitioning (plot on the left) and the result of one step of X-means partioning (plot on the right). Examining the figure, we observe that one step of the X-means partitioning resulted in further partitioning of the already partitioned points using k-means. The BIC for $k = 1$ and $k = 2$ are compared to evaluate whether further partioning is required.
 
-<<back5, echo=FALSE, fig.pos="H", fig.show='hold', cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of X-means.">>=
+<<back5, echo=FALSE, fig.pos="H", fig.show='hold', cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of iterative BIC minimisation in X-means.">>=
 plot(0, 0, type="n", xlim=c(-3, 3), ylim=c(-3, 3), axes=FALSE, xlab="", ylab="", main="Initial partitioning of k-means")
 box()
 set.seed(2)
@@ -207,16 +222,19 @@ The main advantage of X-means is the absence of the parameter, $k$, as it comput
 
 
 \subsubsection{Principal component analysis}
-Principal component analysis (PCA) was initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to minimising the errors in response for the case of linear regression models (Figure \ref{fig:back6}). In essence, PCA is an orthogonal transformation technique that projects given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
+Principal component analysis (PCA) was initially proposed by Pearson \cite{pea01} as a model fitting technique that minimises squared errors orthogonally, as opposed to minimising the squared errors in response variables for the case of linear regression models. Figure~\ref{fig:back6} presents a simplified diagram, where a linear line, represented by the solid black line, is fitted on the two points, represented by the crosses, orthogonally using the PCA and minimising squared errors in $y$ using the simple linear regression. In essence, PCA is an orthogonal transformation technique that projects given data onto a subspace that maximises the variance associated with the data. It is generally used as a dimensionality reduction technique to find an appropriate lower dimensional representation of the data so that it can be visualised in either two- or three-dimensions.
 
 We considered PCA as a preliminary step to reduce the dimensionality of data in an attempt to increase the efficiency of the expensive algorithms such as LOF and DBSCAN. While it allowed us to visualise the data in two-dimensions, the projected data was not an effective representation of the original data as it lost too much information along the way. Hence we used PCA only as an exploratory visualisation tool to help us develop ideas.
 
 
-<<back6, echo=FALSE, fig.pos="H", cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of simple linear regression and PCA.">>=
-plot(0,0, type="n", xlim=c(0.3,0.7), ylim=c(0.2,0.7), asp=1, axes=FALSE, xlab="", ylab="")
+<<back6, echo=FALSE, fig.pos="H", cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of linear model fitting using the simple linear regression and PCA.">>=
+plot(0,0, type="n", xlim=c(0.3,0.7), ylim=c(0.17,0.7), asp=1, axes=FALSE, xlab="x", ylab="y")
+box()
 abline(0, 1)
 lines(c(0.5,0.7), c(0.5,0.3), col="blue")
-lines(c(0.5,0.5), c(0.5,0.15), col="blue")
+lines(c(0.5,0.5), c(0.5,0.18), col="blue")
+points(0.7, 0.3, pch=4)
+points(0.5,0.18, pch=4)
 text(0.6, 0.4, pos=4, "PCA", cex=2)
 text(0.5, 0.2, pos=4, "regression", cex=2)
 @
@@ -230,8 +248,8 @@ text(0.5, 0.2, pos=4, "regression", cex=2)
 %----------------------------------
 % Choice of the parameters for KDE
 %----------------------------------
-%Because the result of KDE can vary according to the choice of $h$ and $K(\cdot)$ we have chosen consistent measures for those parameters. For the smoothing parameter, $h$, we have chosen the one suggested by Scott (1992) over the one by Silverman (1986). The suggestion by Silverman, as given by the equation \ref{eq:methods3}, tends to produce an under-smoothed density where as that by Scott, as given by the equation \ref{eq:methods4}, seems to provide more appropriate smoothing. For the kernel, the Gaussian kernel is chosen as it is considered adequate for univariate data. Figure \ref{fig:hist-example} is two identical histograms of an example set of LOF scores with different density curves superimposed upon.
-%Figure \ref{fig:kde-example} shows the histogram of an example set of LOF scores along with the two different density curves superimposed upon. For the kernel, $K$, the Gaussian kernel is chosen.
+%Because the result of KDE can vary according to the choice of $h$ and $K(\cdot)$ we have chosen consistent measures for those parameters. For the smoothing parameter, $h$, we have chosen the one suggested by Scott (1992) over the one by Silverman (1986). The suggestion by Silverman, as given by the equation~\ref{eq:methods3}, tends to produce an under-smoothed density where as that by Scott, as given by the equation~\ref{eq:methods4}, seems to provide more appropriate smoothing. For the kernel, the Gaussian kernel is chosen as it is considered adequate for univariate data. Figure~\ref{fig:hist-example} is two identical histograms of an example set of LOF scores with different density curves superimposed upon.
+%Figure~\ref{fig:kde-example} shows the histogram of an example set of LOF scores along with the two different density curves superimposed upon. For the kernel, $K$, the Gaussian kernel is chosen.
 % \begin{align}
 % h = 0.9 \hat\sigma n^{-\frac{1}{5}} \label{eq:methods3}
 % \\
