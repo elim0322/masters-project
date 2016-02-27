@@ -274,11 +274,8 @@
 }
 
 \renewcommand{\maketitle}{
-  \pagestyle{empty}
-  \thispagestyle{empty}
   \begin{titlepage}%
   \pagestyle{empty}
-  \thispagestyle{empty}
   \let\footnotesize\small
   \let\footnoterule\relax
   \let \footnote \thanks

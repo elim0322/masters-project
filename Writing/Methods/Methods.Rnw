@@ -114,7 +114,7 @@ Our decision to pursue the implementation of an unsupervised anomaly detection t
 \section{System overview}
 \label{methods:sec1}
 
-Our proposed method is divided into two phases whose objectives are to achieve the highest possible TPR and the lowest possible FPR, respectively, using the previously mentioned ideas. Over the course of the research, the final version of the method has seen a few changes from the initial design we had in mind. For example, our initial design for the first phase was to simply achieve a high TPR by setting a more admissible threshold, strictly following the previously mentioned concept. However the final version now involves more steps, which may seem contradictory to and deviating from the concepts and ideas discussed. But the extra steps were implemented as the result of a natural process of adjusting and improving the system. Keeping this in mind, high-level overviews of Phase~1 and 2 are presented in Figure~\ref{fig:methods-p1} and \ref{fig:methods-p2}, respectively, to supplement the following descriptions of each phase.
+Our proposed method is divided into two phases whose objectives are to achieve the highest possible TPR and the lowest possible FPR, respectively, using the previously mentioned ideas. Over the course of the research, the final version of the method has seen a few changes from the initial design we had in mind. For example, our initial design for the first phase was to simply achieve a high TPR by setting a more admissible threshold, strictly following the previously mentioned concept. However the final version now involves more steps, which may seem contradictory to and deviating from the concepts and ideas discussed. But the extra steps were implemented as the result of a natural process of adjusting and improving the system. Keeping this in mind, high-level overviews of Phases~1 and 2 are presented in Figure~\ref{fig:methods-p1} and \ref{fig:methods-p2}, respectively, to supplement the following descriptions of each phase.
 
 \begin{figure}
 \centering
@@ -150,6 +150,8 @@ Our proposed method is divided into two phases whose objectives are to achieve t
   \label{fig:methods-p1}
 \end{figure}
 
+With reference to Figure~\ref{fig:methods-p1}, Phase 1 accepts numerical data as it initially runs the LOF algorithm to score each instance with a degree of being anomalous. Once every instance is scored, the probability distribution of the LOF scores is estimated using kernel density estimation (KDE), which is then used to plot the estimated probability density function (PDF) to help determine appropriate thresholds. Because we assume that the given test data contains a higher proportion of normal instances, we expect to observe (1) a very dense curvature whose area under the graph, i.e., the probability that the values of the scores fall in that range, is greater than for any other curves and (2) the instances whose scores fall under this region are normal. Then we can extrapolate from the graph, of the PDF, the point at which this major curve ends on the greater side. We lower that point by the value of a parameter to use it as a threshold that is permissible enough to achieve a high TPR. Then those instances whose scores are less than the threshold are labelled as normal (True Negatives) while the others are labelled as possible anomalies (include both True Positives and True Negatives). Once all the instances are labelled as either normal or possible anomaly, a random sample is taken from the set of the normal instances. The random sample is then merged with the set of the possible anomalies to produce a merged set of instances. This merged set has a property that it contains enough of the normal instances that will be clustered with the False Positives from the possible anomalies using the DBSCAN algorithm in Phase 2. Because of the merging, there will be a higher number of normal instances, both False Positives and True Negatives collectively, than that of the actual intrusions in the merged set. Based on this, we identify the largest cluster computed by DBSCAN as the cluster of the normal instances.
+
 \begin{figure}
 \centering
   \begin{tikzpicture}[scale=0.8, every node/.style={transform shape}]
@@ -175,8 +177,6 @@ Our proposed method is divided into two phases whose objectives are to achieve t
   \label{fig:methods-p2}
 \end{figure}
 
-With reference to Figure~\ref{fig:methods-p1}, Phase 1 accepts numerical data as it initially runs the LOF algorithm to score each instance with a degree of being anomalous. Once every instance is scored, the probability distribution of the LOF scores is estimated using kernel density estimation (KDE), which is then used to plot the estimated probability density function (PDF) to help determine appropriate thresholds. Because we assume that the given test data contains a higher proportion of normal instances, we expect to observe (1) a very dense curvature whose area under the graph, i.e., the probability that the values of the scores fall in that range, is greater than for any other curves and (2) the instances whose scores fall under this region are normal. Then we can extrapolate from the graph, of the PDF, the point at which this major curve ends on the greater side. We lower that point by the value of a parameter to use it as a threshold that is permissible enough to achieve a high TPR. Then those instances whose scores are less than the threshold are labelled as normal (True Negatives) while the others are labelled as possible anomalies (include both True Positives and True Negatives). Once all the instances are labelled as either normal or possible anomaly, a random sample is taken from the set of the normal instances. The random sample is then merged with the set of the possible anomalies to produce a merged set of instances. This merged set has a property that it contains enough of the normal instances that will be clustered with the False Positives from the possible anomalies using the DBSCAN algorithm in Phase 2. Because of the merging, there will be a higher number of normal instances, both False Positives and True Negatives collectively, than that of the actual intrusions in the merged set. Based on this, we identify the largest cluster computed by DBSCAN as the cluster of the normal instances.
-
 With reference to Figure~\ref{fig:methods-p2}, Phase 2 accepts the merged set as the input and performs the DBSCAN algorithm on it. If one does not have necessary domain knowledge to help decide what the values of the input parameters for the DBSCAN should be, the \emph{labels} of the random sample can be used to track down which input parameter should produce the most desirable results. The parameter, $\mathit{MinPts}$, do not have much impact on the result so it can be fixed values while the other parameter, $\epsilon$, is varied. For each $\epsilon$, we measure the proportion of the True Negatives (from the sample) residing in the largest cluster, denoted by $p_c$. Ideally, we want to observe an increase in this proportion as $\epsilon$ increases because it will then indicate that the largest cluster is correctly adding the True Negatives incrementally. Another pattern we wish to observe is the $\epsilon$ value at which the proportion starts to decrease rapidly as this suggests that the parameter is increased over a threshold at which the DBSCAN algorithm starts to include anomalies, which we do not want. Our suggestion is to select the $\epsilon$ just before the decrease for the most desirable result. Another measure that can provide some extra information is the proportion of the True Negatives from the random sample included in the largest cluster, denoted by $p_r$. Ideally, this proportion should be very close to 1 as this will then indicate that most of the random sample is successfully clustered in the largest cluster. Then the instances included in the largest cluster are all removed so that the remaining instances in the result correspond to the anomalies only, which are the intrusions.
 
 The rest of the section describes our method in more detail with algorithms and formality.
@@ -184,6 +184,7 @@ The rest of the section describes our method in more detail with algorithms and 
 
 %%% PHASE 1
 \subsection{Phase 1}
+Algorithm~\ref{alg1} presents pseudocode for Phase 1. Let $\boldsymbol{x}_i \in \mathbb{R}^m$ be a vector of traffic attributes, or connection features, for the $i$th connection and $\boldsymbol{X}=\{ x_1, x_2, \dotsc, x_n \} \in \mathbb{R}^{n \times m}$ be the complete matrix of connections. The data matrix, $\boldsymbol{X}$, is the input of Phase~1 and the output is a subset of the input data, denoted by $\boldsymbol{X}_\text{P1} \subseteq \boldsymbol{X}$.
 
 \begin{algorithm}
 \caption{Phase 1}
@@ -214,8 +215,6 @@ The rest of the section describes our method in more detail with algorithms and 
 \end{algorithmic}
 \end{algorithm}
 
-Algorithm~\ref{alg1} presents pseudocode for Phase 1. Let $\boldsymbol{x}_i \in \mathbb{R}^m$ be a vector of traffic attributes, or connection features, for the $i$th connection and $\boldsymbol{X}=\{ x_1, x_2, \dotsc, x_n \} \in \mathbb{R}^{n \times m}$ be the complete matrix of connections. The data matrix, $\boldsymbol{X}$, is the input of Phase~1 and the output is a subset of the input data, denoted by $\boldsymbol{X}_\text{P1} \subseteq \boldsymbol{X}$.
-
 Looking at the first line of Algorithm~\ref{alg1}, a couple of containers, $\mathit{PA}$ and $N$, are initialised to store the indices of possible anomalies and normal instances, respectively. Then, the LOF algorithm is run on $\boldsymbol{X}$ with the input parameter $k$ (line 2). The value of $k$ must be greater than the actual number of intrusion instances in $\boldsymbol{X}$, for example if $30\%$ of $\boldsymbol{X}$ is considered to be intrusions then $k = 0.3 \times n,$ where $n$ is the number of intrusions, at least. Once a vector of LOF scores is computed, KDE is run on the scores to estimate their density (line 3). For the kernel, $K(u)$, we use is the Gaussian kernel given by
 \begin{equation}
 K(u) = \frac{1}{\sqrt{2\pi}}e^{-\frac{1}{2}u^2},
@@ -241,10 +240,11 @@ Lastly, the instances in $\boldsymbol{X}$ whose indices match with the elements 
 
 
 
-
-
 %%% PHASE 2
 \subsection{Phase 2}
+Algorithm~\ref{alg2} presents pseudocode for Phase 2. The input of Phase 2 is $\boldsymbol{X}_\text{P1}$, as our goal is to identify any False Positives in it and delete them. The output is a subset of the input data, denoted by $\boldsymbol{X}_\text{P2} \subseteq \boldsymbol{X}_\text{P1}$, following the removal of the identified False Positives.
+
+The first line of Algorithm~\ref{alg2} starts with a container, $C$, being initialised for storing the results of the DBSCAN algorithm. Then we let $\boldsymbol{\epsilon} = \{ x \in \mathbb{R} \mid 0 < x \leq 1 \}$ be a sequence of values in the range, which is to be used in place of the input parameter, $\epsilon$, of DBSCAN (line 2). The interval for the sequence used in our experiments was 0.1 such that $\boldsymbol{\epsilon} = \{ 0.1, 0.2, \dotsc, 1 \}$. Next, the DBSCAN algorithm is run on the input data, $\boldsymbol{X}_\text{P1}$, for each element in $\boldsymbol{\epsilon}$ (line 4) with a fixed value for the other input parameter, $\mathit{MinPts}$. The output of DBSCAN is a set of \emph{cluster id} for each instances, that is the index of clusters to which each instance is assigned. In our experiments, we used $\mathit{MinPts}=6$. Varying $\mathit{MinPts}$ does not affect the end result much. If $\mathit{MinPts}$ is changed, the value of $\epsilon$ needs adjusting to get similar results that would be observed for the unchanged $\mathit{MinPts}$. However variations in $\epsilon$ can significantly change the results, for which we suggest a simple heuristic to determine the value of $\epsilon$ for the best result without the need of actual labels.
 
 \begin{algorithm}
 \caption{Phase 2}
@@ -267,10 +267,6 @@ Lastly, the instances in $\boldsymbol{X}$ whose indices match with the elements 
 \State Store the remaining $c_\text{max}$ in $C_j$ as $\boldsymbol{X}_\text{P2}$
 \end{algorithmic}
 \end{algorithm}
-
-Algorithm~\ref{alg2} presents pseudocode for Phase 2. The input of Phase 2 is $\boldsymbol{X}_\text{P1}$, as our goal is to identify any False Positives in it and delete them. The output is a subset of the input data, denoted by $\boldsymbol{X}_\text{P2} \subseteq \boldsymbol{X}_\text{P1}$, following the removal of the identified False Positives.
-
-First a container, $C$, is initialised for storing the results of the DBSCAN algorithm (line 1). Then we let $\boldsymbol{\epsilon} = \{ x \in \mathbb{R} \mid 0 < x \leq 1 \}$ be a sequence of values in the range, which is to be used in place of the input parameter, $\epsilon$, of DBSCAN (line 2). The interval for the sequence used in our experiments was 0.1 such that $\boldsymbol{\epsilon} = \{ 0.1, 0.2, \dotsc, 1 \}$. Next, the DBSCAN algorithm is run on the input data, $\boldsymbol{X}_\text{P1}$, for each element in $\boldsymbol{\epsilon}$ (line 4) with a fixed value for the other input parameter, $\mathit{MinPts}$. The output of DBSCAN is a set of \emph{cluster id} for each instances, that is the index of clusters to which each instance is assigned. In our experiments, we used $\mathit{MinPts}=6$. Varying $\mathit{MinPts}$ does not affect the end result much. If $\mathit{MinPts}$ is changed, the value of $\epsilon$ needs adjusting to get similar results that would be observed for the unchanged $\mathit{MinPts}$. However variations in $\epsilon$ can significantly change the results, for which we suggest a simple heuristic to determine the value of $\epsilon$ for the best result without the need of actual labels.
 
 Our suggestion begins with finding the cluster with the most members associated, denoted by $c_{\text{max}}$ (line 5), and counting the number of elements in that cluster that are from the random sample, $\textit{sample}_\text{N}$ (line 6). This can be done by simply matching the corresponding indices. We denote this number as $n_\text{sample}$. Then we compute two measures. First is the proportion of $n_\text{sample}$ in $c_\text{max}$, given by
 \begin{equation}
@@ -299,7 +295,15 @@ The demonstration is presented using a particular random seed of instances that 
 
 Assuming the LOF algorithm is successfully performed on the data and their respective LOF scores are produced as a result, the kernel density estimates are presented as shown in Figure~\ref{fig:kde1}. The plot shows a major curvature, around the score of 1, whose probability is given by $\textit{Pr}(0 \leq \textit{score} \leq 2.1) = 0.743$, that is to say $74.3\%$ of the entire data are in this region. The instances whose respective LOF scores fall in this bound are normal because (1) we assumed that the normal instances are more frequent than their intrusion counterparts in the data and (2) the curvature is centred around the score of 1 to indicate these instances are positioned in dense regions, i.e., inliers.
 
-<<kde1, echo=FALSE, fig.align='center', fig.cap="Estimated density of the LOF scores.", out.width="0.68\\linewidth">>=
+Figure~\ref{fig:kde2} illustrates how the threshold, $t$, can be determined. First the scores at which the global maximum and the local minimum occur, represented by the red and blue dashed lines respectively. This can be done by computing the first derivative of the estimated PDF, i.e., the iterated differences in the PDF, then choosing the value of the score where the signs of the derivatives change (which is the turning point). Then using the formula given by Equation~\ref{eq:t} and the values of the extrema given by the legend in the figure, we compute $t$ as follows:
+\begin{align*}
+t & = \mathit{score}_\text{gmax} - \alpha \times (\mathit{score}_\text{gmax} - \mathit{score}_\text{gmin}) \\
+& = 2.09 - 0.1 \times (2.09 - 1.07) \\
+& = 1.99.
+\end{align*}
+Then we use $t=1.99$ to label all instances whose scores are less than $t$ as normal and the rest as possible anomalies. After that, we take a random sample from the cluster and merge with the possible anomalies, and run the DBSCAN algorithm with $\epsilon = \{0.1, 0.2, \dotsc, 1\}$ and $\textit{MinPts}=6$. Figure~\ref{fig:kde3} presents the plot of $p_c$, $p_s$, TPR and FPR across the values of $\epsilon$. In the figure, there are two plots. Examining the plot on the left, the lines of $p_c$ and $p_s$ are represented by the solid and dashed lines, respectively. The values of $p_c$ appear to start decreasing from $\epsilon=0.3$ however the values of $p_s$ are still increasing to indicate that the decrease is just caused by the False Positives being added to the cluster. At $\epsilon>0.6$, we observe a big decrease in $p_c$, which means that the cluster is adding anomalies. In addition, the value of $p_s$ reaches its maximum value of 1 at $\epsilon=0.6$ to indicate that the entire random sample is assigned to the cluster. Hence, $\epsilon=0.6$ is our choice. On the plot to the right, the actual TPR and FPR are presented by the blue and red lines, respectively. The lines of $p_c$ and $p_s$ are both dotted but the values are the same as in the plot to the left. Checking to see the TPR and FPR corresponding to our choice of $\epsilon$ reveals that the TPR is at $0.97$ while the FPR is at $0.06$.
+
+<<kde1, echo=FALSE, fig.align='center', fig.cap="Estimated density of the LOF scores.", out.width="0.6\\linewidth">>=
 load(file = "//Users/eric/masters-project/Writing/Methods/lof_scores.RData")
 d = density(lof_30p, bw = "nrd", kernel = "gaussian")
 local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)
@@ -322,16 +326,7 @@ text(2.3, -0.09, "2.09", xpd=T)
 # sfsmisc::integrate.xy(d$x[local_min:512], d$y[local_min:512])
 @
 
-Figure~\ref{fig:kde2} illustrates how the threshold, $t$, can be determined. First the scores at which the global maximum and the local minimum occur, represented by the red and blue dashed lines respectively. This can be done by computing the first derivative of the estimated PDF, i.e., the iterated differences in the PDF, then choosing the value of the score where the signs of the derivatives change (which is the turning point). Then using the formula given by Equation~\ref{eq:t} and the values of the extrema given by the legend in the figure, we compute $t$ as follows:
-\begin{align*}
-t & = \mathit{score}_\text{gmax} - \alpha \times (\mathit{score}_\text{gmax} - \mathit{score}_\text{gmin}) \\
-& = 2.09 - 0.1 \times (2.09 - 1.07) \\
-& = 1.99.
-\end{align*}
-Then we use $t=1.99$ to label all instances whose scores are less than $t$ as normal and the rest as possible anomalies. After that, we take a random sample from the cluster and merge with the possible anomalies, and run the DBSCAN algorithm with $\epsilon = \{0.1, 0.2, \dotsc, 1\}$ and $\textit{MinPts}=6$. Figure~\ref{fig:kde3} presents the plot of $p_c$, $p_s$, TPR and FPR across the values of $\epsilon$. In the figure, there are two plots. Examining the plot on the left, the lines of $p_c$ and $p_s$ are represented by the solid and dashed lines, respectively. The values of $p_c$ appear to start decreasing from $\epsilon=0.3$ however the values of $p_s$ are still increasing to indicate that the decrease is just caused by the False Positives being added to the cluster. At $\epsilon>0.6$, we observe a big decrease in $p_c$, which means that the cluster is adding anomalies. In addition, the value of $p_s$ reaches its maximum value of 1 at $\epsilon=0.6$ to indicate that the entire random sample is assigned to the cluster. Hence, $\epsilon=0.6$ is our choice. On the plot to the right, the actual TPR and FPR are presented by the blue and red lines, respectively. The lines of $p_c$ and $p_s$ are both dotted but the values are the same as in the plot to the left. Checking to see the TPR and FPR corresponding to our choice of $\epsilon$ reveals that the TPR is at $0.97$ while the FPR is at $0.06$.
-
-
-<<kde2, echo=FALSE, fig.align='center', fig.cap="The threshold computed using the global maximum and the local minimum.", out.width="0.68\\linewidth">>=
+<<kde2, echo=FALSE, fig.align='center', fig.cap="The threshold computed using the global maximum and the local minimum.", out.width="0.6\\linewidth">>=
 load(file = "lof_scores.RData")
 d = density(lof_30p, bw = "nrd", kernel = "gaussian")
 local_min = min(which(diff(sign(diff(d$y))) ==   2) + 1)

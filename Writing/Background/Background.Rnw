@@ -171,7 +171,7 @@ DBSCAN is used in Phase 2 of our method. The purpose of Phase 2 is to cluster Fa
 There are a couple of schemes used in our experiments, namely the X-means clustering algorithm and Principal Component Analysis (PCA), that are worthwhile discussing.
 
 \subsubsection{X-means}
-The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00x}, is an extension of K-means that iteratively finds an optimal number of clusters, $k$. The objective of the K-means clustering algorithm is to minimise within-cluster variance into $k$ partitions, that is effectively minimising
+The X-means clustering algorithm, proposed by Pelleg and Moore \cite{pel00}, is an extension of K-means that iteratively finds an optimal number of clusters, $k$. The objective of the K-means clustering algorithm is to minimise within-cluster variance into $k$ partitions, that is effectively minimising
 \begin{equation}
 \underset{\mathbf{S}}{\text{arg min}} = \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_i} \Vert \mathbf{x} - \boldsymbol{\mu}_i \Vert^2,
 \end{equation}
@@ -230,7 +230,7 @@ We considered PCA as a preliminary step to reduce the dimensionality of data in 
 <<back6, echo=FALSE, fig.pos="H", cache=TRUE, out.width="0.45\\linewidth", fig.align='center', fig.cap="An example of linear model fitting using the simple linear regression and PCA.">>=
 plot(0,0, type="n", xlim=c(0.3,0.7), ylim=c(0.17,0.7), asp=1, axes=FALSE, xlab="x", ylab="y")
 box()
-abline(0, 1)
+lines(c(0.2, 0.7), c(0.2,0.7))
 lines(c(0.5,0.7), c(0.5,0.3), col="blue")
 lines(c(0.5,0.5), c(0.5,0.18), col="blue")
 points(0.7, 0.3, pch=4)

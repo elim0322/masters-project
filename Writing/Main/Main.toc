@@ -32,6 +32,7 @@
 \contentsline {chapter}{\numberline {6}Conclusion}{49}
 \contentsline {section}{\numberline {6.1}Future work}{49}
 \contentsline {chapter}{Appendices}{51}
-\setcounter {tocdepth}{0}
+\setcounter {tocdepth}{1}
+\begingroup \let \l@chapter \l@section \let \l@section \l@subsection 
 \contentsline {chapter}{\numberline {A}Supplementary graphical output from dataset-1 of KDD'99 data}{53}
 \contentsline {chapter}{\numberline {B}Supplementary graphical output from dataset-2 of KDD'99 data}{61}

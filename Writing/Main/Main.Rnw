@@ -38,14 +38,12 @@
 
 
 \begin{document}
+
 \title{Unsupervised Density- and Anomaly-based Intrusion Detector in Networks}
 \author{Eric Lim}
 \department{Computer Science}
 \supervisor{Prof.~Gill Dobbie}{Dr.~Yun Sing Koh}
 \maketitle
-\pagestyle{empty}
-\thispagestyle{empty}
-
 
 \frontmatter
 \begin{abstract}
@@ -53,7 +51,7 @@ To protect the integrity and security of networks, experts and researchers are c
 \end{abstract}
 
 \begin{acknowledgements}
-I would like to express my deepest gratitude to my supervisors, Professor Gill Dobbie and Dr.\ Yun Sing Koh for their superb guidance and feedbacks. Without them, I would not have learnt as much as I did during the course.
+I would like to express my deepest gratitude to my supervisors, Professor Gill Dobbie and Dr.\ Yun Sing Koh, for their guidance and feedbacks. Without them, I would not have learnt as much as I did during the course.
 
 \bigskip
 
