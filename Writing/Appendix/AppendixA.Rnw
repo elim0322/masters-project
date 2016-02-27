@@ -78,9 +78,9 @@ dat2.sds.50a = c(sd(system.results_dat2_50a05k$P1.detection.rate), sd(system.res
 \chapter{Supplementary graphical output from dataset-1 of KDD'99 data}
 \label{ch:appendixa}
 
-\renewcommand{\thetable}{A\arabic{table}}
+\renewcommand{\thetable}{A.\arabic{table}}
 \setcounter{table}{0}
-\renewcommand{\thefigure}{A\arabic{figure}}
+\renewcommand{\thefigure}{A.\arabic{figure}}
 \setcounter{figure}{0}
 
 Each of the figures in Appendix~\ref{ch:appendixa} corresponds to the kernel density estimates of LOF scores, computed from dataset-1 of KDD'99 using different values for (1) the parameter, $k_p$ and (2) the intrusion frequencies. The collection of the graphical output presented in the appendix allows one to visualise the effect of varying $k_p$ for each of the different intrusion frequencies, and supplements our discussion in Section~\ref{evaluation:sec3.1} that the scores are less noisy and reveal underlying densities, i.e., curvatures, to a greater extent as $k_p$ increases.
@@ -139,9 +139,9 @@ densityCurves(dat1_50a_50k, main=expression(paste(k[p]," = ",0.5)),cex.main=1.7,
 
 \chapter{Supplementary graphical output from dataset-2 of KDD'99 data}
 \label{ch:appendixb}
-\renewcommand{\thetable}{B\arabic{table}}
+\renewcommand{\thetable}{B.\arabic{table}}
 \setcounter{table}{0}
-\renewcommand{\thefigure}{B\arabic{figure}}
+\renewcommand{\thefigure}{B.\arabic{figure}}
 \setcounter{figure}{0}
 
 
