@@ -41,23 +41,28 @@
 \title{Unsupervised Density- and Anomaly-based Intrusion Detector in Networks}
 \author{Eric Lim}
 \department{Computer Science}
-\supervisor{Prof. Gill Dobbie}{Dr. Yun Sing Koh}
+\supervisor{Prof.~Gill Dobbie}{Dr.~Yun Sing Koh}
 \maketitle
+\pagestyle{empty}
+\thispagestyle{empty}
+
 
 \frontmatter
 \begin{abstract}
-To protect the integrity and security of networks, experts and researchers are constantly improving ways to capture network-based threats. As the security systems advance towards efficient and effective recognition of such threats, exploiters and malicious users introduce novel attacks unknown to the society to circumvent the defensive systems. Novel threats are difficult to detect and capture due to a lack of information about them initially, but they must not be disregarded until sufficient information is gathered to help identify them. A capable security system should not only be able to detect previously known attacks but also possess abilities to detect unknown novel attacks. We propose a method in which the novel attacks can be detected without prior knowledge or presumption of their intention and purposes. Our method is based on (1) unsupervised anomaly detection algorithms that do not require labels in data, which makes it a useful exploratory tool for finding potential novel threats in the given data, and (2) local density algorithms, such as LOF and DBSCAN, to robustly analyse data while not being affected by the arbitrary shapes of the data. Our method implements a two-phase structure to mitigate one of the main caveats of an unsupervised anomaly detection task, that is relative underperformance in comparison to its supervised and semi-supervised counterparts. We evaluate each phase of our method as well as the whole, using KDD'99 data, to show that it works as designed and compare the results against other possible methods to report the strengths and weaknesses of our method. In our experiments, our proposed method was able to detect between 95\% and 98\% of intrusions, on average, from one dataset of KDD'99 and about 88\% of intrusions from another, which suggests that our method is accurate. The standard deviations of our results were extremely small to suggest that our method is also precise. Our method was able to outperform clustering-based and PCA-based approaches in terms of both accuracy and precision.
+To protect the integrity and security of networks, experts and researchers are constantly improving ways to capture network-based threats. As the security systems advance towards efficient and effective recognition of such threats, exploiters and malicious users introduce novel attacks unknown to the society to circumvent the defensive systems. Novel threats are difficult to detect and capture due to a lack of information initially, but they must not be disregarded until sufficient information is gathered to help identify them. A capable security system should not only be able to detect previously known attacks but also possess abilities to detect unknown novel attacks. We propose a method in which the novel attacks can be detected without prior knowledge or presumption of their intentions and purposes. Our method is based on (1) unsupervised anomaly detection algorithms that do not require labels in data, which makes it a useful exploratory tool for finding potential novel threats in the given data, and (2) local density algorithms, such as LOF and DBSCAN, to robustly analyse data while not being affected by the arbitrary shapes of the data. Our method implements a two-phase structure to mitigate one of the main caveats of an unsupervised anomaly detection task, that is relative underperformance in comparison to its supervised and semi-supervised counterparts. We evaluate each phase of our method as well as the whole, using KDD'99 data, to show that it works as designed and compare the results against other possible methods to report the strengths and weaknesses of our method. In our experiments, our proposed method was able to detect between 95\% and 98\% of intrusions, on average, from one dataset of KDD'99 and about 88\% of intrusions from another, which suggests that our method is accurate. The standard deviations of our results were extremely small to suggest that our method is also precise. Our method was able to outperform clustering-based and PCA-based approaches in terms of both accuracy and precision.
 \end{abstract}
 
 \begin{acknowledgements}
-I would like to express my deepest gratitude to my lovely supervisors, Professor Gill Dobbie and Dr. Yun Sing Koh for their superb guidance and feedbacks. Without them, I would not have learnt as much as I did during the course. I hope their stress levels are finally at peace.
+I would like to express my deepest gratitude to my supervisors, Professor Gill Dobbie and Dr.\ Yun Sing Koh for their superb guidance and feedbacks. Without them, I would not have learnt as much as I did during the course.
 
 \bigskip
 
+\noindent
 I would also like to thank my fianc\'ee and both of our families for their endless love, support and patience that I often wondered if I deserved so much.
 
 \bigskip
 
+\noindent
 Lastly and most importantly, I am grateful to God Almighty for everything was possible through Him.
 \end{acknowledgements}
 
