@@ -218,7 +218,7 @@ text(1.5, -2.5, "BIC(k = 2)")
 text(2,2.5, "BIC(k = 2)")
 @
 
-The main advantage of X-means is the absence of the parameter, $k$, as it computes it for users. The manual, inefficient process of having to perform multiple runs of K-means on the same data just to find an optimal $k$ can be completely avoided using X-means. Also X-means scales well computationally, which means it is capable of handling larger data more efficiently than its K-means counterpart.
+The main advantage of X-means is the absence of the parameter, $k$, as it computes for users. The manual, inefficient process of having to perform multiple runs of K-means on the same data just to find an optimal $k$ can be completely avoided using X-means. Also X-means scales well computationally, which means it is capable of handling larger data more efficiently than its K-means counterpart.
 
 
 \subsubsection{Principal component analysis}

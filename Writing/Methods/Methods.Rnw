@@ -215,7 +215,7 @@ Algorithm~\ref{alg1} presents pseudocode for Phase 1. Let $\boldsymbol{x}_i \in 
 \end{algorithmic}
 \end{algorithm}
 
-Looking at the first line of Algorithm~\ref{alg1}, a couple of containers, $\mathit{PA}$ and $N$, are initialised to store the indices of possible anomalies and normal instances, respectively. Then, the LOF algorithm is run on $\boldsymbol{X}$ with the input parameter $k$ (line 2). The value of $k$ must be greater than the actual number of intrusion instances in $\boldsymbol{X}$, for example if $30\%$ of $\boldsymbol{X}$ is considered to be intrusions then $k = 0.3 \times n,$ where $n$ is the number of intrusions, at least. Once a vector of LOF scores is computed, KDE is run on the scores to estimate their density (line 3). For the kernel, $K(u)$, we use is the Gaussian kernel given by
+Looking at the first line of Algorithm~\ref{alg1}, a couple of containers, $\mathit{PA}$ and $N$, are initialised to store the indices of possible anomalies and normal instances, respectively. Then, the LOF algorithm is run on $\boldsymbol{X}$ with the input parameter $k$ (line 2). The value of $k$ must be greater than the actual number of intrusion instances in $\boldsymbol{X}$, for example if $30\%$ of $\boldsymbol{X}$ is considered to be intrusions then $k = 0.3 \times n,$ where $n$ is the number of intrusions, at least. Once a vector of LOF scores is computed, KDE is run on the scores to estimate their density (line 3). For the kernel, $K(u)$, we use the Gaussian kernel given by
 \begin{equation}
 K(u) = \frac{1}{\sqrt{2\pi}}e^{-\frac{1}{2}u^2},
 \end{equation}
